@@ -30,10 +30,13 @@ spec:
         - name: keel-dockerconfig
       containers:
         - name: website
-          image: neuralestate/pulsio-website
+          image: neuralestate/pulsio-website-production
           imagePullPolicy: Always
           ports:
             - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: envs
           readinessProbe:
             httpGet:
               path: /

@@ -1,7 +1,7 @@
 import { AppError } from 'nano-fw/docs/index.ts';
 import type Stripe from 'stripe';
+import { checkoutSchema, type PaymentRowInsert, type Plan, paymentSchema, type SubscriptionRow, subscriptionSchema, subscriptionStatusSchema } from 'types/payment.ts';
 import ENV from '#api/env.ts';
-import { checkoutSchema, type PaymentRowInsert, type Plan, paymentSchema, type SubscriptionRow, subscriptionSchema, subscriptionStatusSchema } from '../../../types/src/payment.ts';
 import { PaymentRepository } from './PaymentRepository.ts';
 import { stripe } from './Stripe.ts';
 

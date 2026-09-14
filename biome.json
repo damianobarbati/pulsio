@@ -7,7 +7,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!packages/webapp/src/public/world.json"]
+    "includes": ["**", "!packages/webapp/src/public/world.json", "!packages/website/next-env.d.ts"]
   },
   "formatter": {
     "indentStyle": "space",

@@ -6,11 +6,13 @@ Pulsio — Premium analytics made simple, privacy-first, developer-friendly, fai
 
 Dependencies:
 - `fnm` (eg: `brew install fnm`)
+- `sops` and `age` (eg: `brew install sops age`)
 - add `eval "$(fnm env --use-on-cd)"` into your `~/.zprofile` or `~/.profile` 
 
 Set envs:
 ```sh
-cp .env.sample .env
+export SOPS_AGE_KEY_FILE=/secure/path/xyz.key
+sops decrypt ./infra/test.sops.env > .env
 ```
 
 ## Development
@@ -27,6 +29,7 @@ pnpm env:down
 pnpm env:up
 pnpm -F api db:migrate
 pnpm -F api db:seed
+pnpm -F api build
 ```
 
 Start services:
@@ -59,5 +62,5 @@ pnpm -r build
 
 To run with https locally:
 ```sh
-npx ngrok start --all --config ngrok.yml --authtoken <authtoken>
+npx ngrok start --all --env ngrok.yml --authtoken <authtoken>
 ```

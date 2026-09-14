@@ -1,6 +1,6 @@
 import { setTimeout } from 'node:timers/promises';
+import { type PageViewRowInsert, pageViewSchema } from 'types/event.ts';
 import ENV from '#api/env.ts';
-import { type PageViewRowInsert, pageViewSchema } from '../../types/src/event.ts';
 import { EventRepository } from './events/EventRepository.ts';
 export const queueName = ENV.QUEUE_NAME;
 export const processQueue = async (batchSize = ENV.BATCH_SIZE): Promise<number> => {

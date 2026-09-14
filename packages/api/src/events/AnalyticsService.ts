@@ -1,5 +1,5 @@
 import { AppError } from 'nano-fw/docs/index.ts';
-import { type AnalyticsInput, type AnalyticsQuery, filterSchema, type GoalStats, overviewSchema } from '../../../types/src/analytics.ts';
+import { type AnalyticsInput, type AnalyticsQuery, filterSchema, type GoalStats, overviewSchema } from 'types/analytics.ts';
 import { GoalRepository } from '../goals/GoalRepository.ts';
 import { AnalyticsRepository } from './AnalyticsRepository.ts';
 

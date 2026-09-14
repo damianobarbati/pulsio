@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { PaymentRow, PaymentRowInsert, SubscriptionRow } from '../../../types/src/payment.ts';
+import type { PaymentRow, PaymentRowInsert, SubscriptionRow } from 'types/payment.ts';
 import { database } from '../../dao/database.ts';
 export const PaymentRepository = {
   async create({ payment }: { payment: PaymentRowInsert }) {

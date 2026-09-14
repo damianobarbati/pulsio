@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
+import type { PageViewRowInsert } from 'types/event.ts';
 import ENV from '#api/env.ts';
-import type { PageViewRowInsert } from '../../../types/src/event.ts';
 import { cache } from '../../dao/cache.ts';
 import { clickhouse } from '../../dao/clickhouse.ts';
 

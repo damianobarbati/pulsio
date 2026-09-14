@@ -6,6 +6,7 @@
     "#dao/*": "./dao/*"
   },
   "scripts": {
+    "pretest": "pnpm build",
     "test": "vitest run --reporter=default --reporter=junit --outputFile=/tmp/junit.xml --coverage",
     "start:dev": "NODE_ENV=development NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' node --env-file-if-exists=../../.env --watch ./src/index.ts",
     "start": "NODE_ENV=production NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' node ./src/index.ts",
@@ -14,27 +15,26 @@
     "db:migrate": "NODE_ENV=development NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' knex migrate:latest --knexfile=./dao/database.ts",
     "db:seed": "NODE_ENV=development NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' knex seed:run --knexfile=./dao/database.ts",
     "db:migrate:make": "NODE_ENV=development NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' knex migrate:make --knexfile=./dao/database.ts",
-    "payments:record": "NODE_ENV=development NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' node --env-file-if-exists=../../.env ./src/payments/record.ts",
     "db:seed:make": "NODE_ENV=development NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' knex seed:make --knexfile=./dao/database.ts",
-    "build:track": "vite build --config ./client/vite.config.ts",
-    "pretest": "pnpm build:track",
-    "geoip:update": "node ./scripts/update-geoip.ts"
+    "build": "pnpm build:track; pnpm build:geoip",
+    "build:geoip": "node ./scripts/geoip.ts",
+    "build:track": "vite build -l=silent --config ./client/vite.config.ts"
   },
   "dependencies": {
     "@clickhouse/client": "^1.23.1",
     "@hono/node-server": "^2.1.1",
-    "amaro": "^1.1.11",
+    "amaro": "^1.2.0",
     "hono": "^4.13.7",
     "ioredis": "^6.0.0",
     "knex": "^3.3.0",
     "maxmind": "^5.0.7",
     "nano-fw": "^1.0.4",
-    "nodemailer": "^10.0.9",
+    "nodemailer": "^10.0.10",
     "pg": "^8.22.0",
     "stripe": "^22.6.2",
     "types": "workspace:*",
     "ua-parser-js": "^2.0.10",
-    "zod": "^4.6.4"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",

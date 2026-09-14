@@ -1,16 +1,18 @@
-packages/api/client/client.dist.js
-packages/api/data/*.mmdb
-packages/api/data/*.tmp
+**/*.dist.js
+**/*.mmdb
+**/*.tmp
 
-**/.env*
-!**/.env.sample
+**/*.env
+!**/sample.env
+**/public/config.json
 **/node_modules/
 **/dist/
 **/.next/
-**/dist/
 **/coverage/
 **/zap-reports/
 **/stats.html
 .idea/
 .vscode/
 .DS_Store
+
+ops/

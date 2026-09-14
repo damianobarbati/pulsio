@@ -1,6 +1,6 @@
 import { AppError } from 'nano-fw/docs/index.ts';
+import type { Account } from 'types/account.ts';
 import ENV from '#api/env.ts';
-import type { Account } from '../../../types/src/account.ts';
 import { cache } from '../../dao/cache.ts';
 import { AnalyticsController } from '../events/AnalyticsController.ts';
 import { AccountEmail } from './AccountEmail.ts';

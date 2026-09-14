@@ -1,5 +1,5 @@
-import type { AnalyticsQuery, Dimension } from '../../../types/src/analytics.ts';
-import type { Goal } from '../../../types/src/goal.ts';
+import type { AnalyticsQuery, Dimension } from 'types/analytics.ts';
+import type { Goal } from 'types/goal.ts';
 import { cache } from '../../dao/cache.ts';
 import { clickhouse } from '../../dao/clickhouse.ts';
 

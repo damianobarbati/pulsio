@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { Goal, GoalInput } from '../../../types/src/goal.ts';
+import type { Goal, GoalInput } from 'types/goal.ts';
 import { database } from '../../dao/database.ts';
 
 export const GoalRepository = {

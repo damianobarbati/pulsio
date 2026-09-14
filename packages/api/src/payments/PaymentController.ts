@@ -1,4 +1,4 @@
-import { checkoutInputSchema, paymentInputSchema } from '../../../types/src/payment.ts';
+import { checkoutInputSchema, paymentInputSchema } from 'types/payment.ts';
 import { PaymentService } from './PaymentService.ts';
 export const PaymentController = {
   async list({ accountId }: { accountId: string }) {

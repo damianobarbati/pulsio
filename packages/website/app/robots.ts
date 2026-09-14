@@ -1,7 +1,10 @@
 import type { MetadataRoute } from 'next';
-import { siteUrl } from './seo';
+import { getWebsiteConfig } from './seo';
+
+export const dynamic = 'force-dynamic';
 
 export default function robots(): MetadataRoute.Robots {
+  const siteUrl = new URL(getWebsiteConfig().WEBSITE_URL);
   return {
     rules: {
       userAgent: '*',

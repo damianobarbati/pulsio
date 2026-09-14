@@ -4,13 +4,14 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
+import { getConfig } from './config';
 
 type Registration = { email: string; password: string; domain: string; plan: 'start' | 'grow' | 'scale' };
 type Setup = { domain: string; snippet: string; detected: boolean; adminUrl: string };
 
-const apiPath = (path: string) => {
-  const url = new URL(path, process.env.API_URL as string).toString();
-  return url;
+const apiPath = (path: string, config: { API_URL: string } | undefined) => {
+  if (!config) return null;
+  return new URL(path, config.API_URL).toString();
 };
 
 const readSetup = async (url: string): Promise<Setup> => {
@@ -29,16 +30,20 @@ const registerAccount = async (url: string, { arg }: { arg: Registration }): Pro
 
 export const StartTracking = () => {
   const form = useForm<Registration>({ defaultValues: { plan: 'start' } });
+  const configuration = useSWR('/env.json', getConfig, { revalidateOnFocus: false });
   React.useEffect(() => {
     const plan = new URLSearchParams(window.location.search).get('plan');
     if (plan === 'grow' || plan === 'scale') form.setValue('plan', plan);
   }, [form]);
-  const registration = useSWRMutation(apiPath('/auth/register'), registerAccount);
+  const registration = useSWRMutation(apiPath('/auth/register', configuration.data), registerAccount);
   const [account, setAccount] = React.useState<Setup | null>(null);
   const [copied, setCopied] = React.useState(false);
   const [copyError, setCopyError] = React.useState('');
-  const status = useSWR(apiPath('/account/setup'), readSetup, { refreshInterval: (data) => (data || account ? 2000 : 0), shouldRetryOnError: false });
+  const status = useSWR(apiPath('/account/setup', configuration.data), readSetup, { refreshInterval: (data) => (data || account ? 2000 : 0), shouldRetryOnError: false });
   const setup = status.data || account;
+
+  if (configuration.error) return <p role="alert">{configuration.error.message}</p>;
+  if (!configuration.data) return null;
 
   const submit = form.handleSubmit(async (values) => {
     try {

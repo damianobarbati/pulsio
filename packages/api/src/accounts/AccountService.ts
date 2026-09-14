@@ -1,8 +1,8 @@
 import { createHash, randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
+import type { SiteRow, SiteSetup } from 'types/account.ts';
 import ENV from '#api/env.ts';
 import { EventRepository } from '#api/events/EventRepository.ts';
-import type { SiteRow, SiteSetup } from '../../../types/src/account.ts';
 import { AccountRepository } from './AccountRepository.ts';
 
 const deriveKey = promisify(scrypt);

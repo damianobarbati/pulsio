@@ -1,16 +1,17 @@
-declare module '*.css' {
-  const content: Record<string, string>;
-  export default content;
-}
+import type { Env } from './env.ts';
 
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
+declare global {
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
+  }
 
-interface ImportMetaEnv {
-  readonly APP_ENV: string;
-  readonly APP_NAME: string;
-  readonly APP_VERSION: string;
-  readonly API_URL: string;
-  readonly WEBSITE_URL: string;
+  interface ImportMetaEnv {
+    readonly APP_ENV: string;
+    readonly APP_NAME: string;
+    readonly APP_VERSION: string;
+  }
+
+  interface Window {
+    config: Env;
+  }
 }

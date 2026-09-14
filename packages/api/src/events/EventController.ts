@@ -1,4 +1,4 @@
-import type { TrackEvent } from '../../../types/src/event.ts';
+import type { TrackEvent } from 'types/event.ts';
 import { EventService } from './EventService.ts';
 
 const isHttpUrl = (value: unknown): value is string => {

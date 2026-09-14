@@ -30,15 +30,13 @@ spec:
         - name: keel-dockerconfig
       containers:
         - name: api
-          image: neuralestate/pulsio-api
+          image: neuralestate/pulsio-api-production
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
           envFrom:
-            - configMapRef:
-                name: api-config
             - secretRef:
-                name: api-secrets
+                name: envs
           readinessProbe:
             httpGet:
               path: /healthcheck
@@ -54,14 +52,12 @@ spec:
               cpu: "250m"
       initContainers:
         - name: migrations
-          image: neuralestate/pulsio-api
+          image: neuralestate/pulsio-api-production
           imagePullPolicy: Always
           command: ["npm", "run", "db:migrate"]
           envFrom:
-            - configMapRef:
-                name: api-config
             - secretRef:
-                name: api-secrets
+                name: envs
           resources:
             requests:
               memory: "128Mi"

@@ -1,12 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { createPageMetadata, siteUrl } from './seo';
+import { connection } from 'next/server';
+import { createPageMetadata, getWebsiteConfig } from './seo';
 
-export const metadata: Metadata = createPageMetadata({
-  title: 'Premium analytics, made simple',
-  description: 'Privacy-first website analytics for developers. See visitors, pageviews, top pages, and traffic sources without the noise.',
-  path: '/',
-});
+export const generateMetadata = async (): Promise<Metadata> => {
+  await connection();
+  const config = getWebsiteConfig();
+  return createPageMetadata({
+    title: 'Premium analytics, made simple',
+    description: 'Privacy-first website analytics for developers. See visitors, pageviews, top pages, and traffic sources without the noise.',
+    path: '/',
+    siteUrl: new URL(config.WEBSITE_URL),
+  });
+};
 
 const plans = [
   { name: 'Start', monthly: '$4', yearly: '$39', pageviews: '50k', sites: '3', featured: true },
@@ -15,7 +21,10 @@ const plans = [
   { name: 'Expand', monthly: 'Contact us', yearly: 'Contact us', pageviews: '1M+', sites: 'Custom', featured: false },
 ];
 
-export default function Home() {
+export default async function Home() {
+  await connection();
+  const config = getWebsiteConfig();
+  const siteUrl = new URL(config.WEBSITE_URL);
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',

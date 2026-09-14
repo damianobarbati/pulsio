@@ -1,11 +1,19 @@
 # ROADMAP
 
+codex resume 01a0a142-a294-7973-9d2f-824ca9b3fa33
+
 Se servono altri chiarimenti chiedi prima di implementare.
 
 ---
+Sistema il design system, uguale su tutti i servizi.  
+Testa le email.  
+Testa il tracking.  
+Testa i goals.  
+Testa il geolocation.  
+
 Reperisci credenziali produzione di stripe e smtp.  
 Aggiungi manifest k8s.  
-Aggiungi secret a k8s e gh actions.
+Aggiungi secret a k8s e gh actions.  
 
 ---
 Crea ambiente di staging:

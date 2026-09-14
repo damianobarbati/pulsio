@@ -17,8 +17,7 @@
     "tsc": "tsc",
     "env:up": "docker compose up -d --wait --quiet-pull --remove-orphans",
     "env:down": "docker compose down --volumes --remove-orphans",
-    "predev": "pnpm stop",
-    "stop": "kill-port 8080 3000 3001 3002 80",
+    "predev": "kill-port 8080 3000 3001 3002 80",
     "dev": "pnpm -r --parallel run '/^(start|worker):dev$/'",
     "open": "open -a 'Google Chrome' http://localhost:8080 http://localhost:3000 http://localhost:3001 http://localhost:3002 http://localtest.me"
   },

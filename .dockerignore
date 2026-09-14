@@ -2,12 +2,12 @@
 
 
 
-**/.env*
-!**/.env.sample
+**/*.env
+
+**/public/config.json
 **/node_modules/
 **/dist/
 **/.next/
-**/dist/
 **/coverage/
 **/zap-reports/
 **/stats.html
@@ -15,4 +15,5 @@
 .vscode/
 .DS_Store
 
+ops/
 .git

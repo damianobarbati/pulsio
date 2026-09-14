@@ -1,10 +1,14 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { SWRConfig } from 'swr';
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { App } from './App.tsx';
 
 vi.mock('./Chart.tsx', () => ({ Chart: () => null }));
+
+beforeEach(() => {
+  window.config = { API_URL: 'http://api.test', WEBSITE_URL: 'http://website.test' };
+});
 
 afterEach(() => {
   cleanup();
@@ -15,7 +19,12 @@ afterEach(() => {
 it('shows login errors and lets the user correct credentials', async () => {
   vi.stubGlobal(
     'fetch',
-    vi.fn(async (url) => new Response(JSON.stringify({ message: url === '/auth/login' ? 'Email or password is incorrect.' : 'Please log in.' }), { status: 401 })),
+    vi.fn(
+      async (url) =>
+        new Response(JSON.stringify({ message: new URL(String(url), 'http://localhost').pathname === '/auth/login' ? 'Email or password is incorrect.' : 'Please log in.' }), {
+          status: 401,
+        }),
+    ),
   );
   render(
     <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
@@ -50,7 +59,8 @@ const overview = {
 };
 const mockApi = (fetchMock: ReturnType<typeof vi.fn>) => {
   fetchMock.mockImplementation(async (url) => {
-    const path = String(url);
+    const requestUrl = new URL(String(url), 'http://localhost');
+    const path = `${requestUrl.pathname}${requestUrl.search}`;
     const body =
       path === '/account'
         ? { email: 'owner@example.com', sites: [site] }
@@ -95,10 +105,10 @@ it('refreshes the live visitor endpoint after three seconds', async () => {
   await act(async () => {
     await vi.advanceTimersByTimeAsync(0);
   });
-  const initial = fetchMock.mock.calls.filter(([url]) => String(url).startsWith('/analytics/live')).length;
+  const initial = fetchMock.mock.calls.filter(([url]) => new URL(String(url), 'http://localhost').pathname === '/analytics/live').length;
   await act(async () => {
     await vi.advanceTimersByTimeAsync(3100);
   });
-  const refreshed = fetchMock.mock.calls.filter(([url]) => String(url).startsWith('/analytics/live')).length;
+  const refreshed = fetchMock.mock.calls.filter(([url]) => new URL(String(url), 'http://localhost').pathname === '/analytics/live').length;
   expect(refreshed).toBeGreaterThan(initial);
 });

@@ -1,7 +1,7 @@
 import maxmind, { type CityResponse, type Reader } from 'maxmind';
 import { UAParser as UserAgentParser } from 'ua-parser-js';
 
-const geoip: Reader<CityResponse> = await maxmind.open<CityResponse>(new URL('../../data/GeoLite2-City.mmdb', import.meta.url).pathname);
+const geoip: Reader<CityResponse> = await maxmind.open<CityResponse>(new URL('../../GeoLite2-City.mmdb', import.meta.url).pathname);
 
 const sources: Record<'search' | 'social' | 'video' | 'shopping' | 'ai', RegExp> = {
   search: /(^|\.)(google\.[a-z.]+|bing\.com|duckduckgo\.com|search\.yahoo\.com|search\.brave\.com|baidu\.com|yandex\.[a-z.]+|ecosia\.org|search\.aol\.com|ask\.com|qwant\.com)$/,

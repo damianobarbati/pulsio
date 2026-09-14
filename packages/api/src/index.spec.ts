@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
+import type { PageViewFromClient } from 'types/event.ts';
 import { describe, expect, it } from 'vitest';
 import ENV from '#api/env.ts';
 import { createPageviewFromClient } from '#api/helpers.ts';
-import type { PageViewFromClient } from '../../types/src/event.ts';
 import { cache } from '../dao/cache.ts';
 import { baseUrl } from '../vitest.setup.ts';
 

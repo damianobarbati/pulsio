@@ -2,6 +2,7 @@ FROM node:24-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+
 RUN corepack enable
 WORKDIR /mnt
 
@@ -13,12 +14,15 @@ RUN pnpm -F webapp --prod deploy /out
 
 FROM node:24-alpine AS runtime
 ENV NODE_ENV=production
+
 RUN apk add --no-cache dumb-init
+RUN npm install --global --omit=dev --no-audit --no-fund serve@14.2.6
 
 COPY --from=builder /out ./
 COPY --from=builder /mnt/packages/webapp/dist ./dist
 COPY --from=builder /mnt/packages/webapp/serve.json ./serve.json
 
+RUN chown -R node:node /dist
 USER node
 EXPOSE 80
 

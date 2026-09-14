@@ -1,4 +1,4 @@
-import type { TrackEvent } from '../../types/src/event.ts';
+import type { TrackEvent } from 'types/event.ts';
 
 type TrackOptions = { props?: TrackEvent['p']; revenue?: TrackEvent['revenue']; interactive?: boolean };
 type Tracker = ((name: string, options?: TrackOptions) => void) & { q?: [string, TrackOptions?][] };

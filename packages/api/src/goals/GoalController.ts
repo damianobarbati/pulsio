@@ -1,4 +1,4 @@
-import type { GoalInput } from '../../../types/src/goal.ts';
+import type { GoalInput } from 'types/goal.ts';
 import { AnalyticsController } from '../events/AnalyticsController.ts';
 import { GoalRepository } from './GoalRepository.ts';
 import { GoalService } from './GoalService.ts';

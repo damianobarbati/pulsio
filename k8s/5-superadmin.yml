@@ -10,7 +10,6 @@ metadata:
     keel.sh/imagePullSecret: "keel-dockerconfig"
     keel.sh/image-tag: "latest"
     keel.sh/match-tag: "true"
-    keel.sh/approver: "keel"
 spec:
   replicas: 1
   strategy:
@@ -30,10 +29,13 @@ spec:
         - name: keel-dockerconfig
       containers:
         - name: superadmin
-          image: neuralestate/pulsio-superadmin
+          image: neuralestate/pulsio-superadmin-production
           imagePullPolicy: Always
           ports:
             - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: envs
           readinessProbe:
             httpGet:
               path: /
@@ -47,6 +49,10 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "250m"
+      volumes:
+        - name: runtime-env
+          configMap:
+            name: superadmin-env
 
 ---
 

@@ -110,7 +110,7 @@ export const App = () => {
   if (!account.data)
     return (
       <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
-        <a href={import.meta.env.WEBSITE_URL} className="font-black text-4xl tracking-tighter">
+        <a href={window.config.WEBSITE_URL} className="font-black text-4xl tracking-tighter">
           Pulsio.
         </a>
         <h1 className="mt-10 font-semibold text-3xl">Welcome back.</h1>
@@ -139,7 +139,7 @@ export const App = () => {
             {login.isMutating ? 'Logging in…' : 'Log in'}
           </button>
         </form>
-        <a href={`${import.meta.env.WEBSITE_URL}/start-tracking`} className="mt-6 text-sm underline underline-offset-4">
+        <a href={`${window.config.WEBSITE_URL}/start-tracking`} className="mt-6 text-sm underline underline-offset-4">
           New here? Create an account
         </a>
       </main>

@@ -1,6 +1,6 @@
 import { AppError } from 'nano-fw/docs/index.ts';
+import type { AnalyticsInput, Dimension } from 'types/analytics.ts';
 import { AccountRepository } from '#api/accounts/AccountRepository.ts';
-import type { AnalyticsInput, Dimension } from '../../../types/src/analytics.ts';
 import { PaymentService } from '../payments/PaymentService.ts';
 import { AnalyticsRepository } from './AnalyticsRepository.ts';
 import { AnalyticsService } from './AnalyticsService.ts';

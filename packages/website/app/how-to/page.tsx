@@ -1,12 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { createPageMetadata } from '../seo';
+import { connection } from 'next/server';
+import { createPageMetadata, getWebsiteConfig } from '../seo';
 
-export const metadata: Metadata = createPageMetadata({
-  title: 'How website analytics works',
-  description: 'Create a Pulsio account, add one tracking snippet, and see website analytics in a few simple steps.',
-  path: '/how-to',
-});
+export const generateMetadata = async (): Promise<Metadata> => {
+  await connection();
+  const config = getWebsiteConfig();
+  return createPageMetadata({
+    title: 'How website analytics works',
+    description: 'Create a Pulsio account, add one tracking snippet, and see website analytics in a few simple steps.',
+    path: '/how-to',
+    siteUrl: new URL(config.WEBSITE_URL),
+  });
+};
 
 export default function HowTo() {
   return (

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { PageViewRowInsert, TrackEvent } from '../../types/src/event.ts';
+import type { PageViewRowInsert, TrackEvent } from 'types/event.ts';
 export const createPageviewFromClient = (): TrackEvent => ({ v: '1', n: 'pv', s: 'localhost', u: 'http://localhost:3000/', r: '', w: 1920, l: 'en-US', t: 'UTC' });
 export const createPageviewRow = (): PageViewRowInsert => ({
   id: randomUUID(),

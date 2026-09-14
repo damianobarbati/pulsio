@@ -1,6 +1,6 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import type { Account, AccountRow, SiteRow } from '../../../types/src/account.ts';
-import type { Plan } from '../../../types/src/payment.ts';
+import type { Account, AccountRow, SiteRow } from 'types/account.ts';
+import type { Plan } from 'types/payment.ts';
 import { database } from '../../dao/database.ts';
 
 export const AccountRepository = {

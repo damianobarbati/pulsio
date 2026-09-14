@@ -1,5 +1,5 @@
 import { AppError } from 'nano-fw/docs/index.ts';
-import type { GoalInput } from '../../../types/src/goal.ts';
+import type { GoalInput } from 'types/goal.ts';
 import { GoalRepository } from './GoalRepository.ts';
 
 export const GoalService = {

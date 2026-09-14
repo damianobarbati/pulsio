@@ -2,6 +2,7 @@ FROM node:24-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+
 RUN corepack enable
 WORKDIR /mnt
 
@@ -16,8 +17,7 @@ ENV NODE_ENV=production
 RUN apk add --no-cache dumb-init
 
 COPY --from=builder /out ./
-COPY --from=builder /mnt/packages/website/dist ./dist
-COPY --from=builder /mnt/packages/website/serve.json ./serve.json
+COPY --from=builder /mnt/packages/website/.next ./.next
 
 USER node
 EXPOSE 80

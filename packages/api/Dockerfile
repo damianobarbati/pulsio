@@ -7,7 +7,7 @@ WORKDIR /mnt
 FROM base AS builder
 COPY .. .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --silent --frozen-lockfile --prefer-offline
-RUN pnpm -F track --prod deploy /out
+RUN pnpm -F api --prod deploy /out
 
 FROM node:26.7-alpine AS runtime
 ENV NODE_ENV=production
@@ -16,5 +16,5 @@ WORKDIR /mnt
 COPY --from=builder /out ./
 COPY ./pnpm-workspace.yaml ./pnpm-workspace.yaml
 USER node
-EXPOSE 9000
+EXPOSE 8080
 CMD ["/usr/bin/dumb-init", "--", "npm", "run", "start"]

@@ -30,10 +30,13 @@ spec:
         - name: keel-dockerconfig
       containers:
         - name: webapp
-          image: neuralestate/pulsio-webapp
+          image: neuralestate/pulsio-webapp-production
           imagePullPolicy: Always
           ports:
             - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: envs
           readinessProbe:
             httpGet:
               path: /
@@ -47,6 +50,10 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "250m"
+      volumes:
+        - name: runtime-env
+          configMap:
+            name: webapp-env
 
 ---
 

@@ -1,14 +1,22 @@
 import type { Metadata } from 'next';
+import { z } from 'zod';
 
-export const siteUrl = new URL(process.env.WEBSITE_URL as string);
+const configSchema = z.object({
+  API_URL: z.url(),
+  WEBSITE_URL: z.url(),
+  WEBAPP_URL: z.url(),
+});
+
+export const getWebsiteConfig = () => configSchema.parse(process.env);
 
 type PageMetadataInput = {
   description: string;
   path: string;
+  siteUrl: URL;
   title: string;
 };
 
-export const createPageMetadata = ({ description, path, title }: PageMetadataInput): Metadata => {
+export const createPageMetadata = ({ description, path, siteUrl, title }: PageMetadataInput): Metadata => {
   const url = new URL(path, siteUrl);
 
   return {

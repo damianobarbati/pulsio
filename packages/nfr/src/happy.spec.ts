@@ -3,8 +3,13 @@ import { afterAll, afterEach, beforeEach, describe, it } from 'vitest';
 import { database } from '../../api/dao/database.ts';
 import { keepBrowserOpen, openBrowser, pause, type } from './browser.ts';
 
-const websiteUrl = 'http://localhost:3001';
-const dashboardUrl = 'http://localhost:3000';
+const websiteUrl = process.env.WEBSITE_URL;
+const dashboardUrl = process.env.WEBAPP_URL;
+const superadminUrl = process.env.SUPERADMIN_URL;
+const superadminUsername = process.env.SUPERADMIN_USERNAME;
+const superadminPassword = process.env.SUPERADMIN_PASSWORD;
+if (!websiteUrl || !dashboardUrl || !superadminUrl || !superadminUsername || !superadminPassword)
+  throw new Error('WEBSITE_URL, WEBAPP_URL, SUPERADMIN_URL, SUPERADMIN_USERNAME, and SUPERADMIN_PASSWORD are required.');
 const email = 'jane.dane@gmail.com';
 const password = 'jane.dane@gmail.com';
 const domain = 'lvh.me';
@@ -86,6 +91,16 @@ describe('Happy path', () => {
     await current.getByRole('button', { name: 'Websites & account' }).click();
     await current.getByText('Your start plan is active.').waitFor({ state: 'visible', timeout: 30_000 });
     await current.getByRole('link', { name: 'Download invoice' }).waitFor({ state: 'visible', timeout: 30_000 });
+
+    const superadmin = await current.context().newPage();
+    const authorization = `Basic ${Buffer.from(`${superadminUsername}:${superadminPassword}`).toString('base64')}`;
+    await superadmin.setExtraHTTPHeaders({ authorization });
+    await superadmin.goto(superadminUrl);
+    await superadmin.getByRole('textbox', { name: 'Search users' }).fill(email);
+    await superadmin.getByRole('cell', { name: email }).click();
+    await superadmin.getByRole('heading', { name: email }).waitFor({ state: 'visible' });
+    await superadmin.getByText(domain).waitFor({ state: 'visible' });
+    await superadmin.getByText('4.00 USD · paid', { exact: false }).waitFor({ state: 'visible' });
     await pause({ page: current });
   }, 180_000);
 });

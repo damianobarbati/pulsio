@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
+import type { PageViewRowInsert, TrackEvent } from 'types/event.ts';
 import { AccountRepository } from '#api/accounts/AccountRepository.ts';
-import type { PageViewRowInsert, TrackEvent } from '../../../types/src/event.ts';
 import { enrichEvent } from './EventEnrichment.ts';
 import { EventRepository } from './EventRepository.ts';
 

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
+import type { PaymentRow } from 'types/payment.ts';
 import { clickhouse } from '#dao/clickhouse.ts';
 import { database } from '#dao/database.ts';
-import type { PaymentRow } from '../../../types/src/payment.ts';
 
 type AccountListRow = { id: string; email: string; created_at: Date; suspended_at: Date | null; site_count: string; detected_site_count: string };
 type SiteRow = { id: string; account_id: string; domain: string; detected_at: Date | null; created_at: Date };

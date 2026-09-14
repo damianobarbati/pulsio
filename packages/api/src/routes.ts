@@ -7,12 +7,6 @@ import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
 import { AppError, errorHandler, openapiRegistry, registerDocsRoute, registerRoute } from 'nano-fw/docs/index.ts';
 import z from 'nano-fw/zod.ts';
-import { AccountController, authenticatedAccount, sessionCookie } from '#api/accounts/AccountController.ts';
-import { AccountRepository } from '#api/accounts/AccountRepository.ts';
-import { AnalyticsController } from '#api/events/AnalyticsController.ts';
-import { EventController } from '#api/events/EventController.ts';
-import { PaymentController } from '#api/payments/PaymentController.ts';
-import { SuperadminController } from '#api/superadmin/SuperadminController.ts';
 import {
   accountDetailsSchema,
   accountSchema,
@@ -24,15 +18,22 @@ import {
   siteSetupSchema,
   verificationSchema,
   verifiedSchema,
-} from '../../types/src/account.ts';
-import { analyticsInputSchema, breakdownInputSchema, breakdownRowSchema, journeyInputSchema, journeySchema, liveSchema, overviewSchema } from '../../types/src/analytics.ts';
-import { trackEventSchema } from '../../types/src/event.ts';
-import { goalIdentitySchema, goalInputSchema, goalSchema, goalUpdateSchema } from '../../types/src/goal.ts';
-import { cancellationSchema, checkoutInputSchema, checkoutSchema, paymentSchema, subscriptionSchema } from '../../types/src/payment.ts';
+} from 'types/account.ts';
+import { analyticsInputSchema, breakdownInputSchema, breakdownRowSchema, journeyInputSchema, journeySchema, liveSchema, overviewSchema } from 'types/analytics.ts';
+import { trackEventSchema } from 'types/event.ts';
+import { goalIdentitySchema, goalInputSchema, goalSchema, goalUpdateSchema } from 'types/goal.ts';
+import { cancellationSchema, checkoutInputSchema, checkoutSchema, paymentSchema, subscriptionSchema } from 'types/payment.ts';
+import { AccountController, authenticatedAccount, sessionCookie } from '#api/accounts/AccountController.ts';
+import { AccountRepository } from '#api/accounts/AccountRepository.ts';
+import { AnalyticsController } from '#api/events/AnalyticsController.ts';
+import { EventController } from '#api/events/EventController.ts';
+import { PaymentController } from '#api/payments/PaymentController.ts';
+import { SuperadminController } from '#api/superadmin/SuperadminController.ts';
 import ENV from './env.ts';
 import { GoalController } from './goals/GoalController.ts';
 
 const bodyLimitBytes = 2000;
+const webhookBodyLimitBytes = 65_536;
 const clientIp = ({ request }: { request: IncomingMessage }) => {
   const forwarded = request.headers['x-forwarded-for'];
   const value = Array.isArray(forwarded) ? forwarded[0] : forwarded;
@@ -88,7 +89,15 @@ const handleEvent = async ({ request, response }: { request: IncomingMessage; re
 export const app = new Hono();
 app.onError(errorHandler);
 app.use('*', cors({ origin: (origin) => origin, credentials: true }));
-app.use('/*', bodyLimit({ maxSize: bodyLimitBytes }));
+const defaultBodyLimit = bodyLimit({ maxSize: bodyLimitBytes });
+app.use('/*', async (c, next) => {
+  if (c.req.path === '/webhook') {
+    await next();
+    return;
+  }
+  await defaultBodyLimit(c, next);
+});
+app.use('/webhook', bodyLimit({ maxSize: webhookBodyLimitBytes }));
 
 const allowedOrigin: MiddlewareHandler = async (c, next) => {
   const origin = c.req.header('origin');
