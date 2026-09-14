@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter/index.css";
+
+@theme {
+  --font-sans: "Inter Variable", sans-serif;
+  --color-ink: #183b36;
+  --color-paper: #f7f8f2;
+  --color-accent: #d4f47d;
+}
+
+@layer base {
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+  button,
+  a,
+  input {
+    outline-offset: 5px;
+  }
+  button:not(:disabled),
+  a {
+    cursor: pointer;
+  }
+  ::selection {
+    background: var(--color-accent);
+  }
+}

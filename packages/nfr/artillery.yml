@@ -1,0 +1,24 @@
+config:
+  target: http://localhost:8080
+  phases:
+    - name: "For 20 seconds, 100 users every second, up to 100 concurrent users"
+      duration: 20
+      arrivalRate: 100
+      maxVusers: 100
+
+  log:
+    level: error
+
+  http:
+    timeout: 1
+
+  plugins:
+    expect:
+      reportFailuresAsErrors: true
+      outputFormat: silent
+
+    ensure:
+      maxErrorRate: 1 # max 1% of vUsers scenario failures on all vUsers scenarios created
+      thresholds:
+        - http.response_time.p99: 100 # p99 response time <= 100ms
+        - http.response_time.p95: 50 # p95 response time <= 50ms

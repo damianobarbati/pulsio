@@ -1,0 +1,20 @@
+config:
+  payload:
+    name: "users"
+    path: "../users.csv"
+    delimiter: ";"
+    fields: ["email", "password", "domain"]
+
+scenarios:
+  - name: "/api/event"
+
+    flow:
+      - post:
+          url: "/api/event"
+          json:
+            email: "{{ email }}"
+            password: "{{ password }}"
+          expect:
+            - statusCode: 204
+
+      - think: 0.1

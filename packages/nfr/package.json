@@ -1,0 +1,17 @@
+{
+  "name": "nfr",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:happy:ui": "E2E_HEADED=1 E2E_KEEP_OPEN=1 vitest run src/happy.spec.ts",
+    "test:ui": "E2E_HEADED=1 E2E_KEEP_OPEN=1 vitest --ui --standalone",
+    "test:load": "for f in load-scenarios/*.yml; do artillery run --config artillery.yml \"$f\" || exit 1; done"
+  },
+  "devDependencies": {
+    "@vitest/ui": "5.0.0",
+    "artillery": "^2.0.34",
+    "playwright": "^1.62.1",
+    "vitest": "^5.0.0"
+  }
+}

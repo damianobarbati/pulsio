@@ -1,0 +1,13 @@
+{
+  "name": "showcase",
+  "type": "module",
+  "imports": {
+    "#showcase/*": "./src/*"
+  },
+  "scripts": {
+    "start:dev": "serve -s ./src -l tcp://0.0.0.0:80"
+  },
+  "devDependencies": {
+    "serve": "^14.2.6"
+  }
+}

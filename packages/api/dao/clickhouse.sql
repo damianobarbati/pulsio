@@ -1,0 +1,37 @@
+CREATE TABLE IF NOT EXISTS events (
+  id UUID,
+  timestamp DateTime64(3, 'UTC'),
+  created_at DateTime64(3, 'UTC') DEFAULT now64(3),
+  site_id String,
+  event_name LowCardinality(String),
+  protocol_version String,
+  fingerprint String,
+  url String,
+  domain String,
+  path String,
+  query String,
+  referrer Nullable(String),
+  screen_width UInt32,
+  language String,
+  timezone String,
+  page_id String DEFAULT '',
+  interactive UInt8 DEFAULT 1,
+  engagement_ms UInt32 DEFAULT 0,
+  scroll_depth Nullable(UInt8),
+  props Map(String, String),
+  revenue_amount Nullable(Decimal(18, 4)),
+  revenue_currency LowCardinality(String) DEFAULT '',
+  browser LowCardinality(String) DEFAULT '(not set)',
+  browser_version String DEFAULT '(not set)',
+  os LowCardinality(String) DEFAULT '(not set)',
+  os_version String DEFAULT '(not set)',
+  device LowCardinality(String) DEFAULT '(not set)',
+  country LowCardinality(String) DEFAULT '(not set)',
+  region String DEFAULT '(not set)',
+  city String DEFAULT '(not set)',
+  source String DEFAULT 'Direct / None',
+  channel LowCardinality(String) DEFAULT 'Direct'
+) ENGINE = ReplacingMergeTree
+PARTITION BY toYYYYMM(timestamp)
+ORDER BY (site_id, timestamp, id)
+TTL toDateTime(timestamp) + INTERVAL 12 MONTH DELETE;

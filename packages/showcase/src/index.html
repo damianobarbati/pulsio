@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>pulsio — showcase</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="http://localhost:8080/client.js" data-site="localtest.me"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+<div id="root" class="text-center">
+    <h1 class="text-4xl font-bold text-blue-600 tracking-tight mb-6">Hello!</h1>
+
+    <button id="checkout-btn"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-lg transition-colors cursor-pointer"
+    >
+        Checkout
+    </button>
+
+    <p id="thank-you-msg" class="hidden text-green-600 font-semibold mt-4 text-lg">
+        Thank you!
+    </p>
+</div>
+
+<script>
+    document.getElementById('checkout-btn').addEventListener('click', () => {
+        document.getElementById('thank-you-msg').classList.remove('hidden');
+    });
+</script>
+</body>
+</html>
