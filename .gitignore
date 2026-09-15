@@ -4,6 +4,7 @@
 
 **/*.env
 !**/sample.env
+!**/*.sops.env
 **/public/config.json
 **/node_modules/
 **/dist/

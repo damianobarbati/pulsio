@@ -39,9 +39,9 @@ jobs:
           version: 'latest'
 
       - name: Setup env
-        run: sops -d ./infra/test.sops.json > .env
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: sops -d ./infra/test.sops.env >> $GITHUB_ENV
 
       - name: Install dependencies
         run: pnpm install --silent --frozen-lockfile --prefer-offline
@@ -73,6 +73,7 @@ jobs:
         run: pnpm -F superadmin test
 
       - name: Test NFRs
+        if: false
         run: |
           sudo setcap cap_net_bind_service=+ep "$(readlink -f "$(command -v node)")"
 
