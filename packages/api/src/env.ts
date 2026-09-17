@@ -20,8 +20,6 @@ const envSchema = z
     //
     SUPERADMIN_USERNAME: z.string().min(1),
     SUPERADMIN_PASSWORD: z.string().min(1),
-    DASHBOARD_USERNAME: z.string().min(1),
-    DASHBOARD_PASSWORD: z.string().min(1),
     //
     COOKIE_DOMAIN: z.string().nullable(),
     API_URL: z.url().min(1),
