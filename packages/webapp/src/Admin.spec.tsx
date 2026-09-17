@@ -34,7 +34,7 @@ it('shows login errors and lets the user correct credentials', async () => {
   await screen.findByRole('heading', { name: 'Welcome back.' });
   await userEvent.type(screen.getByLabelText('Email'), 'person@example.com');
   await userEvent.type(screen.getByLabelText('Password'), 'incorrect-password');
-  await userEvent.click(screen.getByRole('button', { name: 'Log in' }));
+  await userEvent.keyboard('{Enter}');
   expect((await screen.findByRole('alert')).textContent).toEqual('Email or password is incorrect.');
 });
 

@@ -247,7 +247,7 @@ export const StartTracking = () => {
           </a>
           .
         </p>
-        <button disabled={registration.isMutating} className="mt-7 w-full rounded-full bg-ink px-6 py-4 font-semibold text-white disabled:opacity-60">
+        <button type="submit" disabled={registration.isMutating} className="mt-7 w-full rounded-full bg-ink px-6 py-4 font-semibold text-white disabled:opacity-60">
           {registration.isMutating ? 'Creating your account…' : 'Create account & get snippet ↗'}
         </button>
         <p className="mt-4 text-center text-ink/65 text-xs">No card needed to get started.</p>

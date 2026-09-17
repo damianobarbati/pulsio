@@ -38,7 +38,13 @@ export const AccountController = {
   async register(input: { email: string; password: string; domain: string; plan: 'start' | 'grow' | 'scale' | 'expand' }) {
     try {
       const registration = await AccountService.register(input);
-      await AccountEmail.sendVerification({ email: registration.account.email, token: registration.verificationToken });
+
+      try {
+        await AccountEmail.sendVerification({ email: registration.account.email, token: registration.verificationToken });
+      } catch (error) {
+        console.error('Could not send registration verification email.', error);
+      }
+
       const token = await AccountRepository.createSession({ accountId: registration.account.id });
       const sites = await AccountRepository.sites({ accountId: registration.account.id });
       return { token, setup: AccountService.setup({ site: sites[0], userId: registration.account.id }) };

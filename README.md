@@ -35,13 +35,13 @@ pnpm -F api build
 Start services:
 ```sh
 pnpm dev
-pnpm open # optional, open all client applications
-# or manually...
+pnpm open
+
+# or manually one by one...
 pnpm -F api start:dev
 pnpm -F website start:dev
 pnpm -F webapp start:dev
 pnpm -F superadmin start:dev
-pnpm -F showcase start:dev
 ```
 
 Linting:
@@ -55,7 +55,13 @@ Testing:
 pnpm -r test
 ```
 
-Test builds:
+Testing E2E:
+```sh
+pnpm -F nfr e2e     # headless
+pnpm -F nfr e2e:ui  # headed
+```
+
+Testing builds:
 ```sh
 pnpm -r build
 ```

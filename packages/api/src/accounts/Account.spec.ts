@@ -10,6 +10,23 @@ import { AccountEmail } from './AccountEmail.ts';
 vi.spyOn(AccountEmail, 'sendVerification').mockResolvedValue(undefined);
 
 describe('Account onboarding', () => {
+  it('completes registration when verification email delivery fails', async () => {
+    vi.spyOn(AccountEmail, 'sendVerification').mockRejectedValueOnce(new Error('SMTP unavailable'));
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const registration = await fetch(new URL('/auth/register', baseUrl), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: 'delivery-failure@example.com', password: 'a-long-test-password', domain: 'delivery-failure.example.com' }),
+    });
+
+    expect({ status: registration.status, setup: await registration.json(), cookie: registration.headers.get('set-cookie') }).toMatchObject({
+      status: 201,
+      setup: { domain: 'delivery-failure.example.com' },
+      cookie: expect.stringContaining('HttpOnly'),
+    });
+  });
+
   it('verifies email addresses and blocks login after the one-hour deadline', async () => {
     const verifiedRegistration = await fetch(new URL('/auth/register', baseUrl), {
       method: 'POST',
