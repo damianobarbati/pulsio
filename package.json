@@ -1,0 +1,35 @@
+{
+  "name": "pulsio",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Damiano Barbati <damiano.barbati@gmail.com> (https://github.com/damianobarbati)",
+  "repository": "https://github.com/damianobarbati/pulsio",
+  "description": "Analytics made simple.",
+  "packageManager": "pnpm@12.4.2",
+  "engines": {
+    "pnpm": ">=12.4",
+    "node": ">=26.7"
+  },
+  "type": "module",
+  "scripts": {
+    "postinstall": "pnpm audit --audit-level critical",
+    "lint": "biome check --write",
+    "tsc": "tsc",
+    "env:up": "docker compose up -d --wait --quiet-pull --remove-orphans",
+    "env:down": "docker compose down --volumes --remove-orphans",
+    "predev": "kill-port 8080 3000 3001 3002",
+    "dev": "pnpm -r --parallel run '/^(start|worker):dev$/'",
+    "open": "open -a 'Google Chrome' http://localhost:8080 http://localhost:3000 http://localhost:3001 http://localhost:3002"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
+    "@types/node": "^26.6.1",
+    "@vitest/coverage-v8": "^5.0.1",
+    "kill-port": "^2.0.1",
+    "playwright": "^1.63.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vite-plugin-static-copy": "^4.1.1",
+    "vitest": "^5.0.1"
+  }
+}

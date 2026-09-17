@@ -1,0 +1,7 @@
+version: 2
+
+secret:
+  paths-ignore:
+    - '**/seeds/**'
+    - '**/fixtures/**'
+    - '**/*.spec.*'

@@ -1,0 +1,41 @@
+{
+  "name": "superadmin",
+  "type": "module",
+  "imports": {
+    "#superadmin/*": "./src/*"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "prestart:dev": "node env.ts > ./src/public/config.json",
+    "start:dev": "rm -rf dist && vite --port 3002",
+    "build": "rm -rf dist && vite build",
+    "preserve": "node env.ts > ./dist/config.json",
+    "serve": "serve -s dist -p 80 --config ../serve.json"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@tanstack/react-table": "^9.2.4",
+    "@tanstack/react-virtual": "^3.14.13",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-icons": "^5.6.0",
+    "swr": "^2.4.1",
+    "tailwindcss": "^4.3.0",
+    "ui": "workspace:*",
+    "wouter": "^3.11.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@rolldown/plugin-babel": "^0.2.3",
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "jsdom": "^30.0.1",
+    "rollup-plugin-visualizer": "^7.0.1",
+    "serve": "^14.2.6",
+    "types": "workspace:*",
+    "vite-plugin-compression2": "^2.5.3"
+  }
+}

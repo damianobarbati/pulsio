@@ -1,0 +1,57 @@
+# Database
+
+Guidelines:
+- migration files must never use knex querybuilder, only `database.raw` calls with plain raw sql statements
+- migration files must leave `down` handler empty
+
+## Cheatsheet
+
+Run the following prior to any command listed here to load envs:
+```sh
+export $(grep -v '^#' .env | xargs)
+```
+
+Recreate the schema (this removes all database data):
+```sh
+pnpm -F api db:migrate
+```
+
+Create and apply seeding to import dataset:
+```sh
+pnpm -F api db:seed:make 1-users
+pnpm -F api db:seed
+```
+
+Connect to the database:
+```sh
+docker exec -ti pulsio-db psql ${DB_URI:?}
+```
+
+Connect to cache:
+```sh
+docker exec -ti pulsio-cache redis-cli -u ${CACHE_URI?:}
+```
+
+Import schema:
+```sh
+cat packages/dao/schema.sql | docker exec -i pulsio-db psql -v ON_ERROR_STOP=1 ${DB_URI:?}
+```
+
+Import dump:
+```sh
+# clear current db
+docker exec -ti pulsio-db psql ${DB_URI:?} -c 'drop schema public cascade; create schema public;'
+
+# if dumped in plain SQL
+cat packages/api/api/database/seeds/dataset.sql | docker exec -i pulsio-db psql -v ON_ERROR_STOP=1 ${DB_URI:?}
+# if dumped compressed with `pg_dump -Fc`
+docker exec -i pulsio-db pg_restore --no-owner --disable-triggers -d ${DB_URI:?} < packages/api/api/database/seeds/dataset.sql 
+```
+
+Export dump (add `--data-only` for data only):
+```sh
+# in pain SQL
+docker exec -ti pulsio-db pg_dump --no-owner --no-privileges --disable-triggers -d ${DB_URI:?} > dump.sql
+# compressed
+docker exec -ti pulsio-db pg_dump --no-owner --no-privileges --disable-triggers -Fc -d ${DB_URI:?} > dump.dump
+```

@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+    tags: ['*']
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    timeout-minutes: 5
+    runs-on: ubuntu-26.04
+    environment: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v5
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: 'package.json'
+          cache: 'pnpm'
+
+      - name: Setup SOPS
+        uses: nhedger/setup-sops@v3
+        with:
+          version: 'latest'
+
+      - name: Setup env
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: sops -d ./infra/test.sops.env >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: pnpm install --silent --frozen-lockfile --prefer-offline
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm tsc
+
+      - name: Start testing environment
+        run: |
+          pnpm env:up
+          timeout 10 bash -c -- "while ! docker run --rm --network=host -i postgres:18-alpine pg_isready --quiet --timeout=1 -d ${DB_URI:?}; do sleep 1; done"
+          pnpm -F api db:migrate
+          pnpm -F api db:seed
+          pnpm -F api build
+
+      - name: Test builds
+        run: pnpm -r build
+
+      - name: Test api service
+        run: pnpm -F api test
+
+      - name: Test webapp service
+        run: pnpm -F webapp test
+
+      - name: Test superadmin service
+        run: pnpm -F superadmin test
+
+      - name: Test NFRs
+        if: false
+        run: |
+          sudo setcap cap_net_bind_service=+ep "$(readlink -f "$(command -v node)")"
+
+          # start and wait for services
+          pnpm dev &
+          timeout 10 sh -c 'until $(curl --output /dev/null --silent --head --fail http://localhost:8080/healthcheck); do printf .; sleep 1; done'
+          timeout 10 sh -c 'until $(curl --output /dev/null --silent --head --fail http://localhost:3000); do printf .; sleep 1; done'
+          timeout 10 sh -c 'until $(curl --output /dev/null --silent --head --fail http://localhost:3001); do printf .; sleep 1; done'
+          timeout 10 sh -c 'until $(curl --output /dev/null --silent --head --fail http://localhost:3002); do printf .; sleep 1; done'
+          timeout 10 sh -c 'until $(curl --output /dev/null --silent --head --fail http://localhost:80); do printf .; sleep 1; done'
+
+          pnpm -F nfr exec playwright install chromium
+          pnpm -F nfr e2e
+
+  build-and-deploy:
+    timeout-minutes: 5
+    runs-on: ubuntu-26.04
+    needs: [test]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Build images
+        run: |
+          DOCKER_BUILDKIT=1 docker build --quiet --rm --force-rm -t api -f ./packages/api/Dockerfile .
+          DOCKER_BUILDKIT=1 docker build --quiet --rm --force-rm -t website -f ./packages/website/Dockerfile .
+          DOCKER_BUILDKIT=1 docker build --quiet --rm --force-rm -t webapp -f ./packages/webapp/Dockerfile .
+          DOCKER_BUILDKIT=1 docker build --quiet --rm --force-rm -t superadmin -f ./packages/superadmin/Dockerfile .
+
+      - name: GitHub Registry login
+        if: github.event_name == 'push'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push images
+        if: github.event_name == 'push'
+        run: |
+          REGISTRY_OWNER="${GITHUB_REPOSITORY_OWNER,,}"
+
+          if [[ "${{ github.ref }}" == refs/tags/* ]];
+            then SUFFIX="-production"
+            else SUFFIX="-production" # todo: provide staging environment and use staging suffix
+          fi
+          
+          docker tag api ghcr.io/$REGISTRY_OWNER/pulsio-api${SUFFIX}:latest
+          docker tag website ghcr.io/$REGISTRY_OWNER/pulsio-website${SUFFIX}:latest
+          docker tag webapp ghcr.io/$REGISTRY_OWNER/pulsio-webapp${SUFFIX}:latest
+          docker tag superadmin ghcr.io/$REGISTRY_OWNER/pulsio-superadmin${SUFFIX}:latest
+
+          docker push ghcr.io/$REGISTRY_OWNER/pulsio-api${SUFFIX}:latest
+          docker push ghcr.io/$REGISTRY_OWNER/pulsio-website${SUFFIX}:latest
+          docker push ghcr.io/$REGISTRY_OWNER/pulsio-webapp${SUFFIX}:latest
+          docker push ghcr.io/$REGISTRY_OWNER/pulsio-superadmin${SUFFIX}:latest

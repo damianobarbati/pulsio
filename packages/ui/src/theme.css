@@ -1,0 +1,44 @@
+@theme {
+  --font-sans: "Inter Variable", sans-serif;
+  --color-pulsio-blue: #055dfe;
+  --color-pulsio-ink: #0b0b0b;
+  --color-pulsio-surface: #f7faff;
+  --color-pulsio-nav: #eef5ff;
+  --color-pulsio-line: #dbe5f5;
+  --color-pulsio-muted: #667085;
+  --color-pulsio-lime: #84cc16;
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --shadow-pulsio: 0 8px 24px rgb(11 11 11 / 0.06);
+}
+
+:root {
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+}
+
+@layer base {
+  body {
+    background: var(--color-pulsio-surface);
+    color: var(--color-pulsio-ink);
+  }
+  button,
+  a,
+  input,
+  select {
+    outline-offset: 4px;
+  }
+  button:not(:disabled),
+  a {
+    cursor: pointer;
+  }
+  ::selection {
+    background: #cfe0ff;
+  }
+}
