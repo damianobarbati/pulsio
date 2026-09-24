@@ -42,8 +42,6 @@ export const post = async <Result>(url: string, body: unknown): Promise<Result> 
 
 export const login = async (_key: string, { arg }: { arg: { email: string; password: string } }) => request({ url: '/auth/login', method: 'POST', body: arg, loginRequest: true });
 
-export const logout = async () => request({ url: '/auth/logout', method: 'POST' });
-
 export const mutation = async (url: string, { arg }: { arg: unknown }) => {
   const result = await request({ url, method: 'POST', body: arg });
   return result;

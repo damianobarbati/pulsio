@@ -14,7 +14,7 @@ type PageKey = [string, string, number, Sort['id'], Sort['direction']];
 const pageSize = 50;
 const column = createColumnHelper<typeof virtualizedTableFeatures, User>();
 const columns = column.columns([
-  column.accessor('email', { header: 'Email', size: 300, cell: (info) => <span className="font-medium">{info.getValue()}</span> }),
+  column.accessor('email', { header: 'Email', size: 300, cell: (info) => <span>{info.getValue()}</span> }),
   column.accessor('name', { header: 'Name', size: 180, cell: (info) => info.getValue() || '—' }),
   column.accessor('role', { header: 'Role', size: 120, cell: (info) => <span className="capitalize">{info.getValue()}</span> }),
   column.accessor('suspended_at', {
@@ -79,9 +79,8 @@ export const Users = () => {
       <DataTable
         className="mt-6 flex min-h-0 flex-1 flex-col"
         search={
-          <label className="block w-full max-w-sm font-medium text-sm">
-            Search users
-            <Input className="mt-2" type="search" placeholder="Name or email" value={query} onChange={(event) => setQuery(event.target.value)} />
+          <label className="block w-full max-w-sm text-sm">
+            <Input className="mt-2" type="search" placeholder="Search" value={query} onChange={(event) => setQuery(event.target.value)} />
           </label>
         }
         footer={
@@ -90,12 +89,12 @@ export const Users = () => {
               <p role="alert" className="text-red-700">
                 {result.error instanceof Error ? result.error.message : 'Could not load users.'}
               </p>
-              <button type="button" className="font-medium text-pulsio-blue underline" onClick={() => result.mutate()}>
+              <button type="button" className="text-pulsio-blue underline" onClick={() => result.mutate()}>
                 Try again
               </button>
             </div>
           ) : (
-            <span>{loading && !users.length ? 'Loading users…' : `${count(users.length)} users loaded${hasMore ? ' · Scroll to load more' : ''}`}</span>
+            <span>{loading && !users.length ? 'Loading users…' : `${count(users.length)} users loaded${hasMore ? ' · Scroll to load' : ''}`}</span>
           )
         }
       >

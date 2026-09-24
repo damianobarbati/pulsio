@@ -143,18 +143,6 @@ create table goals
     constraint goals_properties_check_object check (jsonb_typeof(properties) = 'object')
 );
 
-create table sessions
-(
-    id         uuid primary key     default uuidv7(),
-    token      text unique,
-    user_id    uuid        not null references users (id) on delete cascade,
-    expires_at timestamptz not null,
-    created_at timestamptz not null default now()::timestamptz(0),
-    constraint sessions_expires_at_check_after_created_at check (expires_at > created_at)
-);
-create index sessions_user_id on sessions (user_id);
-create index sessions_expired on sessions (expires_at);
-
 create table subscriptions
 (
     id                     uuid primary key     default uuidv7(),

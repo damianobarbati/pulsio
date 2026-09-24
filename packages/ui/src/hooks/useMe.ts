@@ -14,11 +14,7 @@ export const useMe = <T>(fetcher: Fetcher<T>, redirect: string = '/auth'): UseMe
     } catch (error) {
       if (!(error instanceof Error && 'status' in error && error.status === 401 && redirect)) throw error;
 
-      try {
-        await mutation('/auth/logout', { arg: {} });
-      } catch (logoutError) {
-        console.error(logoutError);
-      }
+      await mutation('/auth/logout', { arg: {} });
 
       window.location.replace(redirect);
       const navigation = new Promise<never>(() => {});

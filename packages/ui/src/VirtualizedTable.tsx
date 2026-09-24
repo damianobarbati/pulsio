@@ -74,12 +74,12 @@ export const VirtualizedTable = <T extends object>({
               {headerGroup.headers.map((header) => {
                 const sortable = sortableColumns.includes(header.id);
                 return (
-                  <th key={header.id} className="h-10 truncate border-pulsio-line border-b px-4 font-medium">
+                  <th key={header.id} className="h-10 truncate border-pulsio-line border-b px-4 font-normal">
                     {header.isPlaceholder ? null : sortable ? (
-                      <button type="button" className="inline-flex w-full items-center gap-1 text-left hover:text-slate-900" onClick={() => onSort?.(header.id)}>
+                      <span className="inline-flex w-full cursor-pointer items-center gap-1 text-left hover:text-slate-900" onClick={() => onSort?.(header.id)}>
                         <table.FlexRender header={header} />
                         {sort?.id === header.id ? <span aria-hidden="true">{sort.direction === 'asc' ? '↑' : '↓'}</span> : null}
-                      </button>
+                      </span>
                     ) : (
                       <table.FlexRender header={header} />
                     )}
@@ -96,7 +96,7 @@ export const VirtualizedTable = <T extends object>({
             </tr>
           ) : null}
           {visibleRows.map((row) => (
-            <tr key={row.id} className={`group h-16 transition-colors ${onRowClick ? 'cursor-pointer hover:bg-pulsio-surface' : ''}`} onClick={() => onRowClick?.(row.original)}>
+            <tr key={row.id} className={`group h-10 transition-colors ${onRowClick ? 'cursor-pointer hover:bg-pulsio-surface' : ''}`} onClick={() => onRowClick?.(row.original)}>
               {row.getAllCells().map((cell) => (
                 <td key={cell.id} className="truncate border-pulsio-line border-b px-4 py-2 align-middle">
                   <table.FlexRender cell={cell} />

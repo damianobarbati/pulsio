@@ -2,7 +2,6 @@ import { faker } from '@faker-js/faker';
 import jwt from 'jwt-simple';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import ENV from '#api/env.ts';
-import SessionRepository from '#api/misc/SessionRepository.ts';
 import UserRepository from '#api/user/UserRepository.ts';
 import { AuthService } from './AuthService.ts';
 
@@ -63,10 +62,8 @@ describe('AuthService', () => {
       const token = await AuthService.register({ email, password });
       const user = await UserRepository.getBy({ email });
       const authenticatedUser = await AuthService.me({ cookie: AuthService.generateCookie(token) });
-      const sessions = await SessionRepository.getem({ user_id: user.id });
       expect(user).toMatchObject({ email });
       expect(authenticatedUser).toMatchObject({ id: user.id });
-      expect(sessions).toEqual([]);
       expect(token).toMatch(/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
     });
 

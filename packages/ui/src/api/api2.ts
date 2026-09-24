@@ -159,19 +159,6 @@ export const mutation = async <Result>(url: string, { arg }: MutationArgument): 
     setAuthenticated(true);
     return result as Result;
   }
-  if (url === '/auth/logout') {
-    let result: Result;
-
-    try {
-      result = (await request({ url, method: 'POST', body: arg })) as Result;
-    } catch (error) {
-      if (!(error instanceof Error && 'status' in error && error.status === 401)) throw error;
-      result = true as Result;
-    }
-
-    setAuthenticated(false);
-    return result;
-  }
 
   const result = await mock<Result>({ url, method: 'POST', body: arg });
   return result;
