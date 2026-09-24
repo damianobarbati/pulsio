@@ -31,7 +31,7 @@ export class AuthService {
   }
 
   static async generateToken(user: User): Promise<string> {
-    const token = jwt.encode({ sub: user.id, iat: Date.now() / 1000 }, ENV.JWT_SECRET, 'HS256');
+    const token = jwt.encode({ sub: user.id, iat: Date.now() }, ENV.JWT_SECRET, 'HS256');
     return token;
   }
 
@@ -87,7 +87,7 @@ export class AuthService {
     if (!claims.sub || !claims.iat) throw unauthorizedError;
 
     const user = await UserRepository.findBy({ id: claims.sub });
-    if (!user || user.suspended_at || user.password_changed_at > claims.iat) throw unauthorizedError;
+    if (!user || user.suspended_at || Date.parse(user.password_changed_at) > claims.iat) throw unauthorizedError;
 
     return user;
   }

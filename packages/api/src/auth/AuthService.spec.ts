@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker';
 import jwt from 'jwt-simple';
-import { setTimeout } from 'timers/promises';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import ENV from '#api/env.ts';
 import SessionRepository from '#api/misc/SessionRepository.ts';
@@ -114,10 +113,7 @@ describe('AuthService', () => {
       const { id: user_id } = await UserRepository.getBy({ email });
 
       const token_before = await AuthService.login({ email, password });
-
-      await setTimeout(1_000);
       await UserRepository.update(user_id, { password_hash: await AuthService.hashPassword('new-password') });
-
       const token_after = await AuthService.login({ email, password: 'new-password' });
 
       await expect(AuthService.me({ cookie: AuthService.generateCookie(token_before) })).rejects.toMatchObject({ code: 'UNAUTHORIZED', status: 401 });

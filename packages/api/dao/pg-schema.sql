@@ -15,7 +15,7 @@ create table users
     password_hash                 text           not null,
     role                          text           not null default 'user',
     login_at                      timestamptz(0),
-    password_changed_at           timestamptz(0) not null default now()::timestamptz(0),
+    password_changed_at           timestamptz not null default now(),
     suspended_at                  timestamptz(0),
     email_verified_at             timestamptz(0),
     email_verification_token_hash text,
@@ -38,6 +38,23 @@ create table users
 );
 create unique index users_email_unique on users (lower(email));
 
+create function set_password_changed_at() returns trigger
+    language plpgsql as
+$$
+begin
+    new.password_changed_at = now();
+    return new;
+end;
+$$;
+
+create trigger users_set_password_changed_at
+    before update of password_hash
+    on users
+    for each row
+    when (old.password_hash is distinct from new.password_hash)
+execute function set_password_changed_at();
+
+
 create table domains
 (
     id                 uuid primary key     default uuidv7(),
@@ -46,7 +63,7 @@ create table domains
     user_id            uuid        not null references users (id) on delete cascade,
     domain             text        not null,
     detected_at        timestamptz(0), -- not null only if automatically discovered
-    reporting_currency char(3) default 'USD',
+    reporting_currency char(3)              default 'USD',
     constraint domains_domain_check_lowercase check (domain = lower(domain)),
     constraint domains_domain_check_length check (length(domain) between 1 and 253),
     constraint domains_reporting_currency_check_format check (reporting_currency is null or reporting_currency ~ '^[A-Z]{3}$')
