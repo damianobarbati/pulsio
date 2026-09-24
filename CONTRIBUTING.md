@@ -80,7 +80,7 @@ views/                  # route-level components (except shared layouts)
 
 ## Tests
 
-- Add proper unit/integration (e.g., vitest), interaction (e.g., React Story components), and happy-path e2e (e.g., Playwright) tests. Unit-test only complex pure functions/algorithms; integration-test feature flows.
+- Add minimal unit/integration (e.g., vitest), interaction (e.g., React Story components), and happy-path e2e (e.g., Playwright) tests. Unit-test only complex pure functions/algorithms; integration-test feature flows.
 - No clever helpers: explicit setup. Load required fixture in test when possible; no default `beforeEach` fixture when only some tests need it; test input visible without hidden setup.
 - Avoid redundant expectations: one proves one behavior; remove duplicate proof; retain explicit exclusion check when exclusion is tested. No meaningless no-value tests.
 - Prefer vitest `expect.matchObject` to group object-property expectations; prefer `expect.toEqual`, avoid `expect.toBe` for single assertions.

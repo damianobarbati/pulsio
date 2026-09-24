@@ -15,6 +15,7 @@ create table users
     password_hash                 text           not null,
     role                          text           not null default 'user',
     login_at                      timestamptz(0),
+    password_changed_at           timestamptz(0) not null default now()::timestamptz(0),
     suspended_at                  timestamptz(0),
     email_verified_at             timestamptz(0),
     email_verification_token_hash text,
