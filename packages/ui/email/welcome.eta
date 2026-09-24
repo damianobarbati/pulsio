@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; background: #f5f7fb; color: #121826; font-family: Inter, Arial, sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="padding: 40px 16px; background: #f5f7fb;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 560px;">
+            <tr>
+              <td style="padding: 0 0 20px;">
+                <img src="cid:pulsio-logo" width="36" height="36" alt="Pulsio" style="display: block; border: 0;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 40px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px;">
+                <p style="margin: 0 0 12px; color: #055dfe; font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;">Welcome to Pulsio</p>
+                <h1 style="margin: 0; color: #121826; font-size: 28px; line-height: 1.25;">Your analytics workspace is ready.</h1>
+                <p style="margin: 20px 0 0; color: #4b5563; font-size: 16px; line-height: 1.6;">Thanks for joining Pulsio. Confirm your email address to start tracking <strong style="color: #121826;"><%= it.domain %></strong> with privacy-first analytics.</p>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 28px 0;">
+                  <tr>
+                    <td style="border-radius: 8px; background: #055dfe;">
+                      <a href="<%= it.verificationUrl %>" style="display: inline-block; padding: 13px 20px; color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none;">Verify email address</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin: 0; color: #6b7280; font-size: 13px; line-height: 1.5;">This link expires in one hour. If you did not create this account, you can safely ignore this email.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 20px 8px 0; color: #6b7280; font-size: 12px; line-height: 1.5;">Pulsio · Premium analytics, made simple</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

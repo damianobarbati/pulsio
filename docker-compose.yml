@@ -1,0 +1,73 @@
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: pulsio-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=pulsio
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    command: "-c log_statement=all -c log_min_duration_statement=0"
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d pulsio"]
+      start_period: 2s
+      interval: 1s
+      timeout: 1s
+      retries: 5
+
+  ch:
+    image: clickhouse/clickhouse-server:26.3-alpine
+    container_name: pulsio-ch
+    restart: unless-stopped
+    environment:
+      - CLICKHOUSE_DB=pulsio
+      - CLICKHOUSE_USER=user
+      - CLICKHOUSE_PASSWORD=password
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --user=user --password=password --database=pulsio --query 'SELECT 1'"]
+      start_period: 2s
+      interval: 1s
+      timeout: 1s
+      retries: 5
+
+  cache:
+    image: redis:8-alpine
+    container_name: pulsio-cache
+    restart: unless-stopped
+    command: ["redis-server", "--user", "default", "off", "--user", "user", "on", ">password", "~*", "+@all", "--appendonly", "yes", "--loglevel", "warning"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --user user -a password ping"]
+      start_period: 2s
+      interval: 1s
+      timeout: 1s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    restart: unless-stopped
+    environment:
+      - MP_SMTP_AUTH_ACCEPT_ANY=true
+      - MP_SMTP_AUTH_ALLOW_INSECURE=true
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
+  stripe:
+    image: stripe/stripe-cli:latest
+    container_name: stripe
+    restart: unless-stopped
+    command: listen --api-key ${STRIPE_SECRET_KEY?} --forward-to host.docker.internal:8080/webhook --log-level debug
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

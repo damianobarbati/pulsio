@@ -1,0 +1,38 @@
+{
+  "name": "ui",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*",
+    "./email": "./email/index.ts",
+    "./theme.css": "./src/theme.css",
+    "./assets/*": "./assets/*"
+  },
+  "imports": {
+    "#ui/*": "./src/*",
+    "#assets/*": "./assets/*"
+  },
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build": "storybook build --output-dir /tmp/pulsio-storybook"
+  },
+  "dependencies": {
+    "@tanstack/react-table": "^9.2.4",
+    "eta": "^4.6.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-icons": "^5.0.0",
+    "swr": "^2.5.1",
+    "wouter": "^3.11.0"
+  },
+  "devDependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@storybook/react-vite": "^10.6.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "clsx-tw": "^1.0.9",
+    "storybook": "^10.6.0",
+    "tailwindcss": "^4.3.3",
+    "types": "workspace:*"
+  }
+}

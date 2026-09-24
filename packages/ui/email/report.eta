@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; background: #f5f7fb; color: #121826; font-family: Inter, Arial, sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="padding: 40px 16px; background: #f5f7fb;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 640px;">
+            <tr>
+              <td style="padding: 0 0 20px;">
+                <img src="cid:pulsio-logo" width="36" height="36" alt="Pulsio" style="display: block; border: 0;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 36px 40px; background: #121826; border-radius: 16px 16px 0 0; color: #ffffff;">
+                <p style="margin: 0 0 10px; color: #9fc1ff; font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;"><%= it.frequency %> analytics report</p>
+                <h1 style="margin: 0; font-size: 28px; line-height: 1.25;"><%= it.domain %></h1>
+                <p style="margin: 12px 0 0; color: #d1d5db; font-size: 15px;"><%= it.brandName %></p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 32px 40px 40px; background: #ffffff; border: 1px solid #e5e7eb; border-top: 0; border-radius: 0 0 16px 16px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td width="33.33%" style="padding: 0 8px 0 0; vertical-align: top;">
+                      <p style="margin: 0; color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase;">Visitors</p>
+                      <p style="margin: 6px 0 0; color: #121826; font-size: 24px; font-weight: 700;"><%= it.visitors %></p>
+                    </td>
+                    <td width="33.33%" style="padding: 0 8px; vertical-align: top;">
+                      <p style="margin: 0; color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase;">Page views</p>
+                      <p style="margin: 6px 0 0; color: #121826; font-size: 24px; font-weight: 700;"><%= it.pageviews %></p>
+                    </td>
+                    <td width="33.33%" style="padding: 0 0 0 8px; vertical-align: top;">
+                      <p style="margin: 0; color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase;">Visits</p>
+                      <p style="margin: 6px 0 0; color: #121826; font-size: 24px; font-weight: 700;"><%= it.visits %></p>
+                    </td>
+                  </tr>
+                </table>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top: 32px;">
+                  <tr>
+                    <td width="50%" style="padding: 0 12px 0 0; vertical-align: top;">
+                      <h2 style="margin: 0 0 12px; font-size: 16px;">Top pages</h2>
+                      <% if (!it.topPages.length) { %><p style="margin: 0; color: #6b7280; font-size: 14px;">No data</p><% } %>
+                      <% it.topPages.forEach((row) => { %><p style="margin: 0 0 9px; color: #4b5563; font-size: 14px; line-height: 1.4;"><strong style="color: #121826;"><%= row.name %></strong><br /><%= row.value %></p><% }) %>
+                    </td>
+                    <td width="50%" style="padding: 0 0 0 12px; vertical-align: top;">
+                      <h2 style="margin: 0 0 12px; font-size: 16px;">Top sources</h2>
+                      <% if (!it.sources.length) { %><p style="margin: 0; color: #6b7280; font-size: 14px;">No data</p><% } %>
+                      <% it.sources.forEach((row) => { %><p style="margin: 0 0 9px; color: #4b5563; font-size: 14px; line-height: 1.4;"><strong style="color: #121826;"><%= row.name %></strong><br /><%= row.value %></p><% }) %>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 20px 8px 0; color: #6b7280; font-size: 12px; line-height: 1.5;">Powered by Pulsio</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

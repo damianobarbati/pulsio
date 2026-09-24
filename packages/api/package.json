@@ -1,0 +1,54 @@
+{
+  "name": "api",
+  "type": "module",
+  "imports": {
+    "#api/*": "./src/*",
+    "#dao/*": "./dao/*"
+  },
+  "scripts": {
+    "pretest": "pnpm build",
+    "test": "vitest run --reporter=default --reporter=junit --outputFile=/tmp/junit.xml --coverage",
+    "start:dev": "concurrently --kill-others -n 'api,worker,cron' -c 'green,blue,magenta' 'pnpm api:dev' 'pnpm worker:dev' 'pnpm cron:dev'",
+    "api:dev": "NODE_ENV=development NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' node --watch ./src/index.ts",
+    "worker:dev": "NODE_ENV=production NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' node --watch ./src/worker.ts",
+    "cron:dev": "NODE_ENV=production NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' node --watch ./src/cron.ts",
+    "api": "NODE_ENV=production NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' node ./src/index.ts",
+    "worker": "NODE_ENV=production NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' node ./src/worker.ts",
+    "cron": "NODE_ENV=production NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' node ./src/cron.ts",
+    "db:migrate": "NODE_ENV=development NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' knex migrate:latest --knexfile=./dao/pg.ts",
+    "db:seed": "NODE_ENV=development NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' knex seed:run --knexfile=./dao/pg.ts",
+    "db:migrate:make": "NODE_ENV=development NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' knex migrate:make --knexfile=./dao/pg.ts",
+    "db:seed:make": "NODE_ENV=development NODE_OPTIONS='--no-warnings --enable-source-maps --import=amaro/transform' knex seed:make --knexfile=./dao/pg.ts",
+    "build": "pnpm build:client; pnpm build:geoip",
+    "build:geoip": "node ./scripts/geoip.ts",
+    "build:client": "vite build -l=silent --config ./client/vite.config.ts"
+  },
+  "dependencies": {
+    "@clickhouse/client": "^1.23.1",
+    "@hono/node-server": "^2.1.1",
+    "@types/bcrypt": "^6.0.0",
+    "amaro": "^1.2.1",
+    "bcrypt": "^6.0.0",
+    "debug": "^4.4.3",
+    "hono": "^4.13.8",
+    "ioredis": "^6.0.0",
+    "knex": "^3.3.0",
+    "maxmind": "^5.0.7",
+    "nano-fw": "^1.2.0",
+    "node-schedule": "^2.1.1",
+    "nodemailer": "^10.0.10",
+    "pg": "^8.22.0",
+    "stripe": "^22.6.2",
+    "types": "workspace:*",
+    "ua-parser-js": "^2.0.10",
+    "ui": "workspace:*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
+    "@types/node-schedule": "^2.1.8",
+    "@types/pg": "^8.23.1",
+    "@types/ua-parser-js": "^0.7.39",
+    "concurrently": "^10.0.5"
+  }
+}

@@ -1,0 +1,52 @@
+import * as React from 'react';
+import useSWRMutation from 'swr/mutation';
+import { mutation } from 'ui/api/api.ts';
+import { IGlobe, IHome, ILogoutLeft, IUsers } from 'ui/icons.tsx';
+import { NavLink } from 'ui/NavLink.tsx';
+
+export const Nav = () => {
+  const logout = useSWRMutation('/auth/logout', mutation);
+  const [message, setMessage] = React.useState('');
+
+  const signOut = async () => {
+    setMessage('');
+
+    try {
+      await logout.trigger({});
+      window.location.assign('/auth');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not log out. Please try again.');
+    }
+  };
+
+  return (
+    <aside className="w-48 border-pulsio-line border-b bg-pulsio-nav px-5 py-6 lg:flex lg:min-h-screen lg:flex-col lg:border-r lg:border-b-0">
+      <a href={window.config.WEBSITE_URL} className="font-black text-3xl text-pulsio-blue tracking-tighter">
+        Pulsio
+      </a>
+      <nav aria-label="App navigation" className="mt-8 flex gap-2 overflow-x-auto lg:flex-col">
+        <NavLink className="nav-btn" to="/">
+          <IHome size={20} />
+          Overview
+        </NavLink>
+        <NavLink className="nav-btn" to="/users">
+          <IUsers size={20} />
+          Users
+        </NavLink>
+        <NavLink className="nav-btn" to="/domains">
+          <IGlobe size={20} />
+          Domains
+        </NavLink>
+        <button type="button" className="nav-btn" onClick={signOut} disabled={logout.isMutating}>
+          <ILogoutLeft size={20} />
+          Logout
+        </button>
+        {message && (
+          <p role="alert" className="text-red-700 text-sm">
+            {message}
+          </p>
+        )}
+      </nav>
+    </aside>
+  );
+};
