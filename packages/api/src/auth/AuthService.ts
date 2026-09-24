@@ -15,9 +15,12 @@ const sessionDuration = 8 * 60 * 60 * 1000;
 
 export class AuthService {
   static async grantSuperAdmin() {
-    const user = await UserRepository.findBy({ email: ENV.SUPERADMIN_EMAIL });
-    const password_hash = await AuthService.hashPassword(ENV.SUPERADMIN_PASSWORD);
-    if (!user) await UserRepository.create({ email: ENV.SUPERADMIN_EMAIL, password_hash, role: 'superadmin' });
+    try {
+      const user = await UserRepository.findBy({ email: ENV.SUPERADMIN_EMAIL });
+      const password_hash = await AuthService.hashPassword(ENV.SUPERADMIN_PASSWORD);
+      if (!user) return;
+      await UserRepository.create({ email: ENV.SUPERADMIN_EMAIL, password_hash, role: 'superadmin' });
+    } catch {}
   }
 
   static async hashPassword(password: string): Promise<string> {

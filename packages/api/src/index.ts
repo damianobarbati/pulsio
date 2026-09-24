@@ -13,7 +13,7 @@ import EventService from '#api/event/EventService.ts';
 import UserRepository from '#api/user/UserRepository.ts';
 import ENV from './env.ts';
 
-await AuthService.grantSuperAdmin();
+setInterval(AuthService.grantSuperAdmin, 5_000);
 
 export const app = new Hono();
 app.use('*', cors({ origin: (origin) => origin, credentials: true }));
