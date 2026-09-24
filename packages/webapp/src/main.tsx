@@ -6,7 +6,6 @@ import NotFound from 'ui/NotFound.tsx';
 import { Route, Router, Switch } from 'wouter';
 import Auth from '#webapp/views/Auth.tsx';
 import Billing from '#webapp/views/Billing.tsx';
-import Domains from '#webapp/views/Domains.tsx';
 import Home from '#webapp/views/Home.tsx';
 import { Layout } from '#webapp/views/Layout.tsx';
 import Settings from '#webapp/views/Settings.tsx';
@@ -30,7 +29,6 @@ root.render(
                 <Layout>
                   <Switch>
                     <Route path="/" component={Home} />
-                    <Route path="/domains" component={Domains} />
                     <Route path="/billing" component={Billing} />
                     <Route path="/settings" component={Settings} />
                     <Route path="/account" component={NotFound} />
