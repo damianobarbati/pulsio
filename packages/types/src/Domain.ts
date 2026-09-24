@@ -24,3 +24,17 @@ export type DomainRowInsert = z.infer<typeof DomainRowInsertSchema>;
 
 export const DomainRowUpdateSchema = DomainRowSchema.omit(systemKeys).partial();
 export type DomainRowUpdate = z.infer<typeof DomainRowUpdateSchema>;
+
+export const DomainListRequestSchema = z
+  .object({
+    search: z.string(),
+    user_id: z.uuid(),
+    limit: z.number().int().positive(),
+    offset: z.number().int().nonnegative(),
+    sort: z.array(z.tuple([z.enum(['id', 'created_at', 'updated_at', 'user_id', 'domain', 'detected_at', 'reporting_currency']), z.enum(['asc', 'desc'])])).max(2),
+  })
+  .partial();
+export type DomainListRequest = z.infer<typeof DomainListRequestSchema>;
+
+export const DomainListResponseSchema = z.array(DomainRowSchema);
+export type DomainListResponse = z.infer<typeof DomainListResponseSchema>;

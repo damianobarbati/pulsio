@@ -42,7 +42,6 @@ const date = (value: number) => new Date(value).toISOString().slice(0, 10);
 
 export const Home = () => {
   const { user } = useMe<User>(checkAuth);
-  console.log(user);
 
   const sites = [];
   const selected = [];

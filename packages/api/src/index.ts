@@ -6,6 +6,7 @@ import { cors } from 'hono/cors';
 import { AppError, errorHandler, registerDocsRoute, registerRoute } from 'nano-fw/docs/index.ts';
 import { AnySchema } from 'types/common.ts';
 import { UserListRequestSchema, UserListResponseSchema } from 'types/User.ts';
+import { asyncLocalStorage } from '#api/asyncStorage.ts';
 import { AuthService } from '#api/auth/AuthService.ts';
 import { AuthSchema } from '#api/auth/AuthServiceSchema.ts';
 import DomainRepository from '#api/domain/DomainRepository.ts';
@@ -36,7 +37,7 @@ const auth =
 
     if (user.role !== role) throw new AppError(403, 'FORBIDDEN', 'This account cannot access this resource.');
 
-    await next();
+    await asyncLocalStorage.run({ user_id: user.id }, next);
   };
 
 app.get('/healthcheck', (c) => c.text('OK'));
@@ -135,6 +136,20 @@ registerRoute(app, {
   responseSchema: UserListResponseSchema,
   middlewares: [auth('superadmin')],
   handler: (params) => UserRepository.getem(params),
+});
+
+registerRoute(app, {
+  method: 'post',
+  path: '/domain/list',
+  meta: { section: 'Domain', description: 'List domains.' },
+  requestSchema: AnySchema,
+  responseSchema: AnySchema,
+  middlewares: [auth('user')],
+  handler: (params) => {
+    const user_id = asyncLocalStorage.getStore()?.user_id;
+    if (!user_id) throw new AppError(403, 'FORBIDDEN', 'This account cannot access this resource.');
+    return DomainRepository.getem({ ...params, user_id });
+  },
 });
 
 registerRoute(app, {

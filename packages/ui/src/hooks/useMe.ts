@@ -6,13 +6,16 @@ type UseMe<T> = {
   mutate: KeyedMutator<T>;
 };
 
-export const useMe = <T>(fetcher: Fetcher<T>, redirect: string = '/auth'): UseMe<T> => {
+export const useMe = <T extends { role: string }>(fetcher: Fetcher<T>, role?: T['role'], redirect: string = '/auth'): UseMe<T> => {
   const loadMe: Fetcher<T> = async (key) => {
     try {
       const user = await fetcher(key);
+
+      if (role && user.role !== role) throw Object.assign(new Error('Access denied.'), { status: 403 });
+
       return user;
     } catch (error) {
-      if (!(error instanceof Error && 'status' in error && error.status === 401 && redirect)) throw error;
+      if (!(error instanceof Error && 'status' in error && (error.status === 401 || error.status === 403) && redirect)) throw error;
 
       await mutation('/auth/logout', { arg: {} });
 
@@ -22,7 +25,7 @@ export const useMe = <T>(fetcher: Fetcher<T>, redirect: string = '/auth'): UseMe
     }
   };
 
-  const { data: user, mutate } = useSWR<T>(['/auth/me'], loadMe, { suspense: true, dedupingInterval: 60_000 });
+  const { data: user, mutate } = useSWR<T>(['/auth/me', role], loadMe, { suspense: true, dedupingInterval: 60_000 });
 
   return { user: user as NonNullable<T>, mutate };
 };
