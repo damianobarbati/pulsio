@@ -3,7 +3,7 @@ import React from 'react';
 
 export const virtualizedTableFeatures = tableFeatures({ columnSizingFeature });
 
-const rowHeight = 64;
+const rowHeight = 40;
 const overscan = 8;
 
 type VirtualizedTableProps<T extends object> = {
