@@ -1,6 +1,5 @@
-import React from 'react';
 import useSWR, { type Fetcher, type KeyedMutator } from 'swr';
-import { useLocation } from 'wouter';
+import { mutation } from '../api/api.ts';
 
 type UseMe<T> = {
   user: NonNullable<T>;
@@ -8,13 +7,26 @@ type UseMe<T> = {
 };
 
 export const useMe = <T>(fetcher: Fetcher<T>, redirect: string = '/auth'): UseMe<T> => {
-  const [, setLocation] = useLocation();
+  const loadMe: Fetcher<T> = async (key) => {
+    try {
+      const user = await fetcher(key);
+      return user;
+    } catch (error) {
+      if (!(error instanceof Error && 'status' in error && error.status === 401 && redirect)) throw error;
 
-  const { data: user, mutate } = useSWR<T>(['/auth/me'], fetcher, { suspense: true, dedupingInterval: 60_000 });
+      try {
+        await mutation('/auth/logout', { arg: {} });
+      } catch (logoutError) {
+        console.error(logoutError);
+      }
 
-  React.useEffect(() => {
-    if (!user && redirect) setLocation(redirect);
-  }, [user, setLocation, redirect]);
+      window.location.replace(redirect);
+      const navigation = new Promise<never>(() => {});
+      return await navigation;
+    }
+  };
+
+  const { data: user, mutate } = useSWR<T>(['/auth/me'], loadMe, { suspense: true, dedupingInterval: 60_000 });
 
   return { user: user as NonNullable<T>, mutate };
 };

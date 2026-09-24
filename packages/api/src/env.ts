@@ -19,7 +19,7 @@ const envSchema = z
     SUPERADMIN_EMAIL: z.string().min(1),
     SUPERADMIN_PASSWORD: z.string().min(1),
     COOKIE_DOMAIN: z.string().nullable(),
-    JWT_SECRET: z.string().min(32),
+    JWT_SECRET: z.string().min(7),
     API_URL: z.url().min(1),
     WEBSITE_URL: z.url().min(1),
     WEBAPP_URL: z.url().min(1),

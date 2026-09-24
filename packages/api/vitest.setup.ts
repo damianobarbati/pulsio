@@ -1,23 +1,15 @@
-// import { once } from 'node:events';
-// import { promisify } from 'node:util';
-// import { afterAll, beforeAll, beforeEach } from 'vitest';
-// import { ch } from '#dao/ch.ts';
-// import { pg } from '#dao/pg.ts';
-// import { cache } from './dao/cache.ts';
-// import { server } from './src/index.ts';
+import { once } from 'node:events';
+import { beforeAll } from 'vitest';
+import { server } from '#api/index.ts';
+import UserRepository from '#api/user/UserRepository.ts';
+import { JOHN_DOE } from '#dao/seeds/1-seed.ts';
 
-// beforeEach(async () => {
-//   await pg.raw('truncate users cascade');
-//   await ch.command({ query: 'TRUNCATE TABLE events' });
-//   await cache.flushall();
-// });
-//
-// export let baseUrl: string;
-//
-// beforeAll(async () => {
-//   server.listen(0, '127.0.0.1');
-//   await once(server, 'listening');
-//   const address = server.address();
-//   if (!address || typeof address === 'string') throw new Error('Missing HTTP server address');
-//   baseUrl = `http://127.0.0.1:${address.port}`;
-// });
+beforeAll(async () => {
+  global.user = await UserRepository.get(JOHN_DOE.id);
+
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+  const address = server.address();
+  if (!address || typeof address === 'string') throw new Error('Missing HTTP server address');
+  global.API_URL = `http://127.0.0.1:${address.port}`;
+});

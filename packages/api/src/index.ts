@@ -78,7 +78,7 @@ registerRoute(app, {
   middlewares: [allowedOrigin],
   handler: async (params, c) => {
     const token = await AuthService.register(params);
-    const cookie = AuthService.generateSessionCookieValue(token);
+    const cookie = AuthService.generateCookie(token);
     c.header('Set-Cookie', cookie);
     return token;
   },
@@ -93,7 +93,7 @@ registerRoute(app, {
   middlewares: [allowedOrigin],
   handler: async (params, c) => {
     const token = await AuthService.login(params);
-    const cookie = AuthService.generateSessionCookieValue(token);
+    const cookie = AuthService.generateCookie(token);
     c.header('Set-Cookie', cookie);
     return token;
   },
@@ -107,10 +107,7 @@ registerRoute(app, {
   responseSchema: AuthSchema.logoutResponse,
   middlewares: [allowedOrigin],
   handler: async (_params, c) => {
-    const cookie = c.req.header('cookie');
-    if (!cookie) throw new AppError(401, 'NO_SESSION', 'No session cookie found.');
-    await AuthService.logout({ cookie });
-    c.header('Set-Cookie', AuthService.generateSessionCookieValue('', true));
+    c.header('Set-Cookie', AuthService.generateCookie('', true));
     return true;
   },
 });
@@ -124,7 +121,8 @@ registerRoute(app, {
   handler: async (_params, c) => {
     const cookie = c.req.header('cookie');
     if (!cookie) throw new AppError(401, 'NO_SESSION', 'No session cookie found.');
-    const result = await AuthService.me({ cookie });
+    const user = await AuthService.me({ cookie });
+    const { password_hash: _password_hash, email_verification_token_hash: _email_verification_token_hash, ...result } = user;
     return result;
   },
 });

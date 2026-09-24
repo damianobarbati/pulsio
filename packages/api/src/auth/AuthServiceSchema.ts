@@ -7,12 +7,12 @@ const credentialsSchema = z.object({
 });
 
 export const AuthRegisterRequestSchema = credentialsSchema.clone();
-export const AuthRegisterResponseSchema = z.string().regex(/^[a-f0-9]{64}$/);
+export const AuthRegisterResponseSchema = z.string();
 export type AuthRegisterRequest = z.infer<typeof AuthRegisterRequestSchema>;
 export type AuthRegisterResponse = z.infer<typeof AuthRegisterResponseSchema>;
 
 export const AuthLoginRequestSchema = credentialsSchema.clone();
-export const AuthLoginResponseSchema = z.string().regex(/^[a-f0-9]{64}$/);
+export const AuthLoginResponseSchema = z.string();
 export type AuthLoginRequest = z.infer<typeof AuthLoginRequestSchema>;
 export type AuthLoginResponse = z.infer<typeof AuthLoginResponseSchema>;
 
@@ -22,7 +22,7 @@ export type AuthLogoutRequest = z.infer<typeof AuthLogoutRequestSchema>;
 export type AuthLogoutResponse = z.infer<typeof AuthLogoutResponseSchema>;
 
 export const AuthMeRequestSchema = z.object({});
-export const AuthMeResponseSchema = UserSchema;
+export const AuthMeResponseSchema = UserSchema.omit({ password_hash: true, email_verification_token_hash: true });
 export type AuthMeRequest = z.infer<typeof AuthMeRequestSchema>;
 export type AuthMeResponse = z.infer<typeof AuthMeResponseSchema>;
 

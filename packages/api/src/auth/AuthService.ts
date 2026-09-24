@@ -1,24 +1,23 @@
-import { randomBytes } from 'node:crypto';
 import bcrypt from 'bcrypt';
+import jwt from 'jwt-simple';
 import { AppError } from 'nano-fw/docs/index.ts';
 import nodemailer from 'nodemailer';
 import type { User } from 'types/User.ts';
 import { Email } from 'ui/email';
+
 import type { IAuth } from '#api/auth/AuthServiceSchema.ts';
 import ENV from '#api/env.ts';
-import SessionRepository from '#api/misc/SessionRepository.ts';
 import UserRepository from '#api/user/UserRepository.ts';
 
 const mailer = nodemailer.createTransport(ENV.SMTP_URI);
 const sessionCookieName = 'pulsio_session';
-const sessionDuration = 8 * 60 * 60 * 1000;
 
 export class AuthService {
   static async grantSuperAdmin() {
     try {
       const user = await UserRepository.findBy({ email: ENV.SUPERADMIN_EMAIL });
+      if (user) return;
       const password_hash = await AuthService.hashPassword(ENV.SUPERADMIN_PASSWORD);
-      if (!user) return;
       await UserRepository.create({ email: ENV.SUPERADMIN_EMAIL, password_hash, role: 'superadmin' });
     } catch {}
   }
@@ -31,24 +30,28 @@ export class AuthService {
     return await bcrypt.compare(password, hash);
   }
 
-  static getSessionCookieValue(cookie: string) {
-    const match = cookie.match(new RegExp(`${sessionCookieName}=([^;]+)`));
-    const token = match ? match[1] : '';
+  static async generateToken(user: User): Promise<string> {
+    const token = jwt.encode({ sub: user.id, iat: Date.now() / 1000 }, ENV.JWT_SECRET, 'HS256');
     return token;
   }
 
-  static generateSessionCookieValue(token: string, clear = false) {
-    const domain = ENV.COOKIE_DOMAIN ? `; Domain=${ENV.COOKIE_DOMAIN}` : '';
-    const secure = ENV.APP_ENV === 'local' ? '' : '; Secure';
-    const result = `${sessionCookieName}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${clear ? 0 : sessionDuration / 1000}${domain}${secure}`;
-    return result;
+  static getCookie(cookie: string): string {
+    const match = cookie.match(new RegExp(`(?:^|;\\s*)${sessionCookieName}=([^;]*)`));
+    return match ? match[1] : '';
+  }
+
+  static generateCookie(token: string, clear = false) {
+    const parts = [`${sessionCookieName}=${clear ? '' : token}`, 'Path=/', 'HttpOnly', 'SameSite=Strict'];
+    if (clear) parts.push('Max-Age=0');
+    if (ENV.COOKIE_DOMAIN) parts.push(`Domain=${ENV.COOKIE_DOMAIN}`);
+    if (ENV.APP_ENV !== 'local') parts.push('Secure');
+    return parts.join('; ');
   }
 
   static async register({ email, password }: IAuth.registerRequest): Promise<IAuth.registerResponse> {
     const password_hash = await AuthService.hashPassword(password);
     const user = await UserRepository.create({ email, password_hash });
-    const token = await AuthService.createSession(user);
-    void AuthService.sendVerificationEmail({ email, token, domain: ENV.WEBAPP_URL });
+    const token = await AuthService.generateToken(user);
     return token;
   }
 
@@ -64,33 +67,29 @@ export class AuthService {
     const login_at = new Date().toISOString();
     await UserRepository.update(user.id, { login_at });
 
-    const token = await AuthService.createSession(user);
+    const token = await AuthService.generateToken(user);
     return token;
-  }
-
-  static async logout({ cookie }: { cookie: string }) {
-    const token = AuthService.getSessionCookieValue(cookie);
-    const session = await SessionRepository.findBy({ token });
-    if (!session) return;
-    await SessionRepository.remove(session.id);
   }
 
   static async me({ cookie }: { cookie: string }): Promise<User> {
-    const token = AuthService.getSessionCookieValue(cookie);
-    if (!/^[a-f0-9]{64}$/.test(token)) throw new AppError(401, 'UNAUTHORIZED', 'Authentication is required.');
+    const token = AuthService.getCookie(cookie);
+    const unauthorizedError = new AppError(401, 'UNAUTHORIZED', 'Authentication is required.');
 
-    const session = await SessionRepository.findBy({ token });
-    if (!session) throw new AppError(401, 'UNAUTHORIZED', 'Authentication is required.');
+    if (!token) throw unauthorizedError;
 
-    const user = await UserRepository.get(session.user_id);
+    let claims: any;
+    try {
+      claims = jwt.decode(token, ENV.JWT_SECRET) as any;
+    } catch {
+      throw unauthorizedError;
+    }
+
+    if (!claims.sub || !claims.iat) throw unauthorizedError;
+
+    const user = await UserRepository.findBy({ id: claims.sub });
+    if (!user || user.suspended_at || user.password_changed_at > claims.iat) throw unauthorizedError;
+
     return user;
-  }
-
-  static async createSession(user: User): Promise<string> {
-    const token = randomBytes(32).toString('hex');
-    const expires_at = new Date(Date.now() + sessionDuration).toISOString();
-    await SessionRepository.create({ user_id: user.id, token, expires_at });
-    return token;
   }
 
   static async sendVerificationEmail({ email, token, domain }: { email: string; token: string; domain: string }) {
