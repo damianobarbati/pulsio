@@ -2,10 +2,11 @@
 
 import React from 'react';
 import useSWR from 'swr';
+import type { AnalyticsOverview } from 'types/Analytics.ts';
+import type { DomainListResponse } from 'types/Domain.ts';
 import type { User } from 'types/User.ts';
 import { Spinner } from 'ui';
 import { useMe } from 'ui/hooks/useMe.ts';
-import { DomainNotDetected } from '#webapp/components/DomainNotDetected.tsx';
 import { checkAuth, fetcher } from '../api.ts';
 import { Chart } from '../components/Chart.tsx';
 import { type AnalyticsFilter, DashboardFilters } from '../components/DashboardFilters.tsx';
@@ -15,7 +16,6 @@ import { Report } from '../components/Report.tsx';
 import { formatMetric } from '../helpers.ts';
 
 type Kpi = 'liveNow' | 'users' | 'views' | 'sessions' | 'sessionTime' | 'engagement' | 'events' | 'conversion' | 'revenue';
-type AnalyticsOverview = any;
 const kpiLabels: Record<Kpi, string> = {
   liveNow: 'Live now',
   users: 'Users',
@@ -41,13 +41,10 @@ const timelineMetrics: Record<Kpi, string | null> = {
 const date = (value: number) => new Date(value).toISOString().slice(0, 10);
 
 export const Home = () => {
-  const { user } = useMe<User>(checkAuth);
+  useMe<User>(checkAuth, 'user');
+  const domains = useSWR<DomainListResponse>('/domain/list', fetcher, { shouldRetryOnError: false });
 
-  const sites = [];
-  const selected = [];
-  const onSite = () => {};
-
-  const [siteIds, setSiteIds] = React.useState([selected.id]);
+  const [siteIds, setSiteIds] = React.useState<string[]>([]);
   const [from, setFrom] = React.useState(date(Date.now() - 27 * 86400000));
   const [to, setTo] = React.useState(date(Date.now()));
   const [filters, setFilters] = React.useState<AnalyticsFilter[]>([]);
@@ -57,19 +54,26 @@ export const Home = () => {
   const [journeyStart, setJourneyStart] = React.useState('/');
   const [journeyDirection, setJourneyDirection] = React.useState('after');
   const [showJourneys, setShowJourneys] = React.useState(false);
+  const sites = domains.data ?? [];
+  const selectedSiteIds = siteIds.length ? siteIds : sites[0] ? [sites[0].id] : [];
+  const selected = sites.find((site) => site.id === selectedSiteIds[0]);
   const query = new URLSearchParams({
-    sites: siteIds.join(','),
-    reporting_currency: selected.reportingCurrency,
+    sites: selectedSiteIds.join(','),
+    reporting_currency: selected ? selected.reporting_currency : 'USD',
     from: `${from}T00:00:00.000Z`,
     to: new Date(Date.parse(`${to}T00:00:00.000Z`) + 86400000).toISOString(),
     filters: JSON.stringify(filters),
     ...(goal ? { goal } : {}),
   }).toString();
-  const overview = useSWR<AnalyticsOverview>(`/analytics/overview?${query}`, fetcher, { refreshInterval: 30000 });
-  const live = useSWR<{ activeVisitors: number; pages: { name: string; value: number }[] }>(`/analytics/live?sites=${siteIds.join(',')}`, fetcher, {
-    refreshInterval: 3000,
-    dedupingInterval: 1000,
-  });
+  const overview = useSWR<AnalyticsOverview>(selectedSiteIds.length ? `/analytics/overview?${query}` : null, fetcher, { refreshInterval: 30000 });
+  const live = useSWR<{ activeVisitors: number; pages: { name: string; value: number }[] }>(
+    selectedSiteIds.length ? `/analytics/live?sites=${selectedSiteIds.join(',')}` : null,
+    fetcher,
+    {
+      refreshInterval: 3000,
+      dedupingInterval: 1000,
+    },
+  );
   const journeys = useSWR<{ source: string; target: string; step: number; visitors: number }[]>(
     showJourneys ? `/analytics/journeys?${query}&start=${encodeURIComponent(journeyStart)}&direction=${journeyDirection}` : null,
     fetcher,
@@ -84,8 +88,8 @@ export const Home = () => {
     <>
       <DashboardFilters
         sites={sites}
-        siteIds={siteIds}
-        onSite={onSite}
+        siteIds={selectedSiteIds}
+        onSite={(siteId) => setSiteIds((current) => (current.includes(siteId) ? current : [siteId]))}
         onSiteIdsChange={setSiteIds}
         from={from}
         to={to}
@@ -97,7 +101,12 @@ export const Home = () => {
         goal={goal}
         onGoalChange={setGoal}
       />
-      {false && !selected.detected && <DomainNotDetected snippet={selected.snippet} />}
+      {domains.error && (
+        <p role="alert" className="mb-5 rounded bg-red-50 p-4 text-red-700">
+          Could not load domains.
+        </p>
+      )}
+      {!domains.isLoading && !domains.error && !sites.length && <p className="mb-5 text-gray-500">Add a domain to see analytics.</p>}
       {overview.error && (
         <p role="alert" className="mb-5 rounded bg-red-50 p-4 text-red-700">
           {overview.error.message}
@@ -245,7 +254,7 @@ export const Home = () => {
               ]}
             />
             <Goals
-              siteId={selected.id}
+              siteId={selected ? selected.id : ''}
               goals={data.goals}
               onChanged={() => {
                 void overview.mutate();

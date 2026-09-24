@@ -31,6 +31,8 @@ export class AuthService {
   }
 
   static async generateToken(user: User): Promise<string> {
+    // const issuedAt = Math.max(Date.now(), Date.parse(user.password_changed_at));
+    // const token = jwt.encode({ sub: user.id, iat: issuedAt }, ENV.JWT_SECRET, 'HS256');
     const token = jwt.encode({ sub: user.id, iat: Date.now() }, ENV.JWT_SECRET, 'HS256');
     return token;
   }

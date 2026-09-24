@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { ClientEvent, EventRow, EventRowInsert } from 'types/Event.ts';
+import type { ClientEvent, EventRowInsert } from 'types/Event.ts';
 import EventService from '#api/event/EventService.ts';
 
 const IPs = { 'New York': '128.59.105.24', Lisbon: '193.136.2.228' };
@@ -95,7 +95,7 @@ export const createClientEvent = (params: Partial<ClientEvent> = {}) => {
   return result;
 };
 
-export const createEventRow = async (params: Partial<EventRow> = {}): Promise<EventRowInsert> => {
+export const createEventRow = async (params: Partial<ClientEvent> = {}): Promise<EventRowInsert> => {
   const result = await EventService.createEventRow({
     ...createClientEvent(),
     headers: createClientHeaders(),

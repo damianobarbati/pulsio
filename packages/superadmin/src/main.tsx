@@ -5,6 +5,7 @@ import { ScreenGuard, Spinner } from 'ui';
 import NotFound from 'ui/NotFound.tsx';
 import { Route, Router, Switch } from 'wouter';
 import Auth from '#superadmin/views/Auth.tsx';
+import Domains from '#superadmin/views/Domains.tsx';
 import Home from '#superadmin/views/Home.tsx';
 import { Layout } from '#superadmin/views/Layout.tsx';
 import Users from '#superadmin/views/Users.tsx';
@@ -29,6 +30,7 @@ root.render(
                   <Switch>
                     <Route path="/" component={Home} />
                     <Route path="/users" component={Users} />
+                    <Route path="/domains" component={Domains} />
                     <Route component={NotFound} />
                   </Switch>
                 </Layout>

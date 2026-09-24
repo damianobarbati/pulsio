@@ -1,3 +1,4 @@
+import type { DomainListRequest } from 'types/Domain.ts';
 import type { User } from 'types/User.ts';
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
@@ -6,82 +7,6 @@ type GoalMutationArgument = { arg: { method: 'POST' | 'PATCH' | 'DELETE'; data: 
 
 const authenticationKey = 'pulsio-authenticated';
 
-const mockOverview = {
-  activeVisitors: 12,
-  from: '2026-09-01T00:00:00.000Z',
-  to: '2026-09-22T00:00:00.000Z',
-  summary: {
-    visitors: 1248,
-    visits: 1530,
-    pageviews: 3820,
-    viewsPerVisit: 2.5,
-    bounceRate: 42.8,
-    visitDuration: 98,
-    engagementRate: 57.2,
-    events: 641,
-    conversionRate: 8,
-    timeOnPage: 64,
-    scrollDepth: 56,
-  },
-  previous: { visitors: 1100, visits: 1380, pageviews: 3390, viewsPerVisit: 2.4, bounceRate: 45.1, visitDuration: 91, timeOnPage: 58, scrollDepth: 51 },
-  changes: { liveNow: 9.1, users: 13.5, views: 12.7, sessions: 10.9, sessionTime: 7.7, engagement: 4.2, events: -3.1, conversion: 1.4, revenue: 6.8 },
-  timeline: [
-    {
-      label: '2026-09-20T00:00:00.000Z',
-      visitors: 384,
-      visits: 468,
-      pageviews: 1130,
-      viewsPerVisit: 2.4,
-      bounceRate: 43,
-      visitDuration: 96,
-      engagementRate: 57,
-      events: 190,
-      conversionRate: 7.5,
-      timeOnPage: 62,
-      scrollDepth: 54,
-    },
-    {
-      label: '2026-09-21T00:00:00.000Z',
-      visitors: 418,
-      visits: 512,
-      pageviews: 1290,
-      viewsPerVisit: 2.5,
-      bounceRate: 42,
-      visitDuration: 100,
-      engagementRate: 58,
-      events: 211,
-      conversionRate: 8.1,
-      timeOnPage: 65,
-      scrollDepth: 57,
-    },
-    {
-      label: '2026-09-22T00:00:00.000Z',
-      visitors: 446,
-      visits: 550,
-      pageviews: 1400,
-      viewsPerVisit: 2.6,
-      bounceRate: 41,
-      visitDuration: 102,
-      engagementRate: 56.6,
-      events: 240,
-      conversionRate: 8.4,
-      timeOnPage: 67,
-      scrollDepth: 59,
-    },
-  ],
-  topPages: [
-    { name: '/', value: 1480 },
-    { name: '/pricing', value: 760 },
-    { name: '/docs', value: 550 },
-  ],
-  sources: [
-    { name: 'Google', value: 680 },
-    { name: 'Direct', value: 370 },
-    { name: 'github.com', value: 198 },
-  ],
-  goals: [],
-  revenue: [{ currency: 'USD', totalRevenue: 8240, averageRevenue: 82.4, orders: 100 }],
-};
 const mockBreakdown = [
   { name: 'Google', value: 680, percentage: 54.5, pageviews: 1860, visits: 820, bounceRate: 38, visitDuration: 112, timeOnPage: 73, scrollDepth: 61, exitRate: 31 },
   { name: 'Direct', value: 370, percentage: 29.6, pageviews: 1090, visits: 470, bounceRate: 44, visitDuration: 87, timeOnPage: 56, scrollDepth: 50, exitRate: 39 },
@@ -110,16 +35,6 @@ const request = async ({ url, method, body }: { url: string; method: HttpMethod;
 
 const mockGet = ({ url }: { url: string }): unknown => {
   if (url === '/site-groups' || url === '/filter-presets') return [];
-  if (url.startsWith('/analytics/overview')) return mockOverview;
-  if (url.startsWith('/analytics/live'))
-    return {
-      activeVisitors: 12,
-      pages: [
-        { name: '/', value: 7 },
-        { name: '/pricing', value: 3 },
-        { name: '/docs', value: 2 },
-      ],
-    };
   if (url.startsWith('/analytics/breakdown')) return mockBreakdown;
   if (url.startsWith('/analytics/journeys'))
     return [
@@ -143,13 +58,19 @@ const mock = async <Result>({ url, method }: { url: string; method: HttpMethod; 
 };
 
 export const fetcher = async <Result>(url: string): Promise<Result> => {
-  if (url === '/auth/me') {
+  if (url === '/auth/me' || url.startsWith('/analytics/overview') || url.startsWith('/analytics/live')) {
     const result = await request({ url, method: 'GET' });
     return result as Result;
-  } else {
-    const result = await mock<Result>({ url, method: 'GET' });
-    return result;
   }
+
+  if (url === '/domain/list') {
+    const params: DomainListRequest = { sort: [['domain', 'asc']], limit: 1000 };
+    const result = await request({ url, method: 'POST', body: params });
+    return result as Result;
+  }
+
+  const result = await mock<Result>({ url, method: 'GET' });
+  return result;
 };
 
 export const mutation = async <Result>(url: string, { arg }: MutationArgument): Promise<Result> => {

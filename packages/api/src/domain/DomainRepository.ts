@@ -15,4 +15,4 @@ class DomainRepository extends Repository<Domain> {
   }
 }
 
-export default new DomainRepository({ database: pg, tableName: 'domains', uniqueSortColumn: 'id' });
+export default new DomainRepository({ database: pg, tableName: 'domains2', uniqueSortColumn: 'id' });

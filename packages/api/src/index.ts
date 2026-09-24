@@ -4,12 +4,15 @@ import { getRequestListener } from '@hono/node-server';
 import { Hono, type MiddlewareHandler } from 'hono';
 import { cors } from 'hono/cors';
 import { AppError, errorHandler, registerDocsRoute, registerRoute } from 'nano-fw/docs/index.ts';
+import { AnalyticsLiveRequestSchema, AnalyticsLiveResponseSchema, AnalyticsOverviewRequestSchema, AnalyticsOverviewResponseSchema } from 'types/Analytics.ts';
 import { AnySchema } from 'types/common.ts';
 import { UserListRequestSchema, UserListResponseSchema } from 'types/User.ts';
-import { asyncLocalStorage } from '#api/asyncStorage.ts';
+import AnalyticsService from '#api/analytics/AnalyticsService.ts';
+import { asyncStorage } from '#api/asyncStorage.ts';
 import { AuthService } from '#api/auth/AuthService.ts';
 import { AuthSchema } from '#api/auth/AuthServiceSchema.ts';
 import DomainRepository from '#api/domain/DomainRepository.ts';
+import EventRepository from '#api/event/EventRepository.ts';
 import EventService from '#api/event/EventService.ts';
 import UserRepository from '#api/user/UserRepository.ts';
 import ENV from './env.ts';
@@ -37,7 +40,7 @@ const auth =
 
     if (user.role !== role) throw new AppError(403, 'FORBIDDEN', 'This account cannot access this resource.');
 
-    await asyncLocalStorage.run({ user_id: user.id }, next);
+    await asyncStorage.run({ user_id: user.id }, next);
   };
 
 app.get('/healthcheck', (c) => c.text('OK'));
@@ -146,10 +149,30 @@ registerRoute(app, {
   responseSchema: AnySchema,
   middlewares: [auth('user')],
   handler: (params) => {
-    const user_id = asyncLocalStorage.getStore()?.user_id;
+    const user_id = asyncStorage.getStore()?.user_id;
     if (!user_id) throw new AppError(403, 'FORBIDDEN', 'This account cannot access this resource.');
     return DomainRepository.getem({ ...params, user_id });
   },
+});
+
+registerRoute(app, {
+  method: 'get',
+  path: '/analytics/overview',
+  meta: { section: 'Analytics', description: 'Get overview metrics for selected domains and date range.' },
+  requestSchema: AnalyticsOverviewRequestSchema,
+  responseSchema: AnalyticsOverviewResponseSchema,
+  middlewares: [auth('user')],
+  handler: AnalyticsService.overview,
+});
+
+registerRoute(app, {
+  method: 'get',
+  path: '/analytics/live',
+  meta: { section: 'Analytics', description: 'Get current visitors for selected domains.' },
+  requestSchema: AnalyticsLiveRequestSchema,
+  responseSchema: AnalyticsLiveResponseSchema,
+  middlewares: [auth('user')],
+  handler: EventRepository.getLiveVisitors,
 });
 
 registerRoute(app, {

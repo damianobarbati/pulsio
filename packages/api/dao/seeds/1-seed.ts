@@ -15,7 +15,7 @@ export const JOHN_DOE = {
 
 const USERS = 50;
 const DOMAINS_PER_USER = { min: 0, max: 3 };
-const EVENTS_PER_DOMAIN = { min: 1, max: 5_000 };
+const EVENTS_PER_DOMAIN = { min: 2, max: 5_000 };
 
 export async function seed(database: Knex): Promise<void> {
   const seed_present = await database('users').first();
@@ -27,11 +27,12 @@ export async function seed(database: Knex): Promise<void> {
     { name: 'scale', monthly_price: 99, yearly_price: 999, valid_from: new Date('2020-01-01T00:00:00Z') },
   ]);
 
-  const user = await createUserRow({ ...JOHN_DOE });
-  await database('users').insert(user);
+  const johndoe = await createUserRow({ ...JOHN_DOE });
 
   const userCreates = await Promise.all(Array.from({ length: USERS }, createUserRow));
-  const users = await database('users').insert(userCreates).returning<UserRow[]>('*');
+  const users = await database('users')
+    .insert([johndoe, ...userCreates])
+    .returning<UserRow[]>('*');
 
   // 0-10 domains for each user
   const domains_rows: Partial<DomainRow>[] = [];
@@ -43,8 +44,8 @@ export async function seed(database: Knex): Promise<void> {
 
   // 0 to 5k events for each domain
   const events_rows: EventRowInsert[] = [];
-  for (const { domain } of domains) {
-    const rows: EventRowInsert[] = await Promise.all(Array.from({ length: faker.number.int(EVENTS_PER_DOMAIN) }, () => createEventRow({ domain })));
+  for (const { id, domain } of domains) {
+    const rows: EventRowInsert[] = await Promise.all(Array.from({ length: faker.number.int(EVENTS_PER_DOMAIN) }, () => createEventRow({ user_id: id, url: `https://${domain}/` })));
 
     // starting from a random date in last 3y
     const startDate = faker.date.recent({ days: 365 * 2 });
@@ -56,6 +57,15 @@ export async function seed(database: Knex): Promise<void> {
     for (const [index, event_row] of Object.entries(rows)) {
       const eventTime = new Date(startTime + Number(index) * interval);
       event_row.timestamp = eventTime.toISOString();
+
+      if (Number(index) === rows.length - 1) event_row.event_name = 'view';
+
+      // 2% events will be transactions with revenue
+      if (Number(index) !== rows.length - 1 && faker.number.int({ min: 1, max: 50 }) === 1) {
+        const revenue_amount = faker.number.int({ min: 0.01, max: 500 });
+        const revenue_currency = 'USD';
+        Object.assign(event_row, { event_name: 'purchase', transaction_id: faker.string.nanoid(10), revenue_amount, revenue_currency });
+      }
     }
     events_rows.push(...rows);
   }
