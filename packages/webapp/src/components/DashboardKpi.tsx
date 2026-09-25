@@ -1,38 +1,52 @@
 import cx from 'clsx-tw';
+import type React from 'react';
 import { IDown, IUp } from 'ui/icons.tsx';
+import { toRate } from '#webapp/helpers.ts';
 
 type DashboardKpiProps = {
-  label: string;
+  className?: string;
+  label: React.ReactNode;
   value: string | number;
-  change: number | null;
+  previousValue?: number | null;
+  valueFormatter: (value: any) => string;
   selected: boolean;
-  onSelect: () => void;
-  live?: boolean;
+  onSelect?: () => void;
 };
 
-export const DashboardKpi = ({ label, value, change, selected, onSelect, live = false }: DashboardKpiProps) => (
-  <button
-    type="button"
-    aria-pressed={selected}
-    onClick={onSelect}
-    className={cx(
-      `border-gray-100 border-r px-4 py-3 text-left font-semibold transition last:border-0 hover:scale-105 hover:bg-gray-100`,
-      selected && 'rounded bg-gray-100 font-bold',
-    )}
-  >
-    <span className="flex items-center gap-2 whitespace-nowrap text-gray-500 text-xs uppercase">
-      {live && <span className="h-2 w-2 rounded-full bg-emerald-500" />}
-      {label}
-    </span>
-    <span className="mt-2 flex flex-col items-baseline gap-2">
-      <span className="text-2xl tabular-nums tracking-tight">{value}</span>
-      {change !== null && (
-        <span className={`flex items-center gap-1 text-xs ${change > 0 ? 'text-emerald-600' : change < 0 ? 'text-red-600' : 'text-gray-500'}`}>
-          {change > 0 && <IUp />}
-          {change < 0 && <IDown />}
-          {Math.abs(change).toFixed(1)}%
-        </span>
+const calculateChange = (value: string | number, previousValue?: number | null) => {
+  if (typeof value !== 'number' || previousValue === null || previousValue === undefined) return null;
+  if (previousValue === 0) return value === 0 ? 0 : null;
+  return ((value - previousValue) / Math.abs(previousValue)) * 100;
+};
+
+export const DashboardKpi = ({ className, label, value, previousValue, valueFormatter, selected, onSelect }: DashboardKpiProps) => {
+  const change = calculateChange(value, previousValue);
+
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={onSelect}
+      disabled={!onSelect}
+      className={cx(
+        'min-w-0 border-gray-100 border-r px-2 py-3 text-left text-xs transition last:border-0 enabled:hover:scale-105 enabled:hover:bg-gray-100 sm:px-4',
+        selected && 'rounded bg-gray-100 font-bold',
+        !!onSelect && 'cursor-pointer',
+        className,
       )}
-    </span>
-  </button>
-);
+    >
+      <span className="flex flex-row items-center gap-2 text-nowrap text-gray-500 uppercase">{label}</span>
+      <span className="mt-1 flex flex-row items-baseline gap-2">
+        <span className="text-lg tabular-nums tracking-tight">{valueFormatter(value)}</span>
+        {change !== null && (
+          <span className={cx('flex items-center gap-1', change > 0 ? 'text-emerald-600' : change < 0 ? 'text-red-600' : 'text-gray-500')}>
+            {change > 0 && <IUp />}
+            {change < 0 && <IDown />}
+            {change === 0 && <IDown />}
+            {toRate(change)}
+          </span>
+        )}
+      </span>
+    </button>
+  );
+};

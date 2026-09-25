@@ -6,6 +6,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function StartTrackingPage() {
-  return <StartTracking />;
+export default function StartTrackingPage({ className }: { className?: string }) {
+  return <StartTracking className={className} />;
 }

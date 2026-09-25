@@ -1,3 +1,4 @@
+import cx from 'clsx-tw';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
@@ -9,9 +10,9 @@ export const generateMetadata = async (): Promise<Metadata> => {
   return createPageMetadata({ title: 'Privacy Policy', description: 'How Pulsio processes personal data.', path: '/privacy', siteUrl: new URL(config.WEBSITE_URL) });
 };
 
-export default function Privacy() {
+export default function Privacy({ className }: { className?: string }) {
   return (
-    <article className="mx-auto max-w-3xl px-6 py-16 text-ink">
+    <article className={cx('mx-auto max-w-3xl px-6 py-16 text-ink', className)}>
       <Link href="/" className="mb-6 block font-semibold text-pulsio-blue text-sm underline underline-offset-2">
         {'<- go back'}
       </Link>

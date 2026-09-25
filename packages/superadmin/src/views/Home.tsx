@@ -1,9 +1,10 @@
-import { checkAuth } from 'ui/api/api.ts';
-import { useMe } from 'ui/hooks/useMe.ts';
+import type { User } from 'types/User.ts';
+import api from 'ui/api/api.ts';
+import { useMe } from 'ui/hook/useMe.ts';
 
-export const Home = () => {
-  const { user } = useMe(checkAuth);
-  return <div>Home for {user.email}</div>;
+export const Home = ({ className }: { className?: string }) => {
+  const { user } = useMe<User>(api.authMe, 'superadmin');
+  return <div className={className}>Home for {user.email}</div>;
 };
 
 export default Home;

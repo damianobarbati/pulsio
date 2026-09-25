@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises';
 import { faker } from '@faker-js/faker';
 import jwt from 'jwt-simple';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -110,6 +111,7 @@ describe('AuthService', () => {
       const { id: user_id } = await UserRepository.getBy({ email });
 
       const token_before = await AuthService.login({ email, password });
+      await setTimeout(1000);
       await UserRepository.update(user_id, { password_hash: await AuthService.hashPassword('new-password') });
       const token_after = await AuthService.login({ email, password: 'new-password' });
 

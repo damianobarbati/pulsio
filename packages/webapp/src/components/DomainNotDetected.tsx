@@ -1,14 +1,16 @@
+import cx from 'clsx-tw';
 import React from 'react';
 
 type DomainNotDetectedProps = {
+  className?: string;
   snippet: string;
 };
 
-export const DomainNotDetected = ({ snippet }: DomainNotDetectedProps) => {
+export const DomainNotDetected = ({ className, snippet }: DomainNotDetectedProps) => {
   const [copyMessage, setCopyMessage] = React.useState('');
 
   return (
-    <section className="mb-5 rounded-lg border border-violet-100 bg-white p-5">
+    <section className={cx('mb-5 rounded-lg border border-violet-100 bg-white p-5', className)}>
       <h2 className="font-semibold">Waiting for the first signal…</h2>
       <p className="mt-2 text-gray-500 text-sm">Paste this snippet inside your website’s &lt;head&gt;, then visit your site.</p>
       <pre className="mt-3 overflow-auto rounded bg-gray-50 p-3 text-xs">

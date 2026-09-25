@@ -86,6 +86,25 @@ describe('client.ts', () => {
     });
   });
 
+  it('sends active time without an interaction', async () => {
+    await page.clock.install();
+    await page.route('https://api.pulsio.live/client.dist.js', (route) => route.fulfill({ status: 200, contentType: 'application/javascript', body: clientBundleSource }));
+    await page.route('https://api.pulsio.live/event', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
+    await page.route('https://app.test/', (route) => route.fulfill({ contentType: 'text/html', body: html }));
+
+    await page.goto('https://app.test/');
+    await page.bringToFront();
+    const engagementRequestPromise = page.waitForRequest((request) => {
+      const body = request.postData();
+      return request.url() === 'https://api.pulsio.live/event' && !!body && JSON.parse(body).event_name === 'engagement';
+    });
+    await page.clock.runFor(10_000);
+    const engagementRequest = await engagementRequestPromise;
+    const engagementEvent = JSON.parse(engagementRequest.postData() as string);
+
+    expect(engagementEvent.engagement_ms).toBeGreaterThanOrEqual(10_000);
+  });
+
   it('event is sent when user scrolls', async () => {
     await page.route('https://api.pulsio.live/client.dist.js', (route) => route.fulfill({ status: 200, contentType: 'application/javascript', body: clientBundleSource }));
     await page.route('https://api.pulsio.live/event', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));

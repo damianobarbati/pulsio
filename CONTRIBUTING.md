@@ -51,7 +51,9 @@ cli.ts                        # CLI commands definitions
 ## Frontend
 
 - React: functional components/hooks. Each component: own named file; `export const Component = () => {}`; `<ComponentName>Props` type above; built-in hooks via `React` namespace (e.g., `React.useState()`). Use `useMemo`/`useCallback` only when React Compiler does not optimize them and performance benefit exceeds maintenance cost; custom hooks only when reuse/performance benefit exceeds maintenance cost. Avoid external libraries unless strictly necessary; always assess bundle-size impact. No nested JSX ternaries; use early-return/guard clauses for multi-branch rendering or clean single-level conditions.
-- Style: Tailwind utilities. Put frequent reused styles in reusable `ui/` components; never `@apply`. Avoid inline `style` unless dynamically computed; avoid CSS-in-JS.
+- Style: Tailwind utilities. Put frequent reused styles in reusable `ui/` components. Avoid inline `style` unless dynamically computed; avoid CSS-in-JS. 
+- Classname: every component accepts am optional `className` prop as the first prop, which is passed after the default classes to the root element of the component.
+- Use `cx` from `classnames` to combine multiple classnames, cx is imported from `clsx-tw`; don't use string interpolation.
 - All project icons reside in `icons.tsx`, re-exported individually.
 - UX board uses application UI kit: typography; `react-icons` icon set; buttons/inputs with all statuses/interactions (inputs by type, e.g., text/number/date/currency); snackbars (success/warning/error); yes/no confirmation prompts; searchable/filterable table. Provide every view at Desktop `1280 x 700`, Tablet `768x1024`, Smartphone `390x844`. Responsive shrinking may only stack or hide elements; DOM structure never changes by resolution/user.
 - State: `zustand` plain objects for application/domain state; no global React Context (except scoped compound UI components).

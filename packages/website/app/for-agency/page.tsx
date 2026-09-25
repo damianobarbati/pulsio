@@ -1,3 +1,4 @@
+import cx from 'clsx-tw';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AgencyCalculator } from '../../components/AgencyCalculator';
@@ -11,9 +12,9 @@ export const generateMetadata = (): Metadata =>
     siteUrl: new URL(getWebsiteConfig().WEBSITE_URL),
   });
 
-export default function ForAgency() {
+export default function ForAgency({ className }: { className?: string }) {
   return (
-    <>
+    <div className={cx('contents', className)}>
       <section className="mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[1.1fr_.9fr] lg:py-24">
         <div>
           <p className="font-bold text-pulsio-blue text-xs uppercase tracking-wider">Pulsio for agencies</p>
@@ -22,10 +23,10 @@ export default function ForAgency() {
             Track every client site in one place, launch campaigns, and measure revenue precisely. Give clients branded dashboards and automatic reports without extra tools.
           </p>
           <div className="mt-9 flex flex-wrap gap-4">
-            <Link href="/start-tracking" className="rounded-[var(--radius-sm)] bg-pulsio-blue px-7 py-4 font-bold text-white">
+            <Link href="/start-tracking" className="rounded-sm bg-pulsio-blue px-7 py-4 font-bold text-white">
               Start tracking free
             </Link>
-            <a href="#calculator" className="rounded-[var(--radius-sm)] border border-pulsio-line px-7 py-4 font-bold">
+            <a href="#calculator" className="rounded-sm border border-pulsio-line px-7 py-4 font-bold">
               Calculate revenue
             </a>
           </div>
@@ -53,6 +54,6 @@ export default function ForAgency() {
         <p className="font-bold text-pulsio-blue text-xs uppercase tracking-wider">Centralized client growth</p>
         <h2 className="mt-3 font-bold text-3xl tracking-tight">Analytics, sharing, reporting, and revenue in one workflow.</h2>
       </section>
-    </>
+    </div>
   );
 }

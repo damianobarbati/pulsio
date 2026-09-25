@@ -2,10 +2,7 @@ import cx from 'clsx-tw';
 import type React from 'react';
 import { Nav } from '#webapp/components/Nav.tsx';
 
-type LayoutProps = {
-  className?: string;
-  children: React.ReactNode;
-};
+type LayoutProps = { className?: string; children: React.ReactNode };
 
 export const Layout = ({ className, children }: LayoutProps) => {
   return (

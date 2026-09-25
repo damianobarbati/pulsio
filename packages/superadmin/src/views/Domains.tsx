@@ -1,9 +1,10 @@
 import { createColumnHelper } from '@tanstack/react-table';
+import cx from 'clsx-tw';
 import useSWRInfinite from 'swr/infinite';
 import type { DomainListRequest, DomainListResponse } from 'types/Domain.ts';
 import { DataTable } from 'ui';
-import { post } from 'ui/api/api.ts';
-import { VirtualizedTable, type virtualizedTableFeatures } from 'ui/VirtualizedTable.tsx';
+import { POST } from 'ui/api/fetchers.ts';
+import { VirtualizedTable, type virtualizedTableFeatures } from 'ui/component/VirtualizedTable.tsx';
 import { count, dateTime } from '#superadmin/helpers.ts';
 
 type Domain = DomainListResponse[number];
@@ -28,11 +29,11 @@ const loadPage = async ([url, offset]: PageKey): Promise<DomainListResponse> => 
       ['id', 'asc'],
     ],
   };
-  const domains = await post<DomainListResponse>(url, body);
+  const domains = await POST<DomainListResponse>([url, body]);
   return domains;
 };
 
-export const Domains = () => {
+export const Domains = ({ className }: { className?: string }) => {
   const getKey = (pageIndex: number, previousPage: DomainListResponse | null): PageKey | null => {
     if (previousPage && previousPage.length < pageSize) return null;
     const key: PageKey = ['/s/domain/list', pageIndex * pageSize];
@@ -51,7 +52,7 @@ export const Domains = () => {
   };
 
   return (
-    <section className="flex h-[calc(100dvh-3rem)] min-h-96 min-w-0 flex-col">
+    <section className={cx('flex h-[calc(100dvh-3rem)] min-h-96 min-w-0 flex-col', className)}>
       <h1 className="font-bold text-2xl text-pulsio-ink">Domains</h1>
       <DataTable
         className="mt-6 flex min-h-0 flex-1 flex-col"

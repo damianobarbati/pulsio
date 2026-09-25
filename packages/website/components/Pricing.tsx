@@ -1,5 +1,6 @@
 'use client';
 
+import cx from 'clsx-tw';
 import Link from 'next/link';
 import React from 'react';
 
@@ -12,19 +13,22 @@ type PricingPlan = {
   features: string[];
   featured?: boolean;
 };
-type PricingProps = { plans: PricingPlan[] };
+type PricingProps = { className?: string; plans: PricingPlan[] };
 
-export const Pricing = ({ plans }: PricingProps) => {
+export const Pricing = ({ className, plans }: PricingProps) => {
   const [interval, setInterval] = React.useState<'month' | 'year'>('month');
 
   return (
-    <>
+    <div className={cx('contents', className)}>
       <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-2 rounded-2xl bg-pulsio-nav p-1 text-left" role="group" aria-label="Billing period">
         <button
           type="button"
           aria-pressed={interval === 'month'}
           onClick={() => setInterval('month')}
-          className={`rounded-xl px-4 py-3 font-bold text-sm transition ${interval === 'month' ? 'bg-white text-pulsio-ink shadow-sm' : 'text-pulsio-muted hover:text-pulsio-ink'}`}
+          className={cx(
+            'rounded-xl px-4 py-3 font-bold text-sm transition',
+            interval === 'month' ? 'bg-white text-pulsio-ink shadow-sm' : 'text-pulsio-muted hover:text-pulsio-ink',
+          )}
         >
           Monthly
         </button>
@@ -32,7 +36,10 @@ export const Pricing = ({ plans }: PricingProps) => {
           type="button"
           aria-pressed={interval === 'year'}
           onClick={() => setInterval('year')}
-          className={`rounded-xl px-4 py-3 font-bold text-sm transition ${interval === 'year' ? 'bg-white text-pulsio-ink shadow-sm' : 'text-pulsio-muted hover:text-pulsio-ink'}`}
+          className={cx(
+            'rounded-xl px-4 py-3 font-bold text-sm transition',
+            interval === 'year' ? 'bg-white text-pulsio-ink shadow-sm' : 'text-pulsio-muted hover:text-pulsio-ink',
+          )}
         >
           Yearly <span className="ml-1 rounded-full bg-lime-200 px-2 py-0.5 text-[10px] uppercase tracking-wide">Save 20%</span>
         </button>
@@ -42,7 +49,7 @@ export const Pricing = ({ plans }: PricingProps) => {
         {plans.map((plan) => (
           <article
             key={plan.name}
-            className={`flex flex-col rounded-[var(--radius-md)] border p-6 ${plan.featured ? 'border-2 border-pulsio-blue bg-white shadow-pulsio' : 'border-pulsio-line bg-white'}`}
+            className={cx('flex flex-col rounded-sm border p-6', plan.featured ? 'border-2 border-pulsio-blue bg-white shadow-pulsio' : 'border-pulsio-line bg-white')}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -67,13 +74,13 @@ export const Pricing = ({ plans }: PricingProps) => {
             </ul>
             <Link
               href={`/start-tracking?plan=${plan.plan}`}
-              className={`mt-7 rounded-[var(--radius-sm)] px-5 py-3 text-center font-bold text-sm ${plan.featured ? 'bg-pulsio-blue text-white' : 'border border-pulsio-line text-pulsio-ink'}`}
+              className={cx('mt-7 rounded-sm px-5 py-3 text-center font-bold text-sm', plan.featured ? 'bg-pulsio-blue text-white' : 'border border-pulsio-line text-pulsio-ink')}
             >
               Choose {plan.name}
             </Link>
           </article>
         ))}
       </div>
-    </>
+    </div>
   );
 };

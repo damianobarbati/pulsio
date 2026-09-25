@@ -4,6 +4,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./*": "./src/*",
+    "./form": "./src/form/index.ts",
     "./email": "./email/index.ts",
     "./theme.css": "./src/theme.css",
     "./assets/*": "./assets/*"
@@ -18,9 +19,12 @@
   },
   "dependencies": {
     "@tanstack/react-table": "^9.2.4",
+    "clsx-tw": "^1.0.9",
+    "echarts": "^6.1.0",
     "eta": "^4.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hook-form": "^7.88.0",
     "react-icons": "^5.0.0",
     "swr": "^2.5.1",
     "wouter": "^3.11.0"
@@ -31,7 +35,6 @@
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
-    "clsx-tw": "^1.0.9",
     "storybook": "^10.6.0",
     "tailwindcss": "^4.3.3",
     "types": "workspace:*"

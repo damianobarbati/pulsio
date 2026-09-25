@@ -1,5 +1,5 @@
 import useSWRInfinite from 'swr/infinite';
-import { fetcher } from 'ui/api/api.ts';
+import { POST } from 'ui/api/fetchers.ts';
 
 export type Sort = { id: string; direction: 'asc' | 'desc' };
 export type Page<T> = { page: number; pages: number; total: number } & ({ accounts: T[] } | { sites: T[] } | { payments: T[] });
@@ -11,7 +11,7 @@ export const usePagedData = <T extends { id: string }>(view: View, query: string
     const resource = view === 'users' ? 'accounts' : view === 'websites' ? 'websites' : 'payments';
     return `/s/${resource}?query=${encodeURIComponent(query)}&page=${pageIndex + 1}&sort=${encodeURIComponent(sort.id)}&direction=${sort.direction}`;
   };
-  const result = useSWRInfinite<Page<T>>(getKey, fetcher, { keepPreviousData: true, revalidateFirstPage: false, shouldRetryOnError: false });
+  const result = useSWRInfinite<Page<T>>(getKey, POST, { keepPreviousData: true, revalidateFirstPage: false, shouldRetryOnError: false });
   const pages = result.data || [];
   const rows = Array.from(
     new Map(pages.flatMap((page) => ('accounts' in page ? page.accounts : 'sites' in page ? page.sites : page.payments)).map((row) => [row.id, row])).values(),

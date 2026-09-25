@@ -1,3 +1,4 @@
+import cx from 'clsx-tw';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
@@ -47,7 +48,7 @@ const planDetails = [
 
 const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-export default async function Home() {
+export default async function Home({ className }: { className?: string }) {
   await connection();
   const config = getWebsiteConfig();
   const pricesResponse = await fetch(new URL('/plans', config.API_URL), { cache: 'no-store' });
@@ -75,7 +76,7 @@ export default async function Home() {
   };
 
   return (
-    <>
+    <div className={cx('contents', className)}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <section className="mx-auto grid max-w-[1400px] items-center gap-6 px-6 py-8 lg:grid-cols-[.9fr_1.1fr] lg:py-12">
         <div>
@@ -90,10 +91,10 @@ export default async function Home() {
             Privacy-first, developer-friendly, fairly priced.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-5">
-            <Link href="/start-tracking" className="rounded-[var(--radius-sm)] bg-pulsio-blue px-7 py-4 font-bold text-white">
+            <Link href="/start-tracking" className="rounded-sm bg-pulsio-blue px-7 py-4 font-bold text-white">
               Get started free
             </Link>
-            <a href="#pricing" className="rounded-[var(--radius-sm)] border border-pulsio-line bg-white px-7 py-4 font-bold">
+            <a href="#pricing" className="rounded-sm border border-pulsio-line bg-white px-7 py-4 font-bold">
               See live demo
             </a>
           </div>
@@ -117,7 +118,7 @@ export default async function Home() {
           ].map(({ title, text, Icon }) => {
             return (
               <article key={title} className="flex gap-4 border-pulsio-line px-5 lg:border-r">
-                <span className="grid h-16 w-16 shrink-0 place-items-center rounded-[var(--radius-md)] bg-blue-100 text-pulsio-blue">
+                <span className="grid h-16 w-16 shrink-0 place-items-center rounded-sm bg-blue-100 text-pulsio-blue">
                   <Icon size={28} aria-hidden="true" />
                 </span>
                 <div>
@@ -135,6 +136,6 @@ export default async function Home() {
         <p className="mt-2 text-pulsio-muted">All plans include real-time analytics, core reports, and privacy-friendly tracking.</p>
         <Pricing plans={plans} />
       </section>
-    </>
+    </div>
   );
 }

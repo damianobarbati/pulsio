@@ -2,6 +2,7 @@ import type { ClientEvent } from 'types/Event.ts';
 
 type EventOptions = {
   scroll_depth?: ClientEvent['scroll_depth'];
+  engagement_ms?: ClientEvent['engagement_ms'];
   props?: ClientEvent['props'];
   revenue_amount?: ClientEvent['revenue_amount'];
   revenue_currency?: ClientEvent['revenue_currency'];
@@ -38,6 +39,8 @@ const cleanUrl = (value: string, base: string = window.location.origin) => {
   }
 };
 
+let currentViewUrl = cleanUrl(location.href);
+
 const send = (name = 'view', options: EventOptions = {}) => {
   if (!user_id) return;
 
@@ -45,10 +48,11 @@ const send = (name = 'view', options: EventOptions = {}) => {
     version: '1',
     event_name: name,
     user_id,
-    url: cleanUrl(location.href),
+    url: currentViewUrl,
     referrer: document.referrer ? cleanUrl(document.referrer) : null,
     width: screen.width,
     scroll_depth: options.scroll_depth ?? null,
+    engagement_ms: options.engagement_ms ?? 0,
     props: options.props ?? {},
     transaction_id: options.transaction_id ?? null,
     revenue_amount: options.revenue_amount ?? null,
@@ -100,18 +104,42 @@ window.addEventListener('input', registerActivity, { passive: true });
 /**
  * Heartbeat every 10s if the view is visible
  */
+const isActive = () => document.visibilityState === 'visible' && document.hasFocus();
+let activeSince: number | null = isActive() ? performance.now() : null;
+
 const flushEngagement = () => {
-  if (!userActivity.interacted) return;
-  send('interaction', { scroll_depth: userActivity.maxScrollDepth });
+  const now = performance.now();
+  const engagement_ms = activeSince === null ? 0 : Math.max(0, Math.round(now - activeSince));
+  activeSince = isActive() ? now : null;
+  if (!userActivity.interacted && engagement_ms === 0) return;
+
+  const eventName = userActivity.interacted ? 'interaction' : 'engagement';
+  send(eventName, { scroll_depth: userActivity.interacted ? userActivity.maxScrollDepth : null, engagement_ms });
   userActivity.interacted = false;
 };
 
-setInterval(() => {
-  if (document.visibilityState === 'visible') flushEngagement();
-}, 10_000);
+setInterval(flushEngagement, 10_000);
 
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') flushEngagement();
+  if (document.visibilityState === 'hidden') {
+    flushEngagement();
+    activeSince = null;
+  } else if (isActive() && activeSince === null) activeSince = performance.now();
+});
+
+window.addEventListener('blur', () => {
+  flushEngagement();
+  activeSince = null;
+});
+window.addEventListener('focus', () => {
+  if (isActive() && activeSince === null) activeSince = performance.now();
+});
+window.addEventListener('pagehide', () => {
+  flushEngagement();
+  activeSince = null;
+});
+window.addEventListener('pageshow', () => {
+  if (isActive() && activeSince === null) activeSince = performance.now();
 });
 
 /**
@@ -120,6 +148,7 @@ document.addEventListener('visibilitychange', () => {
 const handlePageChange = () => {
   flushEngagement();
   userActivity.maxScrollDepth = 0;
+  currentViewUrl = cleanUrl(location.href);
   send('view');
 };
 

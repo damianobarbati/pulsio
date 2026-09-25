@@ -1,9 +1,10 @@
-import { useMe } from 'ui/hooks/useMe.ts';
-import { checkAuth } from '#webapp/api.ts';
+import type { User } from 'types/User.ts';
+import api from 'ui/api/api.ts';
+import { useMe } from 'ui/hook/useMe.ts';
 
-export const Settings = () => {
-  const { user } = useMe(checkAuth);
-  return <div>Settings for {user.email}</div>;
+export const Settings = ({ className }: { className?: string }) => {
+  const { user } = useMe<User>(api.authMe);
+  return <div className={className}>Settings for {user.email}</div>;
 };
 
 export default Settings;

@@ -1,11 +1,12 @@
+import cx from 'clsx-tw';
 import * as React from 'react';
 import useSWRMutation from 'swr/mutation';
-import { mutation } from 'ui/api/api.ts';
+import api from 'ui/api/api.ts';
+import { NavLink } from 'ui/component/NavLink.tsx';
 import { IGlobe, IHome, ILogoutLeft, IUsers } from 'ui/icons.tsx';
-import { NavLink } from 'ui/NavLink.tsx';
 
-export const Nav = () => {
-  const logout = useSWRMutation('/auth/logout', mutation);
+export const Nav = ({ className }: { className?: string }) => {
+  const logout = useSWRMutation('authLogout', api.authLogout);
   const [message, setMessage] = React.useState('');
 
   const signOut = async () => {
@@ -20,7 +21,7 @@ export const Nav = () => {
   };
 
   return (
-    <aside className="w-48 border-pulsio-line border-b bg-pulsio-nav px-5 py-6 lg:flex lg:min-h-screen lg:flex-col lg:border-r lg:border-b-0">
+    <aside className={cx('w-48 border-pulsio-line border-b bg-pulsio-nav px-5 py-6 lg:flex lg:min-h-screen lg:flex-col lg:border-r lg:border-b-0', className)}>
       <a href={window.config.WEBSITE_URL} className="font-black text-3xl text-pulsio-blue tracking-tighter">
         Pulsio
       </a>

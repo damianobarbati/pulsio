@@ -17,7 +17,7 @@
     "tsc": "tsc",
     "env:up": "docker compose up -d --wait --quiet-pull --remove-orphans",
     "env:down": "docker compose down --volumes --remove-orphans",
-    "predev": "kill-port 8080 3000 3001 3002",
+    "predev": "kill-port 8080 3000 3001 3002 6006",
     "dev": "pnpm -r --parallel run '/^start:dev$/'",
     "open": "open -a 'Google Chrome' http://localhost:8025 http://localhost:8080 http://localhost:3000 http://localhost:3001 http://localhost:3002"
   },
@@ -28,7 +28,7 @@
     "kill-port": "^2.0.1",
     "playwright": "^1.63.0",
     "typescript": "^7.0.2",
-    "vite": "^8.3.0",
+    "vite": "^8.3.1",
     "vite-plugin-static-copy": "^4.1.1",
     "vitest": "^5.0.1"
   }

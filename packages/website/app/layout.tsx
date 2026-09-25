@@ -25,14 +25,14 @@ export const generateMetadata = async (): Promise<Metadata> => {
   };
 };
 
-export default async function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({ className, children }: { className?: string; children: React.ReactNode }) {
   await connection();
   const config = getWebsiteConfig();
   const cookie = (await cookies()).toString();
   const accountResponse = await fetch(new URL('/account', config.API_URL), { cache: 'no-store', headers: { cookie } });
   const loggedIn = accountResponse.ok;
   return (
-    <html lang="en">
+    <html className={className} lang="en">
       <body className="flex min-h-screen flex-col antialiased">
         <a href="#main" className="sr-only focus:not-sr-only">
           Skip to content

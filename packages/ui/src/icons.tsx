@@ -1,5 +1,3 @@
-import type React from 'react';
-
 export { CgSpinner as ISpinner } from 'react-icons/cg';
 export { FcGoogle as IGoogle } from 'react-icons/fc';
 export {
@@ -13,6 +11,7 @@ export {
   HiOutlineBolt as IBolt,
   HiOutlineCalendarDays as ICalendar,
   HiOutlineChartBar as IChart,
+  HiOutlineChevronDown as ChevronDown,
   HiOutlineCog6Tooth as ISettings,
   HiOutlineCreditCard as ICard,
   HiOutlineDocumentText as IReport,
@@ -28,12 +27,5 @@ export {
   HiOutlineUsers as IUsers,
   HiOutlineXMark as IClose,
 } from 'react-icons/hi2';
+export { PiTildeLight as ISame } from 'react-icons/pi';
 export { SiFirefoxbrowser as IFirefox, SiGithub as IGithub, SiGooglechrome as IChrome, SiSafari as ISafari } from 'react-icons/si';
-
-type IconProps = React.SVGProps<SVGSVGElement>;
-
-export const ChevronDown = (props: IconProps) => (
-  <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" {...props}>
-    <path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);

@@ -5,7 +5,7 @@ If instructions in `CONTRIBUTING.md` conflict with standard practices, the rules
 
 At the start of the agent session, load envs from `.env`.  
 
-If code was actually changed, then verify the following all the following commands succeed:
+If backend code was actually changed, then verify the following all the following commands succeed:
 ```sh
 pnpm lint
 pnpm tsc
@@ -15,13 +15,20 @@ pnpm -r test
 pnpm -r build
 ```
 
-Use the following files as reference for the style when coding back-end:
+If frontend code was actually changed, then verify the following all the following commands succeed:
+```sh
+pnpm lint
+pnpm tsc
+pnpm -r build
+```
+
+Use the following files as reference for the style when coding backend:
 ```sh
 /packages/api/src/index.ts
 /packages/src/src/user/*
 ```
 
-Use the following files as reference for the style when coding front-end:
+Use the following files as reference for the style when coding frontend:
 ```sh
 /packages/webapp/src/main.tsx
 /packages/webapp/src/Layout.tsx

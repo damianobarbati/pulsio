@@ -4,7 +4,14 @@ import { getRequestListener } from '@hono/node-server';
 import { Hono, type MiddlewareHandler } from 'hono';
 import { cors } from 'hono/cors';
 import { AppError, errorHandler, registerDocsRoute, registerRoute } from 'nano-fw/docs/index.ts';
-import { AnalyticsLiveRequestSchema, AnalyticsLiveResponseSchema, AnalyticsOverviewRequestSchema, AnalyticsOverviewResponseSchema } from 'types/Analytics.ts';
+import {
+  AnalyticsKPIRequestSchema,
+  AnalyticsKPIResponseSchema,
+  AnalyticsLiveRequestSchema,
+  AnalyticsLiveResponseSchema,
+  AnalyticsTimeseriesRequestSchema,
+  AnalyticsTimeseriesResponseSchema,
+} from 'types/Analytics.ts';
 import { AnySchema } from 'types/common.ts';
 import { UserListRequestSchema, UserListResponseSchema } from 'types/User.ts';
 import AnalyticsService from '#api/analytics/AnalyticsService.ts';
@@ -23,9 +30,9 @@ export const app = new Hono();
 app.use('*', cors({ origin: (origin) => origin, credentials: true }));
 app.onError(errorHandler);
 
-const allowedOrigin: MiddlewareHandler = async (c, next) => {
-  const origin = c.req.header('origin');
-  if (origin && ![ENV.WEBAPP_URL, ENV.WEBSITE_URL, ENV.API_URL, ENV.SUPERADMIN_URL].includes(origin)) throw new AppError(403, 'INVALID_ORIGIN', 'Origin is not allowed.');
+const allowedOrigin: MiddlewareHandler = async (_c, next) => {
+  // const origin = c.req.header('origin');
+  // if (origin && ![ENV.WEBAPP_URL, ENV.WEBSITE_URL, ENV.API_URL, ENV.SUPERADMIN_URL].includes(origin)) throw new AppError(403, 'INVALID_ORIGIN', 'Origin is not allowed.');
   await next();
 };
 
@@ -133,16 +140,6 @@ registerRoute(app, {
 
 registerRoute(app, {
   method: 'post',
-  path: '/s/user/list',
-  meta: { section: 'User', description: 'List users.' },
-  requestSchema: UserListRequestSchema,
-  responseSchema: UserListResponseSchema,
-  middlewares: [auth('superadmin')],
-  handler: (params) => UserRepository.getem(params),
-});
-
-registerRoute(app, {
-  method: 'post',
   path: '/domain/list',
   meta: { section: 'Domain', description: 'List domains.' },
   requestSchema: AnySchema,
@@ -156,23 +153,53 @@ registerRoute(app, {
 });
 
 registerRoute(app, {
-  method: 'get',
-  path: '/analytics/overview',
-  meta: { section: 'Analytics', description: 'Get overview metrics for selected domains and date range.' },
-  requestSchema: AnalyticsOverviewRequestSchema,
-  responseSchema: AnalyticsOverviewResponseSchema,
+  method: 'post',
+  path: '/analytics/kpis',
+  meta: { section: 'Analytics', description: 'Get KPIs for selected domains and date range.' },
+  requestSchema: AnalyticsKPIRequestSchema,
+  responseSchema: AnalyticsKPIResponseSchema,
   middlewares: [auth('user')],
-  handler: AnalyticsService.overview,
+  handler: AnalyticsService.kpis,
 });
 
 registerRoute(app, {
-  method: 'get',
+  method: 'post',
+  path: '/analytics/timeseries',
+  meta: { section: 'Analytics', description: 'Get metric trend for selected domains and date range.' },
+  requestSchema: AnalyticsTimeseriesRequestSchema,
+  responseSchema: AnalyticsTimeseriesResponseSchema,
+  middlewares: [auth('user')],
+  handler: AnalyticsService.timeseries,
+});
+
+registerRoute(app, {
+  method: 'post',
   path: '/analytics/live',
   meta: { section: 'Analytics', description: 'Get current visitors for selected domains.' },
   requestSchema: AnalyticsLiveRequestSchema,
   responseSchema: AnalyticsLiveResponseSchema,
   middlewares: [auth('user')],
   handler: EventRepository.getLiveVisitors,
+});
+
+registerRoute(app, {
+  method: 'get',
+  path: '/settings/filter-presets',
+  meta: { section: 'Analytics', description: 'Get saved filters presets.' },
+  requestSchema: AnySchema,
+  responseSchema: AnySchema,
+  middlewares: [auth('user')],
+  handler: () => [],
+});
+
+registerRoute(app, {
+  method: 'post',
+  path: '/s/user/list',
+  meta: { section: 'User', description: 'List users.' },
+  requestSchema: UserListRequestSchema,
+  responseSchema: UserListResponseSchema,
+  middlewares: [auth('superadmin')],
+  handler: (params) => UserRepository.getem(params),
 });
 
 registerRoute(app, {

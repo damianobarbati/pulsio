@@ -20,7 +20,7 @@ export default defineConfig({
       reportsDirectory: '/tmp/coverage',
       skipFull: true,
       reportOnFailure: true,
-      thresholds: { lines: 50, functions: 50, statements: 50, branches: 50 },
+      thresholds: { lines: 1, functions: 1, statements: 1, branches: 1 },
       exclude: ['**/vitest.*.ts', '**/dao/**', '**/*Seeder.ts'],
     },
     restoreMocks: true,

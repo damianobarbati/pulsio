@@ -1,22 +1,26 @@
+import cx from 'clsx-tw';
 import * as React from 'react';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import useSWRMutation from 'swr/mutation';
+import { MPOST } from 'ui/api/fetchers.ts';
+import { Button } from 'ui/component/Button.tsx';
+import { Textarea } from 'ui/component/Textarea.tsx';
+import { Input, Select } from 'ui/form';
 import { IEdit, IPlus, ITrash } from 'ui/icons.tsx';
-import { goalMutation } from '../api.ts';
-import { formatMetric } from '../helpers.ts';
+import { toNumber, toRate } from '#webapp/helpers.ts';
 
 type GoalStats = any;
 
-type GoalsProps = { siteId: string; goals: GoalStats[]; onChanged: () => void; onSelect: (id: string) => void };
+type GoalsProps = { className?: string; siteId: string; goals: GoalStats[]; onChanged: () => void; onSelect: (id: string) => void };
 type GoalForm = { name: string; kind: 'page' | 'event' | 'scroll'; target: string; threshold: number; propertyKey: string; propertyValue: string; properties: string };
-export const Goals = ({ siteId, goals, onChanged, onSelect }: GoalsProps) => {
+export const Goals = ({ className, siteId, goals, onChanged, onSelect }: GoalsProps) => {
   const [editing, setEditing] = React.useState<string | null>(null);
   const [deleting, setDeleting] = React.useState<string | null>(null);
   const [message, setMessage] = React.useState('');
   const form = useForm<GoalForm>({ defaultValues: { name: '', kind: 'event', target: '', threshold: 50, propertyKey: '', propertyValue: '', properties: '{}' } });
   const kind = form.watch('kind');
-  const save = useSWRMutation(editing ? `/goals/${editing}` : '/goals', goalMutation);
-  const remove = useSWRMutation(`/goals/${deleting}`, goalMutation);
+  const save = useSWRMutation(editing ? `/goals/${editing}` : '/goals', MPOST);
+  const remove = useSWRMutation(`/goals/${deleting}`, MPOST);
   const submit = form.handleSubmit(async ({ properties, propertyKey, propertyValue, ...values }) => {
     try {
       const parsed = properties.trim() ? JSON.parse(properties) : propertyKey ? { [propertyKey]: propertyValue } : {};
@@ -29,7 +33,7 @@ export const Goals = ({ siteId, goals, onChanged, onSelect }: GoalsProps) => {
     }
   });
   return (
-    <section className="rounded-lg border border-gray-100 bg-white p-6 shadow-sm md:col-span-2">
+    <section className={cx('rounded-lg border border-gray-100 bg-white p-6 shadow-sm md:col-span-2', className)}>
       <div className="flex items-center justify-between gap-4">
         <h2 className="font-semibold text-sm uppercase">Goal conversions</h2>
         <button
@@ -45,76 +49,48 @@ export const Goals = ({ siteId, goals, onChanged, onSelect }: GoalsProps) => {
         </button>
       </div>
       {editing !== null && (
-        <form onSubmit={submit} className="mt-5 grid gap-4 rounded-lg border border-violet-100 bg-violet-50/50 p-5 sm:grid-cols-2">
-          <label className="text-sm">
-            Display name
-            <input required {...form.register('name')} className="mt-1 w-full rounded border border-gray-200 bg-white p-2" />
-          </label>
-          <label className="text-sm">
-            Goal trigger
-            <select {...form.register('kind')} className="mt-1 w-full rounded border border-gray-200 bg-white p-2">
+        <FormProvider {...form}>
+          <form onSubmit={submit} className="mt-5 grid gap-4 rounded-lg border border-violet-100 bg-violet-50/50 p-5 sm:grid-cols-2">
+            <Input label="Display name" name="name" required />
+            <Select label="Goal trigger" name="kind">
               <option value="event">Custom event</option>
               <option value="page">Pageview</option>
               <option value="scroll">Scroll depth</option>
-            </select>
-          </label>
-          <label className="text-sm">
-            {kind === 'event' ? 'Event name' : 'Page path (wildcards supported)'}
-            <input
+            </Select>
+            <Input
+              label={kind === 'event' ? 'Event name' : 'Page path (wildcards supported)'}
               required
               placeholder={kind === 'event' ? 'Signup' : '/thank-you or /blog/**'}
-              {...form.register('target')}
-              className="mt-1 w-full rounded border border-gray-200 bg-white p-2"
+              name="target"
             />
-          </label>
-          {kind === 'scroll' && (
-            <label className="text-sm">
-              Scroll threshold (%)
-              <input type="number" min="1" max="100" {...form.register('threshold', { valueAsNumber: true })} className="mt-1 w-full rounded border border-gray-200 bg-white p-2" />
-            </label>
-          )}
-          <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
-            <label className="text-sm">
-              Property key
-              <input
-                {...form.register('propertyKey')}
-                placeholder="plan"
-                disabled={Boolean(form.watch('properties').trim())}
-                className="mt-1 w-full rounded border border-gray-200 bg-white p-2"
-              />
-            </label>
-            <label className="text-sm">
-              Equals value
-              <input
-                {...form.register('propertyValue')}
-                placeholder="pro"
-                disabled={Boolean(form.watch('properties').trim())}
-                className="mt-1 w-full rounded border border-gray-200 bg-white p-2"
-              />
-            </label>
-            <details className="sm:col-span-2">
-              <summary className="cursor-pointer text-sm">Advanced JSON conditions</summary>
-              <label className="mt-2 block text-sm">
-                Custom property conditions (JSON)
-                <textarea
-                  {...form.register('properties')}
-                  placeholder={'{"plan":"pro","source":"ad"}'}
-                  rows={3}
-                  className="mt-2 w-full rounded border border-gray-200 bg-white p-2 font-mono text-sm"
-                />
-              </label>
-              <p className="mt-1 text-gray-500 text-xs">Use either simple fields or a JSON object. JSON errors show below.</p>
-            </details>
-          </div>
-          <div className="flex items-center gap-4 sm:col-span-2">
-            <button disabled={save.isMutating} className="rounded bg-violet-600 px-4 py-2 text-sm text-white disabled:opacity-50">
-              {save.isMutating ? 'Saving…' : 'Save goal'}
-            </button>
-            <button type="button" onClick={() => setEditing(null)} className="text-sm">
-              Cancel
-            </button>
-          </div>
-        </form>
+            {kind === 'scroll' && <Input label="Scroll threshold (%)" name="threshold" type="number" min="1" max="100" />}
+            <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
+              <Input label="Property key" name="propertyKey" placeholder="plan" disabled={Boolean(form.watch('properties').trim())} />
+              <Input label="Equals value" name="propertyValue" placeholder="pro" disabled={Boolean(form.watch('properties').trim())} />
+              <details className="sm:col-span-2">
+                <summary className="cursor-pointer text-sm">Advanced JSON conditions</summary>
+                <label className="mt-2 block text-sm">
+                  Custom property conditions (JSON)
+                  <Textarea
+                    {...form.register('properties')}
+                    placeholder={'{"plan":"pro","source":"ad"}'}
+                    rows={3}
+                    className="mt-2 w-full rounded border border-gray-200 bg-white p-2 font-mono text-sm"
+                  />
+                </label>
+                <p className="mt-1 text-gray-500 text-xs">Use either simple fields or a JSON object. JSON errors show below.</p>
+              </details>
+            </div>
+            <div className="flex items-center gap-4 sm:col-span-2">
+              <Button type="submit" disabled={save.isMutating}>
+                {save.isMutating ? 'Saving…' : 'Save goal'}
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setEditing(null)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
       )}
       {message && (
         <p role="status" className="mt-3 text-sm">
@@ -143,9 +119,9 @@ export const Goals = ({ siteId, goals, onChanged, onSelect }: GoalsProps) => {
                     {goal.kind} · {goal.target}
                   </p>
                 </td>
-                <td className="px-2 tabular-nums">{formatMetric('visitors', goal.uniqueConversions)}</td>
-                <td className="px-2 tabular-nums">{formatMetric('visitors', goal.totalConversions)}</td>
-                <td className="px-2 tabular-nums">{formatMetric('conversionRate', goal.conversionRate)}</td>
+                <td className="px-2 tabular-nums">{toNumber(goal.uniqueConversions)}</td>
+                <td className="px-2 tabular-nums">{toNumber(goal.totalConversions)}</td>
+                <td className="px-2 tabular-nums">{toRate(goal.conversionRate)}</td>
                 <td className="px-2">
                   {goal.revenue.map((item) => (
                     <p key={item.currency}>

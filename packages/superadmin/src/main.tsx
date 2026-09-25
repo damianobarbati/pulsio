@@ -2,9 +2,9 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { SWRConfig } from 'swr';
 import { ScreenGuard, Spinner } from 'ui';
-import NotFound from 'ui/NotFound.tsx';
+import { Auth } from 'ui/component/Auth.tsx';
+import NotFound from 'ui/component/NotFound.tsx';
 import { Route, Router, Switch } from 'wouter';
-import Auth from '#superadmin/views/Auth.tsx';
 import Domains from '#superadmin/views/Domains.tsx';
 import Home from '#superadmin/views/Home.tsx';
 import { Layout } from '#superadmin/views/Layout.tsx';
@@ -24,14 +24,24 @@ root.render(
         <Router>
           <React.Suspense fallback={<Spinner size="lg" />}>
             <Switch>
-              <Route path="/auth" component={Auth} />
+              <Route path="/auth">
+                <Auth title="Pulsio Superadmin" role="superadmin" />
+              </Route>
               <Route path="/" nest>
                 <Layout>
                   <Switch>
-                    <Route path="/" component={Home} />
-                    <Route path="/users" component={Users} />
-                    <Route path="/domains" component={Domains} />
-                    <Route component={NotFound} />
+                    <Route path="/">
+                      <Home />
+                    </Route>
+                    <Route path="/users">
+                      <Users />
+                    </Route>
+                    <Route path="/domains">
+                      <Domains />
+                    </Route>
+                    <Route>
+                      <NotFound />
+                    </Route>
                   </Switch>
                 </Layout>
               </Route>

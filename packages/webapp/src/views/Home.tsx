@@ -1,358 +1,202 @@
-// @ts-nocheck
-
+import cx from 'clsx-tw';
+import dayjs from 'dayjs';
 import React from 'react';
 import useSWR from 'swr';
-import type { AnalyticsOverview } from 'types/Analytics.ts';
-import type { DomainListResponse } from 'types/Domain.ts';
+import type { AnalyticsKPIResponse, AnalyticsLiveResponse, AnalyticsTimeseriesResponse, Metric } from 'types/Analytics.ts';
 import type { User } from 'types/User.ts';
-import { Spinner } from 'ui';
-import { useMe } from 'ui/hooks/useMe.ts';
-import { checkAuth, fetcher } from '../api.ts';
-import { Chart } from '../components/Chart.tsx';
-import { type AnalyticsFilter, DashboardFilters } from '../components/DashboardFilters.tsx';
+import { Pulser, Spinner } from 'ui';
+import api from 'ui/api/api.ts';
+import { POST } from 'ui/api/fetchers.ts';
+import { ChartLine } from 'ui/component/ChartLine.tsx';
+import { useMe } from 'ui/hook/useMe.ts';
+import { toAmount, toDuration, toNumber, toRate } from '#webapp/helpers.ts';
+import { DashboardFilters } from '../components/DashboardFilters.tsx';
 import { DashboardKpi } from '../components/DashboardKpi.tsx';
-import { Goals } from '../components/Goals.tsx';
-import { Report } from '../components/Report.tsx';
-import { formatMetric } from '../helpers.ts';
 
-type Kpi = 'liveNow' | 'users' | 'views' | 'sessions' | 'sessionTime' | 'engagement' | 'events' | 'conversion' | 'revenue';
-const kpiLabels: Record<Kpi, string> = {
-  liveNow: 'Live now',
-  users: 'Users',
-  views: 'Views',
-  sessions: 'Sessions',
-  sessionTime: 'Session time',
-  engagement: 'Engagement',
-  events: 'Events',
-  conversion: 'Conversion',
-  revenue: 'Revenue',
+const metricToFormatter = {
+  users_count: toNumber,
+  sessions_count: toNumber,
+  pageviews_per_session_avg: toNumber,
+  duration_per_session_avg: toDuration,
+  events_count: toNumber,
+  engagement_rate: toRate,
+  conversion_rate: toRate,
+  transactions_count: toNumber,
+  revenue_sum: (value) => toAmount(value, 'USD'),
+  revenue_per_transaction_avg: (value: number) => toAmount(value, 'USD'),
 };
-const timelineMetrics: Record<Kpi, string | null> = {
-  liveNow: null,
-  users: 'visitors',
-  views: 'pageviews',
-  sessions: 'visits',
-  sessionTime: 'visitDuration',
-  engagement: 'engagementRate',
-  events: 'events',
-  conversion: 'conversionRate',
-  revenue: null,
+
+const defaultFilters = {
+  domains: [] as string[],
+  from: dayjs().startOf('year').toISOString(),
+  to: dayjs().endOf('year').toISOString(),
+  compare: false,
 };
-const date = (value: number) => new Date(value).toISOString().slice(0, 10);
 
-export const Home = () => {
-  useMe<User>(checkAuth, 'user');
-  const domains = useSWR<DomainListResponse>('/domain/list', fetcher, { shouldRetryOnError: false });
+export const Home = ({ className }: { className?: string }) => {
+  useMe<User>(api.authMe, 'user');
 
-  const [siteIds, setSiteIds] = React.useState<string[]>([]);
-  const [from, setFrom] = React.useState(date(Date.now() - 27 * 86400000));
-  const [to, setTo] = React.useState(date(Date.now()));
-  const [filters, setFilters] = React.useState<AnalyticsFilter[]>([]);
-  const [goal, setGoal] = React.useState('');
-  const [_showLive, _setShowLive] = React.useState(false);
-  const [selectedKpi, setSelectedKpi] = React.useState<Kpi>('users');
-  const [journeyStart, setJourneyStart] = React.useState('/');
-  const [journeyDirection, setJourneyDirection] = React.useState('after');
-  const [showJourneys, setShowJourneys] = React.useState(false);
-  const sites = domains.data ?? [];
-  const selectedSiteIds = siteIds.length ? siteIds : sites[0] ? [sites[0].id] : [];
-  const selected = sites.find((site) => site.id === selectedSiteIds[0]);
-  const query = new URLSearchParams({
-    sites: selectedSiteIds.join(','),
-    reporting_currency: selected ? selected.reporting_currency : 'USD',
-    from: `${from}T00:00:00.000Z`,
-    to: new Date(Date.parse(`${to}T00:00:00.000Z`) + 86400000).toISOString(),
-    filters: JSON.stringify(filters),
-    ...(goal ? { goal } : {}),
-  }).toString();
-  const overview = useSWR<AnalyticsOverview>(selectedSiteIds.length ? `/analytics/overview?${query}` : null, fetcher, { refreshInterval: 30000 });
-  const live = useSWR<{ activeVisitors: number; pages: { name: string; value: number }[] }>(
-    selectedSiteIds.length ? `/analytics/live?sites=${selectedSiteIds.join(',')}` : null,
-    fetcher,
-    {
-      refreshInterval: 3000,
-      dedupingInterval: 1000,
-    },
-  );
-  const journeys = useSWR<{ source: string; target: string; step: number; visitors: number }[]>(
-    showJourneys ? `/analytics/journeys?${query}&start=${encodeURIComponent(journeyStart)}&direction=${journeyDirection}` : null,
-    fetcher,
-  );
-  const addFilter = (filter: AnalyticsFilter) => {
-    setFilters((current) => [...current.filter((item) => item.dimension !== filter.dimension || item.key !== filter.key), filter]);
-  };
-  const data = overview.data;
-  const revenue = data?.revenue.length === 1 ? data.revenue[0] : undefined;
-  const timelineMetric = timelineMetrics[selectedKpi];
+  const [filters, setFilters] = React.useState(defaultFilters);
+  const [selectedMetric, setSelectedMetric] = React.useState<Metric>('users_count');
+  const [displayedTimeseries, setDisplayedTimeseries] = React.useState<{ data: AnalyticsTimeseriesResponse; metric: Metric; interval: 'hour' | 'day' | 'week' | 'month' }>();
+  const days = dayjs(filters.to).diff(filters.from, 'day');
+  const interval = days <= 2 ? 'hour' : days <= 90 ? 'day' : days <= 365 ? 'week' : 'month';
+  const periodDuration = dayjs(filters.to).diff(dayjs(filters.from)) + 1;
+  const previousFilters = { ...filters, from: dayjs(filters.from).subtract(periodDuration, 'millisecond').toISOString(), to: filters.from };
+
+  const analyticsFilters = { domains: filters.domains, metric: selectedMetric, from: filters.from, to: filters.to, interval };
+  const previousAnalyticsFilters = { domains: previousFilters.domains, metric: selectedMetric, from: previousFilters.from, to: previousFilters.to, interval };
+
+  const liveSWR = useSWR<AnalyticsLiveResponse>(filters.domains.length ? ['/analytics/live', { domains: filters.domains }] : null, POST, { refreshInterval: 60_000 });
+
+  const kpisSWR = useSWR<AnalyticsKPIResponse>(filters.domains.length ? ['/analytics/kpis', analyticsFilters] : null, POST);
+  const previousKpisSWR = useSWR<AnalyticsKPIResponse>(filters.domains.length ? ['/analytics/kpis', previousAnalyticsFilters] : null, POST);
+
+  const timeseriesSWR = useSWR<AnalyticsTimeseriesResponse>(filters.domains.length ? ['/analytics/timeseries', analyticsFilters] : null, POST);
+  const previousTimeseriesSWR = useSWR<AnalyticsTimeseriesResponse>(filters.domains.length ? ['/analytics/timeseries', previousAnalyticsFilters] : null, POST);
+
+  const kpis = kpisSWR.data;
+  const timeseries = timeseriesSWR.data;
+  const comparisonTimeseries = previousTimeseriesSWR.data;
+  const error = liveSWR.error || kpisSWR.error || previousKpisSWR.error || timeseriesSWR.error || previousTimeseriesSWR.error;
+
+  React.useEffect(() => {
+    if (!timeseries) return;
+    setDisplayedTimeseries({ data: timeseries, metric: selectedMetric, interval });
+  }, [timeseries, selectedMetric, interval]);
+
   return (
-    <>
-      <DashboardFilters
-        sites={sites}
-        siteIds={selectedSiteIds}
-        onSite={(siteId) => setSiteIds((current) => (current.includes(siteId) ? current : [siteId]))}
-        onSiteIdsChange={setSiteIds}
-        from={from}
-        to={to}
-        onFromChange={setFrom}
-        onToChange={setTo}
-        filters={filters}
-        onFilterAdd={addFilter}
-        onFiltersChange={setFilters}
-        goal={goal}
-        onGoalChange={setGoal}
-      />
-      {domains.error && (
-        <p role="alert" className="mb-5 rounded bg-red-50 p-4 text-red-700">
-          Could not load domains.
-        </p>
-      )}
-      {!domains.isLoading && !domains.error && !sites.length && <p className="mb-5 text-gray-500">Add a domain to see analytics.</p>}
-      {overview.error && (
-        <p role="alert" className="mb-5 rounded bg-red-50 p-4 text-red-700">
-          {overview.error.message}
-          <button type="button" onClick={() => overview.mutate()} className="ml-3 underline">
-            Try again
-          </button>
-        </p>
-      )}
-      {overview.isLoading && <Spinner size="lg" />}
-      {data && (
-        <>
-          <section className="rounded-[var(--radius-lg)] border border-pulsio-line bg-white p-3 shadow-pulsio sm:p-5">
-            <div id="kpis" className="grid w-full grid-cols-8">
-              <DashboardKpi label="Live now" value={live.data?.activeVisitors ?? '…'} change={data.changes.liveNow} selected={selectedKpi === 'liveNow'} onSelect={() => {}} live />
+    <main className={className}>
+      <DashboardFilters className="w-full" onChange={setFilters} />
+
+      {!filters.domains.length && <p className="text-center text-gray-600 text-sm">Select a website to view analytics.</p>}
+      {!!error && <p className="text-red-600 text-sm">Could not load analytics. Please try again.</p>}
+      {!!filters.domains.length && !kpisSWR.data && !error && <Spinner size="lg" />}
+
+      {!!kpis && (
+        <section className="relative rounded-sm border border-pulsio-line bg-white p-2 shadow-pulsio">
+          {!!kpis && (
+            <div id="kpis" className="grid w-full grid-cols-11 p-2">
+              <DashboardKpi
+                label={
+                  <span>
+                    <Pulser className={cx('-ml-1', liveSWR.data ? 'text-emerald-500' : 'text-red-500')} active={!!liveSWR.data} />
+                    Live Now
+                  </span>
+                }
+                value={liveSWR.data ?? '...'}
+                selected={false}
+                valueFormatter={toNumber}
+              />
+
               <DashboardKpi
                 label="Users"
-                value={formatMetric('visitors', data.summary.visitors)}
-                change={data.changes.users}
-                selected={selectedKpi === 'users'}
-                onSelect={() => setSelectedKpi('users')}
-              />
-              <DashboardKpi
-                label="Views"
-                value={formatMetric('pageviews', data.summary.pageviews)}
-                change={data.changes.views}
-                selected={selectedKpi === 'views'}
-                onSelect={() => setSelectedKpi('views')}
+                value={kpis.users_count}
+                previousValue={previousKpisSWR.data?.users_count}
+                valueFormatter={toNumber}
+                selected={selectedMetric === 'users_count'}
+                onSelect={() => setSelectedMetric('users_count')}
               />
               <DashboardKpi
                 label="Sessions"
-                value={formatMetric('visits', data.summary.visits)}
-                change={data.changes.sessions}
-                selected={selectedKpi === 'sessions'}
-                onSelect={() => setSelectedKpi('sessions')}
+                value={kpis.sessions_count}
+                previousValue={previousKpisSWR.data?.sessions_count}
+                valueFormatter={toNumber}
+                selected={selectedMetric === 'sessions_count'}
+                onSelect={() => setSelectedMetric('sessions_count')}
               />
               <DashboardKpi
-                label="Session time"
-                value={formatMetric('visitDuration', data.summary.visitDuration)}
-                change={data.changes.sessionTime}
-                selected={selectedKpi === 'sessionTime'}
-                onSelect={() => setSelectedKpi('sessionTime')}
+                label="Session Views"
+                value={kpis.pageviews_per_session_avg}
+                previousValue={previousKpisSWR.data?.pageviews_per_session_avg}
+                valueFormatter={toNumber}
+                selected={selectedMetric === 'pageviews_per_session_avg'}
+                onSelect={() => setSelectedMetric('pageviews_per_session_avg')}
+              />
+              <DashboardKpi
+                label="Session Time"
+                value={kpis.duration_per_session_avg}
+                previousValue={previousKpisSWR.data?.duration_per_session_avg}
+                valueFormatter={toDuration}
+                selected={selectedMetric === 'duration_per_session_avg'}
+                onSelect={() => setSelectedMetric('duration_per_session_avg')}
+              />
+              <DashboardKpi
+                label="Events"
+                value={kpis.events_count}
+                previousValue={previousKpisSWR.data?.events_count}
+                valueFormatter={toNumber}
+                selected={selectedMetric === 'events_count'}
+                onSelect={() => setSelectedMetric('events_count')}
               />
               <DashboardKpi
                 label="Engagement"
-                value={formatMetric('engagementRate', data.summary.engagementRate)}
-                change={data.changes.engagement}
-                selected={selectedKpi === 'engagement'}
-                onSelect={() => setSelectedKpi('engagement')}
+                value={kpis.engagement_rate}
+                previousValue={previousKpisSWR.data?.engagement_rate}
+                valueFormatter={toRate}
+                selected={selectedMetric === 'engagement_rate'}
+                onSelect={() => setSelectedMetric('engagement_rate')}
               />
               <DashboardKpi
                 label="Conversion"
-                value={formatMetric('conversionRate', data.summary.conversionRate)}
-                change={data.changes.conversion}
-                selected={selectedKpi === 'conversion'}
-                onSelect={() => setSelectedKpi('conversion')}
+                value={kpis.conversion_rate}
+                previousValue={previousKpisSWR.data?.conversion_rate}
+                valueFormatter={toRate}
+                selected={selectedMetric === 'conversion_rate'}
+                onSelect={() => setSelectedMetric('conversion_rate')}
+              />
+              <DashboardKpi
+                label="Transactions"
+                value={kpis.transactions_count}
+                previousValue={previousKpisSWR.data?.transactions_count}
+                valueFormatter={toNumber}
+                selected={selectedMetric === 'transactions_count'}
+                onSelect={() => setSelectedMetric('transactions_count')}
               />
               <DashboardKpi
                 label="Revenue"
-                value={revenue ? revenue.totalRevenue.toLocaleString('en', { style: 'currency', currency: revenue.currency, maximumFractionDigits: 0 }) : '–'}
-                change={data.changes.revenue}
-                selected={selectedKpi === 'revenue'}
-                onSelect={() => setSelectedKpi('revenue')}
+                value={kpis.revenue_sum}
+                previousValue={previousKpisSWR.data?.revenue_sum}
+                valueFormatter={(value) => toAmount(value, 'USD')}
+                selected={selectedMetric === 'revenue_sum'}
+                onSelect={() => setSelectedMetric('revenue_sum')}
+              />
+              <DashboardKpi
+                label="Trans. revenue"
+                value={kpis.revenue_per_transaction_avg}
+                previousValue={previousKpisSWR.data?.revenue_per_transaction_avg}
+                valueFormatter={(value) => toAmount(value, 'USD')}
+                selected={selectedMetric === 'revenue_per_transaction_avg'}
+                onSelect={() => setSelectedMetric('revenue_per_transaction_avg')}
               />
             </div>
-            {timelineMetric && (
-              <Chart
-                label={`${kpiLabels[selectedKpi]} over the selected period`}
-                className="mt-4 h-[360px] sm:h-[430px]"
-                option={{
-                  animation: false,
-                  color: ['#7064ff'],
-                  grid: { left: 45, right: 10, top: 20, bottom: 40 },
-                  tooltip: { trigger: 'axis', renderMode: 'richText' },
-                  xAxis: {
-                    type: 'category',
-                    boundaryGap: false,
-                    data: data.timeline.map((point) =>
-                      new Date(point.label).toLocaleString('en-GB', {
-                        timeZone: 'UTC',
-                        day: 'numeric',
-                        month: 'short',
-                        ...(data.timeline.length <= 48 && Date.parse(data.to) - Date.parse(data.from) <= 172800000 ? { hour: '2-digit' } : {}),
-                      }),
-                    ),
-                    axisLine: { lineStyle: { color: '#d4d4da' } },
-                    axisLabel: { color: '#85858e', margin: 15 },
-                  },
-                  yAxis: { type: 'value', min: 0, splitNumber: 6, axisLabel: { color: '#85858e' }, splitLine: { lineStyle: { color: '#ededf1' } } },
-                  series: [
-                    {
-                      type: 'line',
-                      showSymbol: false,
-                      connectNulls: false,
-                      lineStyle: { width: 2 },
-                      areaStyle: { color: '#eeebff', opacity: 0.8 },
-                      data: data.timeline.map((point) => point[timelineMetric]),
-                    },
-                  ],
-                }}
+          )}
+
+          {!displayedTimeseries && timeseriesSWR.isLoading && (
+            <div className="mt-4 flex h-90 items-center justify-center sm:h-107.5">
+              <Spinner size="lg" />
+            </div>
+          )}
+          {!!displayedTimeseries && (
+            <div className="relative">
+              <ChartLine
+                key={`${displayedTimeseries.metric}-${filters.compare ? 'compare' : 'single'}`}
+                className="mt-4 h-90"
+                data={displayedTimeseries.data}
+                compareData={filters.compare ? comparisonTimeseries : undefined}
+                interval={displayedTimeseries.interval}
+                valueFormatter={metricToFormatter[displayedTimeseries.metric] || toNumber}
               />
-            )}
-            {!data.summary.visitors && <p className="pb-3 text-center text-gray-400 text-sm">No visits in this period. New data will appear automatically.</p>}
-          </section>
-          <div className="mt-6 grid gap-6 md:grid-cols-2">
-            <Report
-              query={query}
-              initial="source"
-              color="#eff5ff"
-              onFilter={addFilter}
-              tabs={[
-                { label: 'Channels', dimension: 'channel' },
-                { label: 'Sources', dimension: 'source' },
-                { label: 'Campaigns', dimension: 'utm_campaign' },
-              ]}
-            />
-            <Report
-              query={query}
-              color="#fff7eb"
-              onFilter={addFilter}
-              tabs={[
-                { label: 'Top pages', dimension: 'page' },
-                { label: 'Entry pages', dimension: 'entry_page' },
-                { label: 'Exit pages', dimension: 'exit_page' },
-              ]}
-            />
-            <Report
-              query={query}
-              color="#f1efff"
-              onFilter={addFilter}
-              tabs={[
-                { label: 'Map', dimension: 'map' },
-                { label: 'Countries', dimension: 'country' },
-                { label: 'Regions', dimension: 'region' },
-                { label: 'Cities', dimension: 'city' },
-              ]}
-            />
-            <Report
-              query={query}
-              color="#ecfcf5"
-              onFilter={addFilter}
-              tabs={[
-                { label: 'Browsers', dimension: 'browser' },
-                { label: 'Operating systems', dimension: 'os' },
-                { label: 'Devices', dimension: 'device' },
-              ]}
-            />
-            <Goals
-              siteId={selected ? selected.id : ''}
-              goals={data.goals}
-              onChanged={() => {
-                void overview.mutate();
-              }}
-              onSelect={setGoal}
-            />
-            <Report
-              query={query}
-              color="#f4f1ff"
-              onFilter={addFilter}
-              tabs={[
-                { label: 'Custom properties', dimension: 'property' },
-                { label: 'Events', dimension: 'event' },
-                { label: 'Hostnames', dimension: 'hostname' },
-              ]}
-            />
-            <section className="rounded-lg border border-gray-100 bg-white p-6 shadow-sm">
-              <h2 className="font-semibold text-sm uppercase">Revenue</h2>
-              <table className="mt-5 w-full text-left text-sm">
-                <thead className="text-gray-500">
-                  <tr>
-                    <th className="font-normal">Currency</th>
-                    <th className="font-normal">Total revenue</th>
-                    <th className="font-normal">Average revenue</th>
-                    <th className="font-normal">Orders</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.revenue.map((row) => (
-                    <tr key={row.currency}>
-                      <td className="py-4">{row.currency}</td>
-                      <td>{row.totalRevenue.toLocaleString('en', { style: 'currency', currency: row.currency })}</td>
-                      <td>{row.averageRevenue.toLocaleString('en', { style: 'currency', currency: row.currency })}</td>
-                      <td>{row.orders}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {!data.revenue.length && <p className="py-20 text-center text-gray-400">No revenue recorded in this period.</p>}
-            </section>
-            <section className="rounded-lg border border-gray-100 bg-white p-6 shadow-sm md:col-span-2">
-              <h2 className="font-semibold text-sm uppercase">User journeys</h2>
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  setShowJourneys(true);
-                }}
-                className="mt-4 flex flex-wrap gap-3 text-sm"
-              >
-                <label>
-                  Starting page or event
-                  <input value={journeyStart} onChange={(event) => setJourneyStart(event.target.value)} className="ml-3 rounded border border-gray-200 p-2" />
-                </label>
-                <select
-                  aria-label="Journey direction"
-                  value={journeyDirection}
-                  onChange={(event) => setJourneyDirection(event.target.value)}
-                  className="rounded border border-gray-200 p-2"
-                >
-                  <option value="after">What happened next</option>
-                  <option value="before">What happened before</option>
-                </select>
-                <button className="rounded bg-violet-600 px-4 py-2 text-white">Explore journeys</button>
-              </form>
-              {journeys.error && (
-                <p role="alert" className="mt-4 text-red-600">
-                  {journeys.error.message}
-                </p>
+              {(timeseriesSWR.isLoading || previousTimeseriesSWR.isLoading) && (
+                <div className="absolute top-3 right-3" role="status" aria-label="Updating chart">
+                  <Spinner size="sm" />
+                </div>
               )}
-              {journeys.isLoading && <p role="status">Loading journeys…</p>}
-              {journeys.data && (
-                <table className="mt-5 w-full text-left text-sm">
-                  <thead>
-                    <tr>
-                      <th>Step</th>
-                      <th>From</th>
-                      <th>To</th>
-                      <th>Visitors</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {journeys.data.map((row) => (
-                      <tr key={`${row.step}-${row.source}-${row.target}`} className="border-gray-100 border-b">
-                        <td className="py-3">{row.step}</td>
-                        <td>{row.source}</td>
-                        <td>{row.target}</td>
-                        <td>{row.visitors}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-              {journeys.data && !journeys.data.length && <p className="mt-4 text-gray-400">No journeys from this starting point.</p>}
-            </section>
-          </div>
-        </>
+            </div>
+          )}
+        </section>
       )}
-    </>
+    </main>
   );
 };
 

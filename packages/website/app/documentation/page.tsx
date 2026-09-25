@@ -1,3 +1,4 @@
+import cx from 'clsx-tw';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
@@ -27,22 +28,22 @@ export const generateMetadata = async (): Promise<Metadata> => {
   });
 };
 
-const Code = ({ children }: { children: string }) => (
-  <pre className="mt-5 overflow-x-auto rounded-[var(--radius-sm)] bg-pulsio-ink p-5 text-sm text-white leading-relaxed">
+const Code = ({ className, children }: { className?: string; children: string }) => (
+  <pre className={cx('mt-5 overflow-x-auto rounded-sm bg-pulsio-ink p-5 text-sm text-white leading-relaxed', className)}>
     <code>{children}</code>
   </pre>
 );
 
-export default function Documentation() {
+export default function Documentation({ className }: { className?: string }) {
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-12 lg:grid lg:grid-cols-[15rem_minmax(0,48rem)] lg:justify-center lg:gap-16 lg:py-16">
+    <div className={cx('mx-auto max-w-[1400px] px-6 py-12 lg:grid lg:grid-cols-[15rem_minmax(0,48rem)] lg:justify-center lg:gap-16 lg:py-16', className)}>
       <aside className="mb-10 lg:mb-0">
         <nav aria-label="Documentation sections" className="lg:sticky lg:top-8">
           <p className="font-bold text-pulsio-blue text-xs uppercase tracking-widest">Documentation</p>
           <ol className="mt-4 flex gap-x-4 gap-y-2 overflow-x-auto pb-2 text-sm lg:flex-col lg:gap-1 lg:overflow-visible">
             {sections.map((section) => (
               <li key={section.id} className="shrink-0">
-                <a href={`#${section.id}`} className="block rounded-[var(--radius-sm)] px-3 py-2 text-ink/70 hover:bg-blue-100 hover:text-ink">
+                <a href={`#${section.id}`} className="block rounded-sm px-3 py-2 text-ink/70 hover:bg-blue-100 hover:text-ink">
                   {section.label}
                 </a>
               </li>
@@ -124,7 +125,7 @@ export default function Documentation() {
               ['Custom data', 'Event names, event properties, and hostnames.'],
               ['Filtering', 'Combine page, traffic, campaign, location, technology, hostname, event, and property filters with is, is not, or contains.'],
             ].map(([title, text]) => (
-              <div key={title} className="rounded-[var(--radius-sm)] bg-blue-100 p-5">
+              <div key={title} className="rounded-sm bg-blue-100 p-5">
                 <h3 className="font-bold">{title}</h3>
                 <p className="mt-2 text-ink/75 text-sm leading-relaxed">{text}</p>
               </div>

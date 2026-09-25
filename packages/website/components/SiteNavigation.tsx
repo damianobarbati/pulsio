@@ -1,15 +1,13 @@
 'use client';
 
+import cx from 'clsx-tw';
 import Link from 'next/link';
 import React from 'react';
 import { IClose, IMenuBars } from 'ui/icons.tsx';
 
-type SiteNavigationProps = {
-  dashboardUrl: string;
-  loggedIn: boolean;
-};
+type SiteNavigationProps = { className?: string; dashboardUrl: string; loggedIn: boolean };
 
-export const SiteNavigation = ({ dashboardUrl, loggedIn: initialLoggedIn }: SiteNavigationProps) => {
+export const SiteNavigation = ({ className, dashboardUrl, loggedIn: initialLoggedIn }: SiteNavigationProps) => {
   const [loggedIn, setLoggedIn] = React.useState(initialLoggedIn);
   const [menuOpen, setMenuOpen] = React.useState(false);
 
@@ -20,10 +18,10 @@ export const SiteNavigation = ({ dashboardUrl, loggedIn: initialLoggedIn }: Site
   }, []);
 
   return (
-    <>
+    <div className={cx('contents', className)}>
       <button
         type="button"
-        className="ml-auto rounded-[var(--radius-sm)] p-2 md:hidden"
+        className="ml-auto rounded-sm p-2 md:hidden"
         aria-controls="site-navigation"
         aria-expanded={menuOpen}
         aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
@@ -34,7 +32,10 @@ export const SiteNavigation = ({ dashboardUrl, loggedIn: initialLoggedIn }: Site
       <nav
         id="site-navigation"
         aria-label="Main navigation"
-        className={`${menuOpen ? 'flex' : 'hidden'} basis-full flex-col items-stretch gap-4 py-3 font-medium text-sm md:ml-8 md:flex md:grow md:flex-row md:flex-wrap md:items-center md:justify-items-start md:gap-6 md:py-0`}
+        className={cx(
+          menuOpen ? 'flex' : 'hidden',
+          'basis-full flex-col items-stretch gap-4 py-3 font-medium text-sm md:ml-8 md:flex md:grow md:flex-row md:flex-wrap md:items-center md:justify-items-start md:gap-6 md:py-0',
+        )}
       >
         <Link href="/how-to">How to</Link>
         <Link href="/documentation">Documentation</Link>
@@ -43,10 +44,10 @@ export const SiteNavigation = ({ dashboardUrl, loggedIn: initialLoggedIn }: Site
         <a href={dashboardUrl} className="md:ml-auto">
           {loggedIn ? 'My Home' : 'Sign in'}
         </a>
-        <Link href="/start-tracking" className="rounded-[var(--radius-sm)] bg-pulsio-blue px-3 py-2 text-white md:ml-0">
+        <Link href="/start-tracking" className="rounded-sm bg-pulsio-blue px-3 py-2 text-white md:ml-0">
           Get started free
         </Link>
       </nav>
-    </>
+    </div>
   );
 };

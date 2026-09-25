@@ -23,3 +23,6 @@ in kpi-container dentro dashboard.tsx
 - rinomina "Total visit" in Sessions (tooltip spiega che Session is A continuous period of user interactions on the application for the same User (daily). A session starts on the first view and ends when no heartbeats or events are received for more than 30 minutes, or when the 00:00 UTC rollover occurs)
 - rinomina "Views per visit" in Views per session
 - rinomina Time on page in Time spent
+
+controlla tutti i form e gli input: non deve essere passato onchange, si devono usare watch per triggerare cambi basati sugli input.
+nelle datatable il componente search deve avere il formcontext dentro, non wrappare tutta la tabella

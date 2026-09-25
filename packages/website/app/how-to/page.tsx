@@ -1,3 +1,4 @@
+import cx from 'clsx-tw';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
@@ -14,9 +15,9 @@ export const generateMetadata = async (): Promise<Metadata> => {
   });
 };
 
-export default function HowTo() {
+export default function HowTo({ className }: { className?: string }) {
   return (
-    <section className="mx-auto max-w-4xl px-6 py-16">
+    <section className={cx('mx-auto max-w-4xl px-6 py-16', className)}>
       <p className="font-bold text-xs uppercase tracking-widest">How it works</p>
       <h1 className="mt-5 font-semibold text-5xl tracking-tight sm:text-6xl">
         From install to insight.

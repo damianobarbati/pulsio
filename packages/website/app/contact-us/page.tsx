@@ -1,8 +1,10 @@
 'use client';
 
+import cx from 'clsx-tw';
 import Link from 'next/link';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import useSWRMutation from 'swr/mutation';
+import { Input } from 'ui/form';
 
 type ContactValues = { name: string; email: string; message: string };
 const sendMessage = async (url: string, { arg }: { arg: ContactValues }) => {
@@ -12,7 +14,7 @@ const sendMessage = async (url: string, { arg }: { arg: ContactValues }) => {
   return result as { message: string };
 };
 
-export const ContactUs = () => {
+export const ContactUs = ({ className }: { className?: string }) => {
   const form = useForm<ContactValues>();
   const message = useSWRMutation('/api/contact', sendMessage);
   const submit = form.handleSubmit(async (values) => {
@@ -22,7 +24,7 @@ export const ContactUs = () => {
     } catch {}
   });
   return (
-    <section className="mx-auto grid max-w-5xl gap-12 px-6 py-16 md:grid-cols-[.8fr_1.2fr]">
+    <section className={cx('mx-auto grid max-w-5xl gap-12 px-6 py-16 md:grid-cols-[.8fr_1.2fr]', className)}>
       <div>
         <Link href="/" className="mb-6 block font-semibold text-pulsio-blue text-sm underline underline-offset-2">
           ← Back to home
@@ -38,55 +40,31 @@ export const ContactUs = () => {
           .
         </p>
       </div>
-      <form onSubmit={submit} className="rounded-[var(--radius-lg)] border border-pulsio-line bg-white p-7 shadow-pulsio">
-        <div className="space-y-5">
-          <label className="block font-semibold text-sm">
-            Name
-            <input
-              required
-              autoComplete="name"
-              {...form.register('name')}
-              className="mt-2 block w-full rounded-[var(--radius-md)] border border-pulsio-line px-3 py-2.5 font-normal"
-            />
-          </label>
-          <label className="block font-semibold text-sm">
-            Email
-            <input
-              required
-              type="email"
-              autoComplete="email"
-              {...form.register('email')}
-              className="mt-2 block w-full rounded-[var(--radius-md)] border border-pulsio-line px-3 py-2.5 font-normal"
-            />
-          </label>
-          <label className="block font-semibold text-sm">
-            Message
-            <textarea
-              required
-              rows={7}
-              {...form.register('message')}
-              className="mt-2 block w-full resize-y rounded-[var(--radius-md)] border border-pulsio-line px-3 py-2.5 font-normal"
-            />
-          </label>
-        </div>
-        {message.error && (
-          <p role="alert" className="mt-4 text-red-700 text-sm">
-            {message.error.message}
-          </p>
-        )}
-        {message.data && (
-          <p role="status" className="mt-4 text-emerald-700 text-sm">
-            {message.data.message}
-          </p>
-        )}
-        <button
-          type="submit"
-          disabled={message.isMutating}
-          className="mt-6 rounded-[var(--radius-md)] bg-pulsio-blue px-5 py-3 font-semibold text-sm text-white disabled:opacity-50"
-        >
-          {message.isMutating ? 'Sending…' : 'Send message'}
-        </button>
-      </form>
+      <FormProvider {...form}>
+        <form onSubmit={submit} className="rounded-lg border border-pulsio-line bg-white p-7 shadow-pulsio">
+          <div className="space-y-5">
+            <Input label="Name" name="name" required autoComplete="name" />
+            <Input label="Email" name="email" required type="email" autoComplete="email" />
+            <label className="block font-semibold text-sm">
+              Message
+              <textarea required rows={7} {...form.register('message')} className="mt-2 block w-full resize-y rounded-sm border border-pulsio-line px-3 py-2.5 font-normal" />
+            </label>
+          </div>
+          {message.error && (
+            <p role="alert" className="mt-4 text-red-700 text-sm">
+              {message.error.message}
+            </p>
+          )}
+          {message.data && (
+            <p role="status" className="mt-4 text-emerald-700 text-sm">
+              {message.data.message}
+            </p>
+          )}
+          <button type="submit" disabled={message.isMutating} className="mt-6 rounded-sm bg-pulsio-blue px-5 py-3 font-semibold text-sm text-white disabled:opacity-50">
+            {message.isMutating ? 'Sending…' : 'Send message'}
+          </button>
+        </form>
+      </FormProvider>
     </section>
   );
 };

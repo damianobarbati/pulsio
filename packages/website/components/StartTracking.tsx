@@ -1,9 +1,11 @@
 'use client';
 
+import cx from 'clsx-tw';
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
+import { Input } from 'ui/form';
 import { getConfig } from './config';
 
 type Registration = { email: string; password: string; domain: string; plan: 'start' | 'grow' | 'scale' };
@@ -28,7 +30,7 @@ const registerAccount = async (url: string, { arg }: { arg: Registration }): Pro
   return result;
 };
 
-export const StartTracking = () => {
+export const StartTracking = ({ className }: { className?: string }) => {
   const form = useForm<Registration>({ defaultValues: { plan: 'start' } });
   const configuration = useSWR('/env.json', getConfig, { revalidateOnFocus: false });
   React.useEffect(() => {
@@ -44,7 +46,12 @@ export const StartTracking = () => {
   const status = useSWR(apiPath('/account/setup', configuration.data), readSetup, { refreshInterval: (data) => (data || account ? 2000 : 0), shouldRetryOnError: false });
   const setup = status.data || account;
 
-  if (configuration.error) return <p role="alert">{configuration.error.message}</p>;
+  if (configuration.error)
+    return (
+      <p role="alert" className={className}>
+        {configuration.error.message}
+      </p>
+    );
   if (!configuration.data) return null;
 
   const submit = form.handleSubmit(async (values) => {
@@ -103,7 +110,7 @@ export const StartTracking = () => {
 
   if (setup) {
     return (
-      <section className="mx-auto max-w-3xl px-6 py-16">
+      <section className={cx('mx-auto max-w-3xl px-6 py-16', className)}>
         <p className="font-bold text-xs uppercase tracking-widest">Your account is ready</p>
         <h1 className="mt-5 font-semibold text-4xl tracking-tight sm:text-5xl">Let’s connect {setup.domain}.</h1>
         <p className="mt-5 text-ink/70 text-lg">Just one line between you and a clearer picture.</p>
@@ -141,7 +148,7 @@ export const StartTracking = () => {
               Visit {setup.domain} ↗
             </a>
             <div role="status" aria-live="polite" className="mt-6 flex items-center gap-3 rounded-xl bg-paper p-4">
-              <span className={`h-3 w-3 shrink-0 rounded-full ${setup.detected ? 'bg-green-600' : 'animate-pulse bg-amber-500 motion-reduce:animate-none'}`} />
+              <span className={cx('h-3 w-3 shrink-0 rounded-full', setup.detected ? 'bg-green-600' : 'animate-pulse bg-amber-500 motion-reduce:animate-none')} />
               <span>{setup.detected ? 'Tracking detected successfully!' : 'Waiting for the first signal…'}</span>
             </div>
             {status.error && (
@@ -178,7 +185,7 @@ export const StartTracking = () => {
   }
 
   return (
-    <section className="mx-auto grid max-w-5xl gap-12 px-6 py-16 md:grid-cols-2">
+    <section className={cx('mx-auto grid max-w-5xl gap-12 px-6 py-16 md:grid-cols-2', className)}>
       <div>
         {registrationError && (
           <p role="alert" className="mb-4 text-red-700">
@@ -199,71 +206,42 @@ export const StartTracking = () => {
           <li>✓ Free to use. No card needed.</li>
         </ul>
       </div>
-      <form onSubmit={submit} className="rounded-3xl border border-ink/15 bg-white p-8">
-        <h2 className="font-semibold text-2xl">Make yourself at home.</h2>
-        <p className="mt-2 text-ink/65 text-sm">Three fields. Then you are ready to install.</p>
-        <div className="mt-7 space-y-5">
-          <label className="block font-semibold text-sm">
-            Email
-            <input
-              type="email"
-              autoComplete="email"
-              required
-              {...form.register('email')}
-              className="mt-2 block w-full rounded-xl border border-ink/25 px-4 py-3 font-normal"
-              placeholder="you@example.com"
-            />
-          </label>
-          <label className="block font-semibold text-sm">
-            Password
-            <input
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={12}
-              maxLength={128}
-              {...form.register('password')}
-              className="mt-2 block w-full rounded-xl border border-ink/25 px-4 py-3 font-normal"
-              aria-describedby="password-help"
-            />
-            <span id="password-help" className="mt-2 block font-normal text-ink/65 text-xs">
-              Use at least 12 characters.
-            </span>
-          </label>
-          <label className="block font-semibold text-sm">
-            Website domain
-            <input
-              type="text"
-              autoComplete="url"
-              required
-              {...form.register('domain')}
-              className="mt-2 block w-full rounded-xl border border-ink/25 px-4 py-3 font-normal"
-              placeholder="your-site.com"
-            />
-          </label>
-          <input type="hidden" {...form.register('plan')} />
-        </div>
-        {registration.error && (
-          <p role="alert" className="mt-5 text-red-700 text-sm">
-            {registration.error.message}
+      <FormProvider {...form}>
+        <form onSubmit={submit} className="rounded-3xl border border-ink/15 bg-white p-8">
+          <h2 className="font-semibold text-2xl">Make yourself at home.</h2>
+          <p className="mt-2 text-ink/65 text-sm">Three fields. Then you are ready to install.</p>
+          <div className="mt-7 space-y-5">
+            <Input label="Email" name="email" type="email" autoComplete="email" required placeholder="you@example.com" />
+            <div>
+              <Input label="Password" type="password" autoComplete="new-password" required minLength={12} maxLength={128} name="password" aria-describedby="password-help" />
+              <span id="password-help" className="mt-2 block font-normal text-ink/65 text-xs">
+                Use at least 12 characters.
+              </span>
+            </div>
+            <Input label="Website domain" name="domain" type="text" autoComplete="url" required placeholder="your-site.com" />
+          </div>
+          {registration.error && (
+            <p role="alert" className="mt-5 text-red-700 text-sm">
+              {registration.error.message}
+            </p>
+          )}
+          <p className="mt-5 text-center text-ink/60 text-xs">
+            By creating your account, you agree to the{' '}
+            <a href="/terms" className="font-semibold text-pulsio-blue underline underline-offset-2">
+              Terms of Service
+            </a>{' '}
+            and acknowledge the{' '}
+            <a href="/privacy" className="font-semibold text-pulsio-blue underline underline-offset-2">
+              Privacy Policy
+            </a>
+            .
           </p>
-        )}
-        <p className="mt-5 text-center text-ink/60 text-xs">
-          By creating your account, you agree to the{' '}
-          <a href="/terms" className="font-semibold text-pulsio-blue underline underline-offset-2">
-            Terms of Service
-          </a>{' '}
-          and acknowledge the{' '}
-          <a href="/privacy" className="font-semibold text-pulsio-blue underline underline-offset-2">
-            Privacy Policy
-          </a>
-          .
-        </p>
-        <button type="submit" disabled={registration.isMutating} className="mt-7 w-full rounded-full bg-ink px-6 py-4 font-semibold text-white disabled:opacity-60">
-          {registration.isMutating ? 'Creating your account…' : 'Create account & get snippet ↗'}
-        </button>
-        <p className="mt-4 text-center text-ink/65 text-xs">No card needed to get started.</p>
-      </form>
+          <button type="submit" disabled={registration.isMutating} className="mt-7 w-full rounded-full bg-ink px-6 py-4 font-semibold text-white disabled:opacity-60">
+            {registration.isMutating ? 'Creating your account…' : 'Create account & get snippet ↗'}
+          </button>
+          <p className="mt-4 text-center text-ink/65 text-xs">No card needed to get started.</p>
+        </form>
+      </FormProvider>
     </section>
   );
 };

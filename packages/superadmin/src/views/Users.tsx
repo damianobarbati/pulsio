@@ -1,10 +1,13 @@
 import { createColumnHelper } from '@tanstack/react-table';
+import cx from 'clsx-tw';
 import React from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import useSWRInfinite from 'swr/infinite';
 import type { UserListRequest, UserListResponse } from 'types/User.ts';
-import { DataTable, Input } from 'ui';
-import { post } from 'ui/api/api.ts';
-import { VirtualizedTable, type virtualizedTableFeatures } from 'ui/VirtualizedTable.tsx';
+import { DataTable } from 'ui';
+import { POST } from 'ui/api/fetchers.ts';
+import { VirtualizedTable, type virtualizedTableFeatures } from 'ui/component/VirtualizedTable.tsx';
+import { Input } from 'ui/form';
 import { count, dateTime } from '#superadmin/helpers.ts';
 
 type User = UserListResponse[number];
@@ -37,11 +40,12 @@ const loadPage = async ([url, search, offset, sortId, direction]: PageKey): Prom
       ['id', 'asc'],
     ],
   };
-  const users = await post<UserListResponse>(url, body);
+  const users = await POST<UserListResponse>([url, body]);
   return users;
 };
 
-export const Users = () => {
+export const Users = ({ className }: { className?: string }) => {
+  const form = useForm({ defaultValues: { search: '' } });
   const [query, setQuery] = React.useState('');
   const [search, setSearch] = React.useState('');
   const [sort, setSort] = React.useState<Sort>({ id: 'created_at', direction: 'desc' });
@@ -74,14 +78,22 @@ export const Users = () => {
   };
 
   return (
-    <section className="flex h-[calc(100dvh-3rem)] min-h-96 min-w-0 flex-col">
+    <section className={cx('flex h-[calc(100dvh-3rem)] min-h-96 min-w-0 flex-col', className)}>
       <h1 className="font-bold text-2xl text-pulsio-ink">Users</h1>
       <DataTable
         className="mt-6 flex min-h-0 flex-1 flex-col"
         search={
-          <label className="block w-full max-w-sm text-sm">
-            <Input className="mt-2" type="search" placeholder="Search" value={query} onChange={(event) => setQuery(event.target.value)} />
-          </label>
+          <FormProvider {...form}>
+            <Input
+              name="search"
+              className="max-w-sm"
+              type="search"
+              aria-label="Search users"
+              placeholder="Search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </FormProvider>
         }
         footer={
           result.error ? (

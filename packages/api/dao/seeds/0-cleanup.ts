@@ -2,11 +2,12 @@ import type { Knex } from 'knex';
 import type { QueryResult } from 'pg';
 import ENV from '#api/env.ts';
 import { ch } from '#dao/ch.ts';
+import { JOHN_DOE } from '#dao/seeds/1-seed.ts';
 
 export async function seed(database: Knex): Promise<void> {
   if (ENV.APP_ENV !== 'local') throw new Error('Clean-up can only be run in the local environment, skipping.');
 
-  const seed_present = await database('users').first();
+  const seed_present = await database('users').where({ id: JOHN_DOE.id }).first();
   if (seed_present) return console.log('Skipping seeding...');
 
   // postgres

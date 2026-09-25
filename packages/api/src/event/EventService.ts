@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { setTimeout } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { type CityResponse, open, validate } from 'maxmind';
+import z from 'nano-fw/zod.ts';
 import type { ClientEvent, EventRowInsert } from 'types/Event.ts';
 import { UAParser } from 'ua-parser-js';
 import EventRepository from '#api/event/EventRepository.ts';
@@ -86,9 +87,48 @@ const getFingerprint = ({ domain, headers, ip, timestamp }: { domain: string; he
 };
 
 export default class EventService {
-  static async startWorker({ signal: _signal }: { signal: AbortSignal }) {
-    while (true) {
-      setTimeout(1_000);
+  private static ratesPromise: Promise<Record<string, number>> | null = null;
+
+  private static async fetchUSDRates(): Promise<Record<string, number>> {
+    const response = await fetch('https://api.frankfurter.dev/v1/2026-09-20?base=USD');
+
+    if (!response.ok) throw new Error('EventService.fetchUSDRates failed.');
+
+    const data = z.object({ rates: z.record(z.string(), z.number().positive()) }).parse(await response.json());
+    const rates = data.rates;
+    return rates;
+  }
+
+  static async getUSDRate(currency: string): Promise<number> {
+    if (currency === 'USD') return 1;
+
+    if (!EventService.ratesPromise) EventService.ratesPromise = EventService.fetchUSDRates();
+
+    let rates: Record<string, number>;
+
+    try {
+      rates = await EventService.ratesPromise;
+    } catch (error) {
+      EventService.ratesPromise = null;
+      throw error;
+    }
+
+    const currencyRate = rates[currency];
+
+    if (!currencyRate) throw new Error(`No USD exchange rate for ${currency}.`);
+
+    const usdRate = 1 / currencyRate;
+    return usdRate;
+  }
+
+  static async startWorker({ signal }: { signal: AbortSignal }) {
+    while (!signal.aborted) {
+      try {
+        await setTimeout(1_000, undefined, { signal });
+      } catch (error) {
+        if (signal.aborted) break;
+        throw error;
+      }
     }
   }
 
@@ -113,6 +153,7 @@ export default class EventService {
     const timestamp = new Date().toISOString();
     const attribution = getAttribution({ referrer: clientEvent.referrer || null, url });
     const fingerprint = getFingerprint({ domain: url.hostname, headers, ip, timestamp });
+    const usd_rate = clientEvent.revenue_currency ? await EventService.getUSDRate(clientEvent.revenue_currency) : 1;
 
     const event_row: EventRowInsert = {
       id,
@@ -131,12 +172,13 @@ export default class EventService {
       language: header({ headers, name: 'accept_language' }).split(',')[0].split(';')[0],
       timezone: geo.timezone,
       transaction_id: clientEvent.transaction_id || '',
-      interactive: clientEvent.event_name === 'view' ? 0 : 1,
-      engagement_ms: 0,
+      interactive: clientEvent.event_name === 'view' || clientEvent.event_name === 'engagement' ? 0 : 1,
+      engagement_ms: clientEvent.engagement_ms ?? 0,
       scroll_depth: clientEvent.scroll_depth ?? null,
       props: Object.fromEntries(Object.entries(clientEvent.props).map(([key, value]) => [key, String(value)])),
       revenue_amount: clientEvent.revenue_amount || null,
       revenue_currency: clientEvent.revenue_currency || '',
+      usd_rate,
       browser: userAgent.browser.name || '',
       browser_version: userAgent.browser.version || '',
       os: userAgent.os.name || '',

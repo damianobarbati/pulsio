@@ -1,3 +1,4 @@
+@import "tailwindcss";
 @import "@fontsource-variable/inter/index.css";
 
 @theme {
@@ -30,32 +31,43 @@
 
 @layer base {
   body {
-    background: var(--color-pulsio-surface);
     color: var(--color-pulsio-ink);
+    background: var(--color-pulsio-surface);
   }
 
-  button,
-  a,
   input,
-  select {
-    outline-offset: 4px;
+  select,
+  textarea {
+    font: inherit;
+    @apply outline-none focus-visible:ring-1 focus-visible:ring-pulsio-blue focus:border-pulsio-blue focus-visible:ring-offset-1;
   }
 
-  button:not(:disabled),
-  a {
-    cursor: pointer;
-  }
-
-  ::selection {
-    background: #cfe0ff;
+  button {
+    @apply outline-none focus-visible:ring-offset-1 focus-visible:ring-1 focus-visible:ring-pulsio-blue focus:border-pulsio-blue;
   }
 }
 
 .nav-btn {
-  @apply inline-flex items-center gap-3 rounded-md px-4 py-3 text-left font-medium text-sm;
+  @apply inline-flex items-center gap-3 rounded-sm px-4 py-3 text-left font-medium text-sm;
   @apply text-slate-600 hover:bg-white/70 hover:scale-105 transition active:scale-95;
 
   &[aria-current="page"] {
     @apply bg-blue-100 text-pulsio-blue;
   }
+}
+
+.pulsio-control {
+  @apply text-sm block;
+}
+
+.pulsio-control-label {
+  @apply block font-medium text-pulsio-ink mb-2;
+}
+
+.pulsio-control-input {
+  @apply block w-full rounded-sm border border-pulsio-line bg-white px-3 py-2.5 text-pulsio-ink placeholder:text-pulsio-muted disabled:bg-slate-50 disabled:opacity-60;
+}
+
+.pulsio-control-checkbox {
+  @apply flex h-5 w-5 items-center justify-center rounded border border-pulsio-line bg-white transition-colors group-has-[:checked]:border-pulsio-blue group-has-[:checked]:bg-pulsio-blue group-has-[:focus-visible]:ring-1 group-has-[:focus-visible]:ring-pulsio-blue group-has-[:focus-visible]:ring-offset-1;
 }

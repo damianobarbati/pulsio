@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS events (
   props Map(String, String), -- Custom event properties.
   revenue_amount Nullable(Decimal(18, 4)), -- Transaction total in revenue currency.
   revenue_currency LowCardinality(String) DEFAULT '', -- ISO currency for transaction revenue.
+  usd_rate Decimal64(8) DEFAULT 1,
   browser LowCardinality(String) DEFAULT '', -- Browser family.
   browser_version String DEFAULT '', -- Browser version.
   os LowCardinality(String) DEFAULT '', -- Operating system family.
