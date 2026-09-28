@@ -27,9 +27,9 @@ pnpm install
 export $(grep -v '^#' .env | xargs)
 pnpm env:down
 pnpm env:up
+pnpm -F api build
 pnpm -F api db:migrate
 pnpm -F api db:seed
-pnpm -F api build
 ```
 
 Start services:

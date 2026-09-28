@@ -44,7 +44,9 @@ jobs:
         run: sops -d ./infra/test.sops.env >> $GITHUB_ENV
 
       - name: Install dependencies
-        run: pnpm install --silent --frozen-lockfile --prefer-offline
+        run: |
+          pnpm install --silent --frozen-lockfile --prefer-offline
+          pnpm exec playwright install chromium-headless-shell
 
       - name: Lint
         run: pnpm lint
@@ -56,9 +58,9 @@ jobs:
         run: |
           pnpm env:up
           timeout 10 bash -c -- "while ! docker run --rm --network=host -i postgres:18-alpine pg_isready --quiet --timeout=1 -d ${DB_URI:?}; do sleep 1; done"
+          pnpm -F api build
           pnpm -F api db:migrate
           pnpm -F api db:seed
-          pnpm -F api build
 
       - name: Test builds
         run: pnpm -r build
@@ -84,8 +86,7 @@ jobs:
           timeout 10 sh -c 'until $(curl --output /dev/null --silent --head --fail http://localhost:3001); do printf .; sleep 1; done'
           timeout 10 sh -c 'until $(curl --output /dev/null --silent --head --fail http://localhost:3002); do printf .; sleep 1; done'
           timeout 10 sh -c 'until $(curl --output /dev/null --silent --head --fail http://localhost:80); do printf .; sleep 1; done'
-
-          pnpm -F nfr exec playwright install chromium-headless-shell
+          
           pnpm -F nfr e2e
 
   build-and-deploy:
