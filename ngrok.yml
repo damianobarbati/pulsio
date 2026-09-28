@@ -1,0 +1,22 @@
+version: 3
+
+tunnels:
+  api:
+    addr: 8080
+    proto: http
+    hostname: api-pulsio.ngrok.dev
+
+  website:
+    addr: 3000
+    proto: http
+    hostname: pulsio.ngrok.dev
+
+  webapp:
+    addr: 3001
+    proto: http
+    hostname: app.pulsio.ngrok.dev
+
+  superadmin:
+    addr: 3002
+    proto: http
+    hostname: superadmin.pulsio.ngrok.dev

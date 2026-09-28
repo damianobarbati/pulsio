@@ -1,0 +1,38 @@
+import { describe, expect, it } from 'vitest';
+import { AuthService } from '#api/auth/AuthService.ts';
+import UserRepository from '#api/user/UserRepository.ts';
+import UserService from '#api/user/UserService.ts';
+
+describe('UserService', () => {
+  it('should change email for an existing user', async () => {
+    const user = await UserRepository.get(global.user2.id);
+    const email = `fox.mulder.${Date.now()}@example.com`;
+
+    try {
+      const result = await UserService.changeEmail({ user_id: user.id, email, current_password: 'fox.mulder@gmail.com' });
+
+      expect(result).toMatchObject({ id: user.id, email });
+      const updatedUser = await UserRepository.get(user.id);
+      expect(updatedUser.email).toEqual(email);
+    } finally {
+      await UserRepository.update(user.id, { email: user.email, email_verified_at: user.email_verified_at });
+    }
+  });
+
+  it('should change password for an existing user', async () => {
+    const user = await UserRepository.get(global.user2.id);
+    const new_password = `new-password-${Date.now()}`.slice(0, 20);
+
+    try {
+      const result = await UserService.changePassword({ user_id: user.id, current_password: 'fox.mulder@gmail.com', new_password });
+      const updatedUser = await UserRepository.get(user.id);
+      const oldPasswordIsValid = await AuthService.verifyPassword('fox.mulder@gmail.com', updatedUser.password_hash);
+      const newPasswordIsValid = await AuthService.verifyPassword(new_password, updatedUser.password_hash);
+
+      expect(result).toEqual(true);
+      expect({ oldPasswordIsValid, newPasswordIsValid }).toEqual({ oldPasswordIsValid: false, newPasswordIsValid: true });
+    } finally {
+      await UserRepository.update(user.id, { password_hash: user.password_hash });
+    }
+  });
+});

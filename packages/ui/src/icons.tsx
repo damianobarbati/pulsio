@@ -1,0 +1,51 @@
+export { CgSpinner as ISpinner } from 'react-icons/cg';
+export {
+  FaDesktop as IDesktop,
+  FaEdge as IEdge,
+  FaLaptop as ILaptop,
+  FaMobileScreenButton as IMobile,
+  FaTabletScreenButton as ITablet,
+  FaWindows as IWindows,
+} from 'react-icons/fa6';
+export { FcGoogle as IGoogle } from 'react-icons/fc';
+export {
+  HiOutlineAdjustmentsHorizontal as IFilter,
+  HiOutlineArrowDown as IDown,
+  HiOutlineArrowLeftOnRectangle as ILogoutLeft,
+  HiOutlineArrowRightOnRectangle as ILogoutRight,
+  HiOutlineArrowsPointingOut as IExpand,
+  HiOutlineArrowUp as IUp,
+  HiOutlineBars3 as IMenuBars,
+  HiOutlineBolt as IBolt,
+  HiOutlineCalendarDays as ICalendar,
+  HiOutlineChartBar as IChart,
+  HiOutlineChevronDown as ChevronDown,
+  HiOutlineCog6Tooth as ISettings,
+  HiOutlineCreditCard as ICard,
+  HiOutlineDocumentText as IReport,
+  HiOutlineEllipsisVertical as IMenu,
+  HiOutlineGlobeAlt as IGlobe,
+  HiOutlineHome as IHome,
+  HiOutlineLink as ILink,
+  HiOutlineLockClosed as ILock,
+  HiOutlinePencilSquare as IEdit,
+  HiOutlinePlus as IPlus,
+  HiOutlineShieldCheck as IShield,
+  HiOutlineTrash as ITrash,
+  HiOutlineUsers as IUsers,
+  HiOutlineXMark as IClose,
+} from 'react-icons/hi2';
+export { PiTildeLight as ISame } from 'react-icons/pi';
+export {
+  SiAndroid as IAndroid,
+  SiApple as IApple,
+  SiBrave as IBrave,
+  SiFirefoxbrowser as IFirefox,
+  SiGithub as IGithub,
+  SiGooglechrome as IChrome,
+  SiLinux as ILinux,
+  SiOpera as IOpera,
+  SiSafari as ISafari,
+  SiSamsung as ISamsung,
+  SiUbuntu as IUbuntu,
+} from 'react-icons/si';

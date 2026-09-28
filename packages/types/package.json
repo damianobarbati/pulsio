@@ -1,0 +1,14 @@
+{
+  "name": "types",
+  "type": "module",
+  "imports": {
+    "#types/*": "./src/*"
+  },
+  "exports": {
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "nano-fw": "^1.2.0",
+    "zod": "^4.6.5"
+  }
+}

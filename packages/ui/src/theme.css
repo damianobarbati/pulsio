@@ -1,0 +1,67 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter/index.css";
+
+@theme {
+  --font-sans: "Inter Variable", sans-serif;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --color-pulsio-blue: #055dfe;
+  --color-pulsio-ink: #0b0b0b;
+  --color-pulsio-surface: #f7faff;
+  --color-pulsio-nav: #eef5ff;
+  --color-pulsio-line: #dbe5f5;
+  --color-pulsio-muted: #667085;
+  --color-pulsio-lime: #84cc16;
+  --color-accent: #dbe8ff;
+  --radius-xs: 0.2rem;
+  --radius-bg: 0.5rem;
+  --shadow-pulsio: 0 8px 24px rgb(11 11 11 / 0.06);
+}
+
+:root {
+  --radius-sm: 0.25rem;
+  --radius-bg: 0.5rem;
+}
+
+@layer base {
+  body {
+    color: var(--color-pulsio-ink);
+    background: var(--color-pulsio-surface);
+  }
+
+  input,
+  select,
+  textarea {
+    font: inherit;
+    @apply outline-none focus-visible:ring-1 focus-visible:ring-pulsio-blue focus:border-pulsio-blue focus-visible:ring-offset-1;
+  }
+
+  button {
+    @apply cursor-pointer outline-none focus-visible:ring-offset-1 focus-visible:ring-1 focus-visible:ring-pulsio-blue focus:border-pulsio-blue;
+  }
+}
+
+.nav-btn {
+  @apply inline-flex items-center gap-3 rounded-sm px-4 py-3 text-left font-medium text-sm;
+  @apply text-slate-600 hover:bg-white/70 hover:scale-105 transition active:scale-95;
+
+  &[aria-current="page"] {
+    @apply bg-blue-100 text-pulsio-blue;
+  }
+}
+
+.pulsio-control {
+  @apply text-sm block;
+}
+
+.pulsio-control-label {
+  @apply block font-medium text-pulsio-ink mb-2;
+}
+
+.pulsio-control-input {
+  @apply block w-full rounded-sm border border-pulsio-line bg-white px-3 py-2.5 text-pulsio-ink placeholder:text-pulsio-muted disabled:bg-slate-50 disabled:opacity-60;
+}
+
+.pulsio-control-checkbox {
+  @apply flex h-5 w-5 items-center justify-center rounded border border-pulsio-line bg-white transition-colors group-has-[:checked]:border-pulsio-blue group-has-[:checked]:bg-pulsio-blue group-has-[:focus-visible]:ring-1 group-has-[:focus-visible]:ring-pulsio-blue group-has-[:focus-visible]:ring-offset-1;
+}

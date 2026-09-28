@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; background: #f5f7fb; color: #121826; font-family: Inter, Arial, sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="padding: 40px 16px; background: #f5f7fb;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 640px;">
+            <tr>
+              <td style="padding: 0 0 20px;">
+                <img src="cid:pulsio-logo" width="36" height="36" alt="Pulsio" style="display: block; border: 0;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 36px 40px; background: #121826; border-radius: 16px 16px 0 0; color: #ffffff;">
+                <p style="margin: 0 0 10px; color: #9fc1ff; font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;"><%= it.frequency %> analytics report</p>
+                <h1 style="margin: 0; font-size: 28px; line-height: 1.25;"><%= it.domain %></h1>
+                <p style="margin: 12px 0 0; color: #d1d5db; font-size: 15px;"><%= it.periodStart %> to <%= it.periodEnd %></p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 32px 40px 40px; background: #ffffff; border: 1px solid #e5e7eb; border-top: 0; border-radius: 0 0 16px 16px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <% it.kpis.forEach((kpi) => { %>
+                  <tr>
+                    <td style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #4b5563; font-size: 14px;"><%= kpi.label %></td>
+                    <td align="right" style="padding: 12px 0; border-bottom: 1px solid #e5e7eb; color: #121826; font-size: 15px; font-weight: 700;"><%= kpi.value %></td>
+                    <td align="right" width="90" style="padding: 12px 0 12px 12px; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;"><%= kpi.delta %></td>
+                  </tr>
+                  <% }) %>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 20px 8px 0; color: #6b7280; font-size: 12px; line-height: 1.5;">Powered by Pulsio</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

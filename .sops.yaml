@@ -1,0 +1,9 @@
+creation_rules:
+  - path_regex: ^infra/test(\.sops)?\.env$
+    age: >-
+      age16wmsnmckve23mjsxmp5t7snkx0374ttfggl8hn0rzm5yn6cqu9rq8w63jt,
+      age1zsguyeqs6n7r2jn2gty0f4n56pnlk6z0yz9shnfwf7dl8u78t4nq5kcrxs
+
+  - path_regex: ^infra/production(\.sops)?\.env$
+    age: >-
+      age16wmsnmckve23mjsxmp5t7snkx0374ttfggl8hn0rzm5yn6cqu9rq8w63jt
