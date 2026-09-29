@@ -340,7 +340,7 @@ export const Domains = ({ className }: { className?: string }) => {
                 <div className="mt-5 rounded-md bg-slate-50 p-4">
                   <div className="flex flex-wrap items-center gap-4">
                     <Select
-                      className="min-w-36 bg-white"
+                      className="min-w-36"
                       label="Frequency"
                       name="reportFrequency"
                       onChange={(event) => updateSelected({ report_frequency: event.target.value as Domain['report_frequency'] })}

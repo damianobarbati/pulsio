@@ -1,5 +1,7 @@
 # ROADMAP
 
+Implementa pagamenti: chiedi piano superiore se si superano numero domini o numero eventi.
+
 Testa il tracking: metriche, goal, revenue.  
 Testa le email.  
 Testa ux pagamenti e download fatture.  

@@ -45,7 +45,7 @@ export const AcquisitionTable = ({ className, domains, from, to }: AcquisitionTa
   const activeTab = tabs.find((item) => item.dimension === tab);
 
   return (
-    <section className={cx('mt-4 overflow-hidden rounded-lg border border-pulsio-line bg-white shadow-pulsio', className)}>
+    <section className={cx('overflow-hidden rounded-sm border border-pulsio-line bg-white shadow-pulsio', className)}>
       <div className="flex min-h-13 items-center gap-4 overflow-x-auto border-pulsio-line border-b px-5 pt-3" role="tablist" aria-label="Acquisition reports">
         {tabs.map((item) => (
           <button

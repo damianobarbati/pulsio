@@ -23,34 +23,34 @@ const metricsQuery = `
     WHERE domain IN {domains:Array(String)}
       AND timestamp >= parseDateTime64BestEffort({from:String}, 3, 'UTC')
       AND timestamp < parseDateTime64BestEffort({to:String}, 3, 'UTC')
-    WINDOW visitor AS (PARTITION BY domain, fingerprint, toDate(timestamp) ORDER BY timestamp, id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+    WINDOW visitor AS (PARTITION BY domain, visitor_hash, toDate(timestamp) ORDER BY timestamp, id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
   ), marked AS (
     SELECT *, if(timestamp > previous_timestamp + INTERVAL 30 MINUTE, 1, 0) AS new_session
     FROM ordered
   ), numbered AS (
-    SELECT *, sum(new_session) OVER (PARTITION BY domain, fingerprint, toDate(timestamp) ORDER BY timestamp, id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS session_number
+    SELECT *, sum(new_session) OVER (PARTITION BY domain, visitor_hash, toDate(timestamp) ORDER BY timestamp, id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS session_number
     FROM marked
   ), sessions AS (
-    SELECT domain, fingerprint, min(timestamp) AS started_at, max(timestamp) AS ended_at,
-      countIf(event_name = 'view') AS pageviews,
+      SELECT domain, visitor_hash, min(timestamp) AS started_at, max(timestamp) AS ended_at,
+      countIf(name = 'view') AS pageviews,
       count() AS events,
       sum(engagement_ms) AS engagement_ms_total,
-      max(event_name IN ('engagement', 'interaction') OR ifNull(scroll_depth, 0) > 0) AS interacted,
-      max(event_name NOT IN ('view', 'engagement', 'interaction', 'checkout', 'purchase')) AS converted,
-      countIf(event_name NOT IN ('view', 'engagement', 'interaction', 'checkout', 'purchase')) AS conversions
+      max(name IN ('engagement', 'interaction') OR ifNull(scroll_depth, 0) > 0) AS interacted,
+      max(name NOT IN ('view', 'engagement', 'interaction', 'checkout', 'purchase')) AS converted,
+      countIf(name NOT IN ('view', 'engagement', 'interaction', 'checkout', 'purchase')) AS conversions
     FROM numbered
-    GROUP BY domain, fingerprint, toDate(timestamp), session_number
+    GROUP BY domain, visitor_hash, toDate(timestamp), session_number
   ), purchases AS (
     SELECT domain, transaction_id, max(timestamp) AS purchased_at,
       argMax(toFloat64(revenue_amount) * toFloat64(usd_rate), (timestamp, id)) AS amount_usd
     FROM ordered
-    WHERE event_name = 'purchase' AND transaction_id != '' AND revenue_amount IS NOT NULL
+    WHERE name = 'purchase' AND transaction_id != '' AND revenue_amount IS NOT NULL
     GROUP BY domain, transaction_id
   )
 `;
 
 const sessionTotals = `
-  toUInt64(uniqExact((domain, fingerprint))) AS users_count,
+  toUInt64(uniqExact((domain, visitor_hash))) AS users_count,
   toUInt64(count()) AS sessions_count,
   toUInt64(sum(pageviews)) AS pageviews_count,
   toUInt64(sum(events)) AS events_count,
@@ -101,10 +101,10 @@ export default class EventRepository {
       ${metricsQuery},
       event_buckets AS (
         SELECT toStartOfInterval(timestamp, INTERVAL 1 ${interval}) AS bucket,
-          toUInt64(uniqExact((domain, fingerprint))) AS users_count,
-          toUInt64(countIf(event_name = 'view')) AS pageviews_count,
+          toUInt64(uniqExact((domain, visitor_hash))) AS users_count,
+          toUInt64(countIf(name = 'view')) AS pageviews_count,
           toUInt64(count()) AS events_count,
-          toUInt64(countIf(event_name NOT IN ('view', 'engagement', 'interaction', 'checkout', 'purchase'))) AS conversions_count
+          toUInt64(countIf(name NOT IN ('view', 'engagement', 'interaction', 'checkout', 'purchase'))) AS conversions_count
         FROM ordered GROUP BY bucket
       ),
       session_buckets AS (
@@ -144,28 +144,28 @@ export default class EventRepository {
     const result = await ch.query({
       query: `
         WITH filtered AS (
-          SELECT domain, event_name, fingerprint
+          SELECT domain, name, visitor_hash
           FROM events
           WHERE domain IN {domains:Array(String)}
             AND timestamp >= parseDateTime64BestEffort({from:String}, 3, 'UTC')
             AND timestamp < parseDateTime64BestEffort({to:String}, 3, 'UTC')
         ), total_users AS (
-          SELECT uniqExact((domain, fingerprint)) AS users FROM filtered
+          SELECT uniqExact((domain, visitor_hash)) AS users FROM filtered
         ), total_events AS (
-          SELECT countIf(event_name NOT IN ('view', 'engagement', 'interaction', 'checkout', 'purchase')) AS count FROM filtered
+          SELECT countIf(name NOT IN ('view', 'engagement', 'interaction', 'checkout', 'purchase')) AS count FROM filtered
         )
         SELECT
-          event_name,
+          name AS event_name,
           toUInt64(count()) AS count,
-          toUInt64(uniqExact((domain, fingerprint))) AS users,
+          toUInt64(uniqExact((domain, visitor_hash))) AS users,
           toFloat64(if(total_users.users > 0, 100 * users / total_users.users, 0)) AS conversion_rate,
           toFloat64(if(total_events.count > 0, 100 * count() / total_events.count, 0)) AS percentage
         FROM filtered
         CROSS JOIN total_users
         CROSS JOIN total_events
-        WHERE event_name NOT IN ('view', 'engagement', 'interaction', 'checkout', 'purchase')
-        GROUP BY event_name, total_users.users, total_events.count
-        ORDER BY count DESC, event_name ASC
+        WHERE name NOT IN ('view', 'engagement', 'interaction', 'checkout', 'purchase')
+        GROUP BY name, total_users.users, total_events.count
+        ORDER BY count DESC, name ASC
         LIMIT 10
       `,
       query_params: { domains, from, to },
@@ -181,23 +181,23 @@ export default class EventRepository {
       os: "if(os = '', 'Unknown', os)",
       device: "if(screen_width < 768, 'Mobile', if(screen_width < 1024, 'Tablet', 'Desktop'))",
       country: "if(country_code = '', 'Unknown', country_code)",
-      region: "if(subdivision_code = '', 'Unknown', subdivision_code)",
-      city: "if(locality = '', 'Unknown', locality)",
+      region: "if(region_code = '', 'Unknown', region_code)",
+      city: "if(city_id = 0, 'Unknown', toString(city_id))",
     };
     const result = await ch.query({
       query: `
         WITH filtered AS (
-          SELECT domain, fingerprint, ${dimensions[dimension]} AS name
+          SELECT domain, visitor_hash, ${dimensions[dimension]} AS name
           FROM events
           WHERE domain IN {domains:Array(String)}
             AND timestamp >= parseDateTime64BestEffort({from:String}, 3, 'UTC')
             AND timestamp < parseDateTime64BestEffort({to:String}, 3, 'UTC')
         ), total_users AS (
-          SELECT uniqExact((domain, fingerprint)) AS users FROM filtered
+          SELECT uniqExact((domain, visitor_hash)) AS users FROM filtered
         )
         SELECT
           name,
-          toUInt64(uniqExact((domain, fingerprint))) AS users,
+          toUInt64(uniqExact((domain, visitor_hash))) AS users,
           toFloat64(if(total_users.users > 0, 100 * users / total_users.users, 0)) AS percentage
         FROM filtered
         CROSS JOIN total_users
@@ -224,17 +224,17 @@ export default class EventRepository {
     const result = await ch.query({
       query: `
         WITH filtered AS (
-          SELECT domain, fingerprint, ${dimensions[dimension]} AS name
+          SELECT domain, visitor_hash, ${dimensions[dimension]} AS name
           FROM events
           WHERE domain IN {domains:Array(String)}
             AND timestamp >= parseDateTime64BestEffort({from:String}, 3, 'UTC')
             AND timestamp < parseDateTime64BestEffort({to:String}, 3, 'UTC')
         ), total_users AS (
-          SELECT uniqExact((domain, fingerprint)) AS users FROM filtered
+          SELECT uniqExact((domain, visitor_hash)) AS users FROM filtered
         )
         SELECT
           name,
-          toUInt64(uniqExact((domain, fingerprint))) AS users,
+          toUInt64(uniqExact((domain, visitor_hash))) AS users,
           toFloat64(if(total_users.users > 0, 100 * users / total_users.users, 0)) AS percentage
         FROM filtered
         CROSS JOIN total_users
@@ -249,7 +249,7 @@ export default class EventRepository {
   }
 
   static async getLiveVisitors({ domains }: { domains: string[] }): Promise<number> {
-    const query = `SELECT toUInt64(uniqExact((domain, fingerprint))) AS activeVisitors FROM events WHERE domain IN {domains:Array(String)} AND timestamp >= now64(3) - INTERVAL 1 MINUTE`;
+    const query = `SELECT toUInt64(uniqExact((domain, visitor_hash))) AS activeVisitors FROM events WHERE domain IN {domains:Array(String)} AND timestamp >= now64(3) - INTERVAL 1 MINUTE`;
     const result = await ch.query({ query, query_params: { domains }, format: 'JSONEachRow' });
     const [row] = await result.json<{ activeVisitors: number }>();
     const value = row ? Number(row.activeVisitors) : 0;

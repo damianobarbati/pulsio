@@ -11,7 +11,7 @@ type DataTableProps = {
 };
 
 export const DataTable = ({ className, children, title, search, filters, footer }: DataTableProps) => (
-  <section className={cx('overflow-hidden rounded-lg border border-pulsio-line bg-white shadow-pulsio', className)}>
+  <section className={cx('overflow-hidden rounded-sm border border-pulsio-line bg-white shadow-pulsio', className)}>
     {title || search || filters ? (
       <div className="flex flex-wrap items-center justify-between gap-3 border-pulsio-line border-b p-4">
         {title ? <h2 className="font-semibold text-sm">{title}</h2> : <span />}

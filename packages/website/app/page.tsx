@@ -3,8 +3,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import screenshot from 'ui/assets/screenshot.png';
+import { Pricing } from 'ui/component/Pricing.tsx';
 import { IBolt, IChart, ILock, IShield } from 'ui/icons.tsx';
-import { Pricing } from '../components/Pricing';
 import { createPageMetadata, getWebsiteConfig } from './seo';
 
 export const generateMetadata = async (): Promise<Metadata> => {
@@ -18,46 +18,9 @@ export const generateMetadata = async (): Promise<Metadata> => {
   });
 };
 
-const planDetails = [
-  {
-    name: 'Start',
-    plan: 'start',
-    description: 'Perfect for personal projects.',
-    features: ['Up to 50,000 page views / month', 'Core analytics', 'Real-time visitors', 'Email support'],
-  },
-  {
-    name: 'Grow',
-    plan: 'grow',
-    description: 'For growing websites.',
-    features: ['Up to 250,000 page views / month', 'All analytics reports', 'Custom events', 'Multiple websites'],
-    featured: true,
-  },
-  {
-    name: 'Scale',
-    plan: 'scale',
-    description: 'For high-traffic businesses.',
-    features: ['Up to 1,000,000 page views / month', 'All Pro features', 'Multiple websites', 'Priority support'],
-  },
-  {
-    name: 'Expand',
-    plan: 'expand',
-    description: 'For high-traffic businesses.',
-    features: ['Up to 1,000,000 page views / month', 'All Pro features', 'Multiple websites', 'Priority support'],
-  },
-];
-
-const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-
 export default async function Home({ className }: { className?: string }) {
   await connection();
   const config = getWebsiteConfig();
-  const pricesResponse = await fetch(new URL('/plans', config.API_URL), { cache: 'no-store' });
-  const prices = pricesResponse.ok ? ((await pricesResponse.json()) as { name: string; monthly_price: number; yearly_price: number }[]) : [];
-  const pricesByName = new Map(prices.map((price) => [price.name, price]));
-  const plans = planDetails.map((plan) => {
-    const price = pricesByName.get(plan.plan);
-    return { ...plan, monthly: currency.format(price?.monthly_price || 0), yearly: currency.format(price?.yearly_price || 0) };
-  });
   const siteUrl = new URL(config.WEBSITE_URL);
   const structuredData = {
     '@context': 'https://schema.org',
@@ -67,12 +30,6 @@ export default async function Home({ className }: { className?: string }) {
     operatingSystem: 'Web',
     description: 'Privacy-first website analytics for developers.',
     url: siteUrl.toString(),
-    offers: plans.slice(0, 3).map((plan) => ({
-      '@type': 'Offer',
-      price: plan.monthly.replace('$', ''),
-      priceCurrency: 'USD',
-      description: `${plan.name} plan with ${plan.features[0].toLowerCase()}.`,
-    })),
   };
 
   return (
@@ -134,7 +91,7 @@ export default async function Home({ className }: { className?: string }) {
         <p className="font-bold text-pulsio-blue text-xs uppercase tracking-wider">Simple, transparent pricing</p>
         <h2 className="mt-3 font-bold text-3xl tracking-tight sm:text-4xl">Start free. Scale when you’re ready.</h2>
         <p className="mt-2 text-pulsio-muted">All plans include real-time analytics, core reports, and privacy-friendly tracking.</p>
-        <Pricing plans={plans} />
+        <Pricing />
       </section>
     </div>
   );

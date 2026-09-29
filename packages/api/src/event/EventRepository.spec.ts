@@ -25,14 +25,14 @@ describe('EventRepository analytics', () => {
     const domain = `${randomUUID()}.example.com`;
     const timestamp = new Date(Date.now() - 60_000);
     const base = await createEventRow({ event_name: 'view', url: `https://${domain}/` });
-    const view = { ...base, id: randomUUID(), domain, fingerprint: randomUUID(), timestamp: timestamp.toISOString(), event_name: 'view', engagement_ms: 0, interactive: 0 };
-    const engagement = { ...view, id: randomUUID(), timestamp: new Date(timestamp.getTime() + 11_000).toISOString(), event_name: 'engagement', engagement_ms: 12_000 };
-    const conversion = { ...view, id: randomUUID(), timestamp: new Date(timestamp.getTime() + 12_000).toISOString(), event_name: 'signup', interactive: 1 };
+    const view = { ...base, id: randomUUID(), domain, timestamp: timestamp.toISOString(), name: 'view', engagement_ms: 0, interactive: 0 };
+    const engagement = { ...view, id: randomUUID(), timestamp: new Date(timestamp.getTime() + 11_000).toISOString(), name: 'engagement', engagement_ms: 12_000 };
+    const conversion = { ...view, id: randomUUID(), timestamp: new Date(timestamp.getTime() + 12_000).toISOString(), name: 'signup', interactive: 1 };
     const purchase = {
       ...view,
       id: randomUUID(),
       timestamp: new Date(timestamp.getTime() + 13_000).toISOString(),
-      event_name: 'purchase',
+      name: 'purchase',
       transaction_id: randomUUID(),
       revenue_amount: 12,
       revenue_currency: 'EUR',
@@ -67,7 +67,7 @@ describe('EventRepository analytics', () => {
     hour.setUTCMinutes(0, 0, 0);
     const timestamp = new Date(hour.getTime() - 1_000);
     const base = await createEventRow({ event_name: 'view', url: `https://${domain}/` });
-    const view = { ...base, id: randomUUID(), domain, timestamp: timestamp.toISOString(), event_name: 'view' };
+    const view = { ...base, id: randomUUID(), domain, timestamp: timestamp.toISOString(), name: 'view' };
     const nextView = { ...view, id: randomUUID(), timestamp: new Date(hour.getTime() + 1_000).toISOString() };
     await EventRepository.createAll([view, nextView]);
 

@@ -166,6 +166,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      es-toolkit:
+        specifier: ^1.52.0
+        version: 1.52.0
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.5.14

@@ -79,7 +79,7 @@ export const LocationTable = ({ className, domains, from, to }: LocationDemograp
   };
 
   return (
-    <section className={cx('mt-4 h-full overflow-hidden rounded-lg border border-pulsio-line bg-white shadow-pulsio', className)}>
+    <section className={cx('h-full overflow-hidden rounded-sm border border-pulsio-line bg-white shadow-pulsio', className)}>
       <div className="flex min-h-13 flex-wrap items-center justify-between gap-3 border-pulsio-line border-b px-5 pt-3">
         <div className="flex gap-4" role="tablist" aria-label="Location demographics">
           {(['map', 'country', 'region', 'city'] as LocationTab[]).map((value) => (

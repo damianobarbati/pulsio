@@ -28,7 +28,7 @@ export const GoalsTable = ({ className, domains, from, to }: GoalsTableProps) =>
 
   return (
     <FormProvider {...form}>
-      <DataTable className={cx('mt-4', className)} title="Goals" search={<Input name="search" aria-label="Search events" className="w-56" placeholder="Search events" />}>
+      <DataTable className={className} title="Goals" search={<Input name="search" aria-label="Search events" className="w-56" placeholder="Search events" />}>
         {swr.isLoading && !swr.data ? (
           <div className="flex h-48 items-center justify-center">
             <Spinner size="lg" />

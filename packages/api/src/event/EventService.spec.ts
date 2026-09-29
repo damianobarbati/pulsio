@@ -25,7 +25,7 @@ describe('EventService', () => {
   it('stores active time without marking a heartbeat as interactive', async () => {
     const headers = createClientHeaders();
     const event = await EventService.createEventRow({ ...createClientEvent({ event_name: 'engagement', engagement_ms: 10_000 }), headers });
-    expect(event).toMatchObject({ event_name: 'engagement', engagement_ms: 10_000, interactive: 0 });
+    expect(event).toMatchObject({ name: 'engagement', engagement_ms: 10_000, interactive: 0 });
   });
 
   describe('ingest', async () => {

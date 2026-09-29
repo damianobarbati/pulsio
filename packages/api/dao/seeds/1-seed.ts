@@ -7,6 +7,7 @@ import type { UserRow } from 'types/User.ts';
 import { createDomainRow } from '#api/domain/DomainSeeder.ts';
 import EventRepository from '#api/event/EventRepository.ts';
 import { createEventRow } from '#api/event/EventSeeder.ts';
+import PlanRepository from '#api/plan/PlanRepository.ts';
 import { createUserRow } from '#api/user/UserSeeder.ts';
 
 const defaultUsers = [
@@ -40,10 +41,39 @@ export async function seed(database: Knex): Promise<void> {
   const seed_present = await database('users').where({ id: JOHN_DOE.id }).first();
   if (seed_present) return console.log('Skipping seeding...');
 
-  await database('plans').insert([
-    { name: 'start', monthly_price: 5, yearly_price: 49, valid_from: new Date('2020-01-01T00:00:00Z') },
-    { name: 'grow', monthly_price: 19, yearly_price: 199, valid_from: new Date('2020-01-01T00:00:00Z') },
-    { name: 'scale', monthly_price: 99, yearly_price: 999, valid_from: new Date('2020-01-01T00:00:00Z') },
+  await PlanRepository.create([
+    {
+      name: 'start',
+      monthly_price: 0,
+      yearly_price: 0,
+      valid_from: new Date().toISOString(),
+      description: 'Perfect for personal projects.',
+      features: ['Up to 10K pageviews/mo', '3 domains', 'Core analytics', 'Real-time visitors'],
+    },
+    {
+      name: 'grow',
+      monthly_price: 9,
+      yearly_price: 99,
+      valid_from: new Date().toISOString(),
+      description: 'For agencies.',
+      features: ['Up to 250K pageviews/mo', 'All Free features', '10 domains', 'Reports'],
+    },
+    {
+      name: 'scale',
+      monthly_price: 99,
+      yearly_price: 999,
+      valid_from: new Date().toISOString(),
+      description: 'For high-traffic businesses.',
+      features: ['Up to 1M pageviews/mo', 'All Pro features', '100 domains', 'Priority support'],
+    },
+    {
+      name: 'expand',
+      monthly_price: 199,
+      yearly_price: 1199,
+      valid_from: new Date().toISOString(),
+      description: 'For exceptional teams.',
+      features: ['Contact us for a custom solution'],
+    },
   ]);
 
   const defaultUsersCreates = await Promise.all(defaultUsers.map(createUserRow));
@@ -85,7 +115,7 @@ const createDomainData = async (user_id: string, domain: string) => {
   const interval = rows.length > 1 ? (endTime - startTime) / (rows.length - 1) : 0;
   for (const [index, event_row] of rows.entries()) {
     // by default, all events are page views
-    event_row.event_name = 'view';
+    event_row.name = 'view';
     // consecutive events in the timespan at regular intervals
     event_row.timestamp = new Date(startTime + index * interval).toISOString();
     event_row.interactive = 0;
@@ -103,7 +133,7 @@ const createDomainData = async (user_id: string, domain: string) => {
         ...event_row,
         id: randomUUID(),
         timestamp,
-        event_name: 'engagement',
+        name: 'engagement',
         interactive: 0,
         engagement_ms,
       };
@@ -117,7 +147,7 @@ const createDomainData = async (user_id: string, domain: string) => {
         ...event_row,
         id: randomUUID(),
         timestamp,
-        event_name: faker.helpers.arrayElement(['hero click', 'more info', 'subscribe', 'trial start']),
+        name: faker.helpers.arrayElement(['hero click', 'more info', 'subscribe', 'trial start']),
       };
       seeded_rows.push(activity_event_row);
     }
@@ -131,7 +161,7 @@ const createDomainData = async (user_id: string, domain: string) => {
         ...event_row,
         id: randomUUID(),
         timestamp,
-        event_name: 'purchase',
+        name: 'purchase',
         interactive: 1,
         transaction_id: faker.string.nanoid(10),
         revenue_amount,

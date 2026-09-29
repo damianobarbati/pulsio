@@ -83,7 +83,7 @@ export const Home = ({ className }: { className?: string }) => {
       {!!filters.domains.length && !kpisSWR.data && !error && <Spinner size="lg" />}
 
       {!!kpis && (
-        <section className="relative rounded-sm border border-pulsio-line bg-white p-2 shadow-pulsio">
+        <section className="relative mb-4 rounded-sm border border-pulsio-line bg-white p-2 shadow-pulsio">
           {!!kpis && (
             <div id="kpis" className="grid w-full grid-cols-[0.8fr_repeat(9,1fr)] p-2">
               <DashboardKpi

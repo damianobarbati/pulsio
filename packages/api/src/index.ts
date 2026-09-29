@@ -10,6 +10,7 @@ import { registerAuthRoutes } from '#api/auth/registerAuthRoutes.ts';
 import { registerCurrencyRoutes } from '#api/currency/registerCurrencyRoutes.ts';
 import { registerDomainRoutes } from '#api/domain/registerDomainRoutes.ts';
 import { registerEventRoutes } from '#api/event/registerEventRoutes.ts';
+import { registerPlanRoutes } from '#api/plan/registerPlanRoutes.ts';
 import { registerReportRoutes } from '#api/report/registerReportRoutes.ts';
 import { registerUserRoutes } from '#api/user/registerUserRoutes.ts';
 import ENV from './env.ts';
@@ -34,11 +35,12 @@ registerEventRoutes(app);
 registerCurrencyRoutes(app);
 registerAnalyticsRoutes(app);
 registerReportRoutes(app);
+registerPlanRoutes(app);
 
 // NB: keep after registering all the application routes or docs won't be generated!
 registerDocsRoute(app, '/', './docs-assets', {
   logoUrl: './logo.svg',
-  tagOrder: ['Auth', 'User', 'Domain', 'Event', 'Currency', 'Analytics', 'Report'],
+  tagOrder: ['Auth', 'User', 'Domain', 'Event', 'Analytics', 'Report', 'Currency', 'Plan'],
   transformOpenapiDocument: async ({ document, request }) => {
     const cookie = request.headers.get('cookie') ?? null;
     const user = cookie ? await AuthService.me({ cookie }) : null;

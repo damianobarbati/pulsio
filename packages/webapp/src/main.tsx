@@ -13,7 +13,11 @@ import Home from '#webapp/views/Home.tsx';
 import { Layout } from '#webapp/views/Layout.tsx';
 import Settings from '#webapp/views/Settings.tsx';
 
-const authenticateFromQuery = async () => {
+const response = await fetch('/config.json', { cache: 'no-store' });
+if (!response.ok) throw new Error('Could not load application runtime configuration');
+window.config = await response.json();
+
+await (async () => {
   if (window.config.APP_ENV !== 'local') return;
 
   const email = new URLSearchParams(window.location.search).get('auth_email');
@@ -25,12 +29,7 @@ const authenticateFromQuery = async () => {
   } catch (error) {
     console.error('Automatic local authentication failed.', error);
   }
-};
-
-const response = await fetch('/config.json', { cache: 'no-store' });
-if (!response.ok) throw new Error('Could not load application runtime configuration');
-window.config = await response.json();
-await authenticateFromQuery();
+})();
 
 const container = document.getElementById('root') as Element;
 const root = createRoot(container);

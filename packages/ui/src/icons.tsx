@@ -11,6 +11,7 @@ export { FcGoogle as IGoogle } from 'react-icons/fc';
 export {
   HiOutlineAdjustmentsHorizontal as IFilter,
   HiOutlineArrowDown as IDown,
+  HiOutlineArrowDownTray as IDownload,
   HiOutlineArrowLeftOnRectangle as ILogoutLeft,
   HiOutlineArrowRightOnRectangle as ILogoutRight,
   HiOutlineArrowsPointingOut as IExpand,
@@ -19,6 +20,7 @@ export {
   HiOutlineBolt as IBolt,
   HiOutlineCalendarDays as ICalendar,
   HiOutlineChartBar as IChart,
+  HiOutlineCheck as ICheck,
   HiOutlineChevronDown as ChevronDown,
   HiOutlineCog6Tooth as ISettings,
   HiOutlineCreditCard as ICard,

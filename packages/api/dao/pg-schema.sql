@@ -232,10 +232,12 @@ create table plans
     monthly_price numeric(12, 2) not null,
     yearly_price  numeric(12, 2) not null,
     valid_from    timestamptz    not null,
+    description   text,
+    features      text[]                  default '{}',
     unique (name, valid_from),
     constraint plans_name_check_value check (name in ('start', 'grow', 'scale', 'expand')),
-    constraint plans_monthly_price_check_positive check (monthly_price > 0),
-    constraint plans_yearly_price_check_positive check (yearly_price > 0)
+    constraint plans_monthly_price_check_positive check (monthly_price >= 0),
+    constraint plans_yearly_price_check_positive check (yearly_price >= 0)
 );
 
 create table superadmin_audit_logs

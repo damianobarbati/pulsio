@@ -94,7 +94,7 @@ export const DeviceTable = ({ className, domains, from, to }: DeviceDemographics
   const rows = report.data ?? [];
 
   return (
-    <section className={cx('mt-4 h-full overflow-hidden rounded-lg border border-pulsio-line bg-white shadow-pulsio', className)}>
+    <section className={cx('h-full overflow-hidden rounded-sm border border-pulsio-line bg-white shadow-pulsio', className)}>
       <div className="flex min-h-13 items-center gap-4 overflow-x-auto border-pulsio-line border-b px-5 pt-3" role="tablist" aria-label="Device demographics">
         {(['browser', 'os', 'device'] as DeviceTab[]).map((value) => (
           <button

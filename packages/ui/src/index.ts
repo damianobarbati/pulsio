@@ -8,6 +8,7 @@ export { EmptyState } from './component/EmptyState.tsx';
 export { KpiCard } from './component/KpiCard.tsx';
 export { Logo } from './component/Logo.tsx';
 export { NotFound } from './component/NotFound.tsx';
+export { Pricing, type PricingInterval } from './component/Pricing.tsx';
 export { Pulser } from './component/Pulser.tsx';
 export { ScreenGuard } from './component/ScreenGuard.tsx';
 export { Spinner } from './component/Spinner.tsx';
