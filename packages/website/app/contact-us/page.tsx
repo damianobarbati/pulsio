@@ -29,15 +29,24 @@ export const ContactUs = ({ className }: { className?: string }) => {
         <Link href="/" className="mb-6 block font-semibold text-pulsio-blue text-sm underline underline-offset-2">
           ← Back to home
         </Link>
-        <p className="font-bold text-pulsio-blue text-xs uppercase tracking-widest">Support</p>
         <h1 className="mt-5 font-semibold text-5xl tracking-tight">How can we help?</h1>
         <p className="mt-5 text-ink/70 text-lg leading-relaxed">Send us a message and we will get back to you at the email address you provide.</p>
         <p className="mt-7 text-ink/65 text-sm">
-          You can also write directly to{' '}
-          <a className="font-semibold text-pulsio-blue underline" href="mailto:info@pulsio.live">
-            info@pulsio.live
+          You can also write directly to
+          <a
+            href="#email"
+            target="_blank"
+            className="ml-1 font-semibold text-pulsio-blue underline"
+            onClick={(e) => {
+              e.preventDefault();
+              const href = atob('bWFpbHRvOg==') + atob('aW5mb0BwdWxzaW8ubGl2ZQ==');
+              console.log(href);
+              window.location.href = href;
+            }}
+            rel="noopener"
+          >
+            {atob('aW5mb0BwdWxzaW8ubGl2ZQ==')}
           </a>
-          .
         </p>
       </div>
       <FormProvider {...form}>

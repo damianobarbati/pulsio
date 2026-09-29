@@ -1,6 +1,6 @@
 import type { Hono } from 'hono';
 import { registerRoute } from 'nano-fw/docs/index.ts';
-import { AnySchema } from 'types/common.ts';
+import { CommonSchemas } from 'types/common.ts';
 import EventService from '#api/event/EventService.ts';
 
 export const registerEventRoutes = (app: Hono) => {
@@ -8,8 +8,8 @@ export const registerEventRoutes = (app: Hono) => {
     method: 'post',
     path: '/event',
     meta: { section: 'Event', description: 'Ingest the event.' },
-    requestSchema: AnySchema,
-    responseSchema: AnySchema,
+    requestSchema: CommonSchemas.any,
+    responseSchema: CommonSchemas.any,
     middlewares: [],
     handler: async (params, c) => {
       const headers = {

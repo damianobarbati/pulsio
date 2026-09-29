@@ -1,51 +1,36 @@
 import cx from 'clsx-tw';
 import React from 'react';
-import type { Plan } from 'types/Plan.ts';
-import { Alert, Badge, Button, Card, Pricing } from 'ui';
-import { ICard, ICheck } from 'ui/icons.tsx';
-import { BillingDetailsForm } from '#webapp/components/BillingDetailsForm.tsx';
+import useSWR from 'swr';
+import useSWRMutation from 'swr/mutation';
+import type { IBilling } from 'types/Billing.ts';
+import type { IPlan } from 'types/Plan.ts';
+import { Badge, Button, Card, Pricing, Spinner } from 'ui';
+import { GET, MPOST, POST } from 'ui/api/fetchers.ts';
+import { ICard } from 'ui/icons.tsx';
 import { BillingPaymentHistory } from '#webapp/components/BillingPaymentHistory.tsx';
 
-type BillingCycle = 'monthly' | 'yearly';
+type BillingCycle = 'month' | 'year';
 
-const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-
-const demoBillingDetails = { company: 'Rossi Studio LLC', vatNumber: 'US123456789', address: '18 Main Street', city: 'New York', country: 'United States' };
+const formatDate = (value: string | null) => (value ? new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(Date.parse(value)) : 'No renewal scheduled');
 
 export const Billing = ({ className }: { className?: string }) => {
-  const [billingCycle, setBillingCycle] = React.useState<BillingCycle>('yearly');
-  const [currentPlan, setCurrentPlan] = React.useState('start');
-  const [selectedPlan, setSelectedPlan] = React.useState<Plan | null>(null);
-  const [billingDetails, setBillingDetails] = React.useState<typeof demoBillingDetails | null>(null);
-  const [showBillingForm, setShowBillingForm] = React.useState(false);
-  const [isConfirmed, setIsConfirmed] = React.useState(false);
+  const summarySWR = useSWR<IBilling.summary>(['/billing/summary'], GET, { suspense: true, shouldRetryOnError: false });
+  const paymentsSWR = useSWR<IBilling.paymentListResponse>(['/billing/payments'], GET, { shouldRetryOnError: false });
+  const plansSWR = useSWR<IPlan.listResponse>(['/plan/list'], POST, { suspense: true, shouldRetryOnError: false });
+  const checkout = useSWRMutation<IBilling.checkoutResponse, Error, string, IBilling.checkoutRequest>('/billing/checkout', MPOST);
+  const [billingCycle, setBillingCycle] = React.useState<BillingCycle>('year');
+  const [selectedPlan, setSelectedPlan] = React.useState<string | null>(null);
+  const summary = summarySWR.data;
+  const selected = plansSWR.data?.find((plan) => plan.name === selectedPlan);
+  const canCheckout = !!selected && selected.name !== 'custom' && (selected.name !== summary?.plan.name || !summary.subscription);
 
-  const hasPlanChange = !!selectedPlan && selectedPlan.name !== currentPlan;
-
-  const selectPlan = (plan: Plan) => {
-    setSelectedPlan(plan);
-    setIsConfirmed(false);
-    setShowBillingForm(false);
+  const startCheckout = async () => {
+    if (!selected || !canCheckout || checkout.isMutating) return;
+    const result = await checkout.trigger({ plan: selected.name, recurrence: billingCycle });
+    window.location.assign(result.url);
   };
 
-  const continueToPayment = () => {
-    if (!selectedPlan) return;
-    if (selectedPlan.name === 'start') {
-      setCurrentPlan('start');
-      setIsConfirmed(true);
-      return;
-    }
-    setShowBillingForm(true);
-    setIsConfirmed(false);
-  };
-
-  const confirmPayment = (details: typeof demoBillingDetails) => {
-    if (!selectedPlan) return;
-    setBillingDetails(details);
-    setCurrentPlan(selectedPlan.name);
-    setShowBillingForm(false);
-    setIsConfirmed(true);
-  };
+  if (!summary) return <Spinner size="lg" />;
 
   return (
     <div className={cx('mx-auto max-w-6xl', className)}>
@@ -55,20 +40,16 @@ export const Billing = ({ className }: { className?: string }) => {
           Billing
         </h1>
       </header>
-
       <Card className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-3">
-          <div>
-            <p className="font-semibold text-pulsio-muted text-sm">Current plan</p>
-            <div className="mt-1 flex flex-wrap items-center gap-2">
-              <h2 className="font-bold text-xl">{currentPlan === 'free' ? 'Free' : `${currentPlan.slice(0, 1).toUpperCase()}${currentPlan.slice(1)}`}</h2>
-              <Badge tone="success">Active</Badge>
-            </div>
-            <p className="mt-1 text-pulsio-muted text-sm">{currentPlan === 'free' ? 'No renewal scheduled' : `Renews ${billingCycle === 'yearly' ? 'yearly' : 'monthly'}`}</p>
+        <div>
+          <p className="font-semibold text-pulsio-muted text-sm">Current plan</p>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <h2 className="font-bold text-xl">{summary.plan.name[0].toUpperCase() + summary.plan.name.slice(1)}</h2>
+            <Badge tone={summary.subscription?.status === 'canceled' ? 'error' : 'success'}>{summary.subscription?.status ?? 'Active'}</Badge>
           </div>
+          <p className="mt-1 text-pulsio-muted text-sm">Next billing date: {formatDate(summary.next_billing_at)}</p>
         </div>
       </Card>
-
       <section aria-labelledby="plans-title">
         <div className="mb-5">
           <h2 id="plans-title" className="font-bold text-2xl tracking-tight">
@@ -77,50 +58,26 @@ export const Billing = ({ className }: { className?: string }) => {
           <p className="mt-1 text-pulsio-muted text-sm">Change your plan or billing frequency at any time.</p>
         </div>
         <Pricing
-          interval={billingCycle === 'yearly' ? 'year' : 'month'}
-          onIntervalChange={(interval) => setBillingCycle(interval === 'year' ? 'yearly' : 'monthly')}
-          onSelectPlan={selectPlan}
-          selectedPlan={selectedPlan?.name}
-          currentPlan={currentPlan}
+          interval={billingCycle}
+          onIntervalChange={setBillingCycle}
+          onSelectPlan={(plan) => setSelectedPlan(plan.name)}
+          selectedPlan={selectedPlan ?? undefined}
+          currentPlan={summary.plan.name}
         />
-
-        {hasPlanChange && selectedPlan && (
-          <Card className="mt-5 border-blue-200 bg-blue-50/60">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="font-semibold">Switch to {selectedPlan.name}</p>
-                <p className="mt-1 text-pulsio-muted text-sm">
-                  {selectedPlan.name === 'start'
-                    ? 'The plan will be free.'
-                    : `${currency.format(billingCycle === 'yearly' ? selectedPlan.yearly_price : selectedPlan.monthly_price)} / ${billingCycle === 'yearly' ? 'year' : 'month'}. Recurring payment with Stripe.`}
-                </p>
-              </div>
-              <Button size="lg" onClick={continueToPayment}>
-                Continue
-              </Button>
+        {canCheckout && selected && (
+          <Card className="mt-5 flex flex-col gap-4 border-blue-200 bg-blue-50/60 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold">Continue with {selected.name}</p>
+              <p className="mt-1 text-pulsio-muted text-sm">Checkout opens in Stripe.</p>
             </div>
+            <Button size="lg" onClick={startCheckout} disabled={checkout.isMutating}>
+              {checkout.isMutating ? 'Opening checkout...' : 'Choose plan & continue'}
+            </Button>
           </Card>
         )}
-        {showBillingForm && selectedPlan && (
-          <BillingDetailsForm
-            initialValues={billingDetails || demoBillingDetails}
-            plan={selectedPlan}
-            cycle={billingCycle}
-            onCancel={() => setShowBillingForm(false)}
-            onConfirm={confirmPayment}
-          />
-        )}
-        {isConfirmed && (
-          <Alert tone="success" className="mt-5 flex items-start gap-3">
-            <ICheck className="mt-0.5 shrink-0" />
-            <span>
-              <strong>Plan updated.</strong> Your {selectedPlan?.name || 'Free'} plan is now active. In production, Stripe would process the payment.
-            </span>
-          </Alert>
-        )}
+        {checkout.error && <p className="mt-4 text-red-600 text-sm">Could not open Stripe Checkout. Please try again.</p>}
       </section>
-
-      <BillingPaymentHistory />
+      <BillingPaymentHistory payments={paymentsSWR.data ?? []} />
     </div>
   );
 };

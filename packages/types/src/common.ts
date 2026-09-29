@@ -1,4 +1,12 @@
 import z from 'zod';
 
-export const AnySchema = z.any();
-export type Any = z.infer<typeof AnySchema>;
+const AnySchema = z.any();
+type Any = z.infer<typeof AnySchema>;
+
+export const CommonSchemas = {
+  any: AnySchema,
+};
+
+export namespace ICommon {
+  export type anyValue = Any;
+}

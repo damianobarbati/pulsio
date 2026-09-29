@@ -3,12 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "e2e": "vitest run src/happy.spec.ts",
-    "e2e:ui": "E2E_HEADED=1 E2E_KEEP_OPEN=1 vitest --ui --watch --open src/happy.spec.ts",
+    "e2e": "vitest run",
+    "e2e:ui": "E2E_HEADED=1 E2E_KEEP_OPEN=1 vitest --ui --watch --open",
     "test:load": "for f in load-scenarios/*.yml; do artillery run --config artillery.yml \"$f\" || exit 1; done"
   },
   "devDependencies": {
     "@vitest/ui": "5.0.2",
-    "artillery": "^2.0.34"
+    "api": "workspace:*",
+    "artillery": "^2.0.34",
+    "stripe": "^22.6.2"
   }
 }

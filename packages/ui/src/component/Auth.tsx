@@ -3,22 +3,24 @@ import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
-import type { User } from 'types/User.ts';
+import type { IUser } from 'types/User.ts';
 import { GET, MPOST } from '../api/fetchers.ts';
 import { Input } from '../form/index.ts';
 import { Button } from './Button.tsx';
 
 type Credentials = { email: string; password: string };
-type AuthProps = { className?: string; title: string; role: User['role'] };
+type AuthProps = { className?: string; title: string; role: IUser.user['role'] };
 
 export const Auth = ({ className, title, role }: AuthProps) => {
   const form = useForm<Credentials>({ defaultValues: { email: '', password: '' } });
   const login = useSWRMutation('/auth/login', MPOST);
-  const session = useSWR<User>(['/auth/me'], GET, { shouldRetryOnError: false });
+  const session = useSWR<IUser.user>(['/auth/me'], GET, { shouldRetryOnError: false });
   const [message, setMessage] = React.useState('');
+  const websiteUrl = window.config.WEBSITE_URL;
 
   React.useEffect(() => {
-    if (session.data && session.data.role === role) window.location.assign('/');
+    const canAccess = session.data && (role === 'user' || session.data.role === role);
+    if (canAccess) window.location.assign('/');
   }, [session.data, role]);
 
   const submit = form.handleSubmit(async (credentials) => {
@@ -27,7 +29,8 @@ export const Auth = ({ className, title, role }: AuthProps) => {
     try {
       await login.trigger(credentials);
       const user = await session.mutate();
-      if (!user || user.role !== role) throw Object.assign(new Error('Access denied.'), { status: 403 });
+      const canAccess = user && (role === 'user' || user.role === role);
+      if (!canAccess) throw Object.assign(new Error('Access denied.'), { status: 403 });
       window.location.assign('/');
     } catch (error) {
       if (error instanceof Error && 'status' in error && error.status === 403) {
@@ -64,6 +67,9 @@ export const Auth = ({ className, title, role }: AuthProps) => {
             </Button>
           </form>
         </FormProvider>
+        <a href={websiteUrl} className="mt-6 block text-center text-pulsio-blue text-sm underline underline-offset-2">
+          Back to website
+        </a>
       </section>
     </main>
   );

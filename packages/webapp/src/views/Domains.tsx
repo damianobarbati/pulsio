@@ -3,15 +3,15 @@ import * as React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
-import type { DomainListResponse } from 'types/Domain.ts';
-import { MDELETE, MPOST, MPUT, POST } from 'ui/api/fetchers.ts';
+import type { IDomain } from 'types/Domain.ts';
+import { DOWNLOAD, MDELETE, MPOST, MPUT, POST } from 'ui/api/fetchers.ts';
 import { Button } from 'ui/component/Button.tsx';
 import { Dialog } from 'ui/component/Dialog.tsx';
 import { Toast } from 'ui/component/Toast.tsx';
 import { Checkbox, Input, Select } from 'ui/form';
-import { ICalendar, IChart, IClose, IGlobe, ILink, IPlus, IReport, ITrash, IUsers } from 'ui/icons.tsx';
+import { ICalendar, IChart, IClose, IDownload, IGlobe, ILink, IPlus, IReport, ITrash, IUsers } from 'ui/icons.tsx';
 
-type Domain = DomainListResponse[number];
+type Domain = IDomain.listResponse[number];
 type ShareLink = Domain['shares'][number];
 type SettingsFormValues = { currency: string };
 type ShareFormValues = { linkLabel: string };
@@ -23,14 +23,14 @@ const formatNumber = (value: number) => new Intl.NumberFormat('en-US').format(va
 
 const getInitials = (domain: string) => domain.slice(0, 2).toUpperCase();
 
-const getStatus = (domain: Domain) => (domain.detected_at ? 'Active' : 'Waiting for data');
+const getStatus = (domain: Domain) => (domain.events_count > 0 ? 'Active' : 'Waiting for data');
 
 const formatLastEvent = (value: string | null) =>
   value ? new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(Math.round((Date.parse(value) - Date.now()) / 60_000), 'minute') : 'No events yet';
 
 const formatCreatedAt = (value: string) => `Created ${new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(Date.parse(value))}`;
 
-const getShareUrl = (linkId: string) => `${window.location.origin}/share/${linkId}`;
+const getShareUrl = (link: ShareLink) => link.url;
 
 const getConfirmCopy = (action: ConfirmAction, domain: Domain) => {
   if (action === 'reset') {
@@ -57,7 +57,7 @@ const getConfirmCopy = (action: ConfirmAction, domain: Domain) => {
 };
 
 export const Domains = ({ className }: { className?: string }) => {
-  const domainsSWR = useSWR<DomainListResponse>(['/domain/list'], POST, { suspense: true, shouldRetryOnError: false });
+  const domainsSWR = useSWR<IDomain.listResponse>(['/domain/list'], POST, { suspense: true, shouldRetryOnError: false });
   const domains = domainsSWR.data ?? [];
   const [selectedId, setSelectedId] = React.useState('');
   const [confirmAction, setConfirmAction] = React.useState<ConfirmAction>(null);
@@ -83,6 +83,7 @@ export const Domains = ({ className }: { className?: string }) => {
   const reset = useSWRMutation(selectedDomain ? `/domain/${selectedDomain.id}/reset` : null, MPOST);
   const remove = useSWRMutation(selectedDomain ? `/domain/${selectedDomain.id}` : null, MDELETE);
   const sendReport = useSWRMutation(selectedDomain ? `/domain/${selectedDomain.id}/report/send` : null, MPOST);
+  const exportEvents = useSWRMutation(selectedDomain ? `/domain/${selectedDomain.id}/export` : null, (path: string) => DOWNLOAD(path));
   const revoke = useSWRMutation(
     selectedDomain && confirmAction && typeof confirmAction === 'object' ? `/domain/${selectedDomain.id}/share/${confirmAction.linkId}` : null,
     MDELETE,
@@ -119,11 +120,11 @@ export const Domains = ({ className }: { className?: string }) => {
 
   const copyShareLink = async (link: ShareLink) => {
     try {
-      const url = getShareUrl(link.id);
+      const url = getShareUrl(link);
       await navigator.clipboard.writeText(url);
       showToast('Share link copied.');
     } catch {
-      showToast(getShareUrl(link.id));
+      showToast(getShareUrl(link));
     }
   };
 
@@ -134,6 +135,23 @@ export const Domains = ({ className }: { className?: string }) => {
 
     await updateSelected({ report_recipients: [...selectedDomain.report_recipients, email] });
     reportForm.setValue('recipient', '');
+  };
+
+  const downloadEvents = async () => {
+    if (!selectedDomain) return;
+
+    try {
+      const blob = await exportEvents.trigger();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${selectedDomain.domain}-events.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('Events exported.');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Could not export events.');
+    }
   };
 
   const handleConfirm = async () => {
@@ -247,6 +265,11 @@ export const Domains = ({ className }: { className?: string }) => {
                 </div>
               </div>
             </div>
+            <div className="mt-5 flex justify-end border-pulsio-line border-t pt-5">
+              <Button type="button" variant="secondary" disabled={exportEvents.isMutating} onClick={downloadEvents}>
+                <IDownload size={18} /> {exportEvents.isMutating ? 'Exporting…' : 'Export CSV'}
+              </Button>
+            </div>
           </section>
 
           <FormProvider {...settingsForm}>
@@ -298,7 +321,7 @@ export const Domains = ({ className }: { className?: string }) => {
                       <ILink className="shrink-0 text-pulsio-muted" size={17} />
                       <div className="min-w-0">
                         <p className="truncate font-medium text-sm">{link.label}</p>
-                        <p className="mt-0.5 truncate text-pulsio-muted text-xs">{getShareUrl(link.id)}</p>
+                        <p className="mt-0.5 truncate text-pulsio-muted text-xs">{getShareUrl(link)}</p>
                         <p className="mt-0.5 text-pulsio-muted text-xs">{formatCreatedAt(link.created_at)}</p>
                       </div>
                     </div>

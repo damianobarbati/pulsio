@@ -48,14 +48,15 @@ export default async function Layout({ className, children }: { className?: stri
         <main id="main" className="flex-1">
           {children}
         </main>
-        <footer className="mx-auto mt-24 flex max-w-6xl flex-wrap justify-between gap-4 border-ink/15 border-t py-4 text-sm">
+        <footer className="mx-auto mt-2 flex w-full justify-center gap-4 border-pulsio-line border-t py-4 text-sm">
           <p className="font-bold">Pulsio. Premium analytics, made simple.</p>
-          <div className="flex gap-6">
+          <div className="ml-2 flex gap-2">
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>
             <Link href="/contact-us">Contact us</Link>
           </div>
         </footer>
+        <script dangerouslySetInnerHTML={{ __html: `window.config = ${JSON.stringify({ API_URL: config.API_URL })};` }} />
       </body>
     </html>
   );

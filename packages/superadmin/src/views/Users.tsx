@@ -3,14 +3,14 @@ import cx from 'clsx-tw';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import useSWRInfinite from 'swr/infinite';
-import type { UserListRequest, UserListResponse } from 'types/User.ts';
+import type { IUser } from 'types/User.ts';
 import { DataTable } from 'ui';
 import { POST } from 'ui/api/fetchers.ts';
 import { VirtualizedTable, type virtualizedTableFeatures } from 'ui/component/VirtualizedTable.tsx';
 import { Input } from 'ui/form';
 import { count, dateTime } from '#superadmin/helpers.ts';
 
-type User = UserListResponse[number];
+type User = IUser.listResponse[number];
 type Sort = { id: 'email' | 'created_at' | 'login_at' | 'trial_ends_at'; direction: 'asc' | 'desc' };
 type PageKey = [string, string, number, Sort['id'], Sort['direction']];
 
@@ -30,8 +30,8 @@ const columns = column.columns([
   column.accessor('trial_ends_at', { header: 'Trial ends', size: 180, cell: (info) => dateTime(info.getValue()) }),
 ]);
 
-const loadPage = async ([url, search, offset, sortId, direction]: PageKey): Promise<UserListResponse> => {
-  const body: UserListRequest = {
+const loadPage = async ([url, search, offset, sortId, direction]: PageKey): Promise<IUser.listResponse> => {
+  const body: IUser.listRequest = {
     search,
     limit: pageSize,
     offset,
@@ -40,7 +40,7 @@ const loadPage = async ([url, search, offset, sortId, direction]: PageKey): Prom
       ['id', 'asc'],
     ],
   };
-  const users = await POST<UserListResponse>([url, body]);
+  const users = await POST<IUser.listResponse>([url, body]);
   return users;
 };
 
@@ -55,13 +55,13 @@ export const Users = ({ className }: { className?: string }) => {
     return () => window.clearTimeout(timeout);
   }, [query]);
 
-  const getKey = (pageIndex: number, previousPage: UserListResponse | null): PageKey | null => {
+  const getKey = (pageIndex: number, previousPage: IUser.listResponse | null): PageKey | null => {
     if (previousPage && previousPage.length < pageSize) return null;
     const key: PageKey = ['/s/user/list', search, pageIndex * pageSize, sort.id, sort.direction];
     return key;
   };
 
-  const result = useSWRInfinite<UserListResponse>(getKey, loadPage, { revalidateFirstPage: false, shouldRetryOnError: false });
+  const result = useSWRInfinite<IUser.listResponse>(getKey, loadPage, { revalidateFirstPage: false, shouldRetryOnError: false });
   const pages = result.data || [];
   const users = pages.flat();
   const loading = result.isLoading || result.isValidating;

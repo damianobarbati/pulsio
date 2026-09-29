@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker';
-import type { DomainRowInsert } from 'types/Domain.ts';
+import type { IDomain } from 'types/Domain.ts';
 
-export const createDomainRow = (params: Partial<DomainRowInsert> = {}): DomainRowInsert => {
+export const createDomainRow = (params: Partial<IDomain.rowInsert> = {}): IDomain.rowInsert => {
   if (!params.user_id) throw new Error('createDomainRow: user_id is required');
 
-  const result: DomainRowInsert = {
+  const result: IDomain.rowInsert = {
     user_id: params.user_id,
     domain: faker.internet.domainName(),
     ...params,

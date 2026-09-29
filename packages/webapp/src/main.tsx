@@ -17,6 +17,9 @@ const response = await fetch('/config.json', { cache: 'no-store' });
 if (!response.ok) throw new Error('Could not load application runtime configuration');
 window.config = await response.json();
 
+const shareMatch = window.location.pathname.match(/^\/share\/([^/]+)/);
+if (shareMatch) window.sessionStorage.setItem('pulsio_share_token', shareMatch[1]);
+
 await (async () => {
   if (window.config.APP_ENV !== 'local') return;
 
@@ -41,6 +44,9 @@ root.render(
         <Router>
           <React.Suspense fallback={<Spinner size="lg" />}>
             <Switch>
+              <Route path="/share/:token">
+                <Home publicShare className="min-h-screen bg-slate-50 px-5 pt-5 pb-15 sm:px-8 lg:px-9" />
+              </Route>
               <Route path="/auth">
                 <Auth title="Pulsio Login" role="user" />
               </Route>

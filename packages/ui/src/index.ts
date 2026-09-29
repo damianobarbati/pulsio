@@ -15,6 +15,7 @@ export { Spinner } from './component/Spinner.tsx';
 export { Table, type TableColumn } from './component/Table.tsx';
 export { Textarea } from './component/Textarea.tsx';
 export { Toast } from './component/Toast.tsx';
+export { TrackingSnippet } from './component/TrackingSnippet.tsx';
 export { Input } from './form/Input.tsx';
 export { InputTime } from './form/InputTime.tsx';
 export { InputTimeRange } from './form/InputTimeRange.tsx';

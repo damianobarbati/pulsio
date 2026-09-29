@@ -1,7 +1,6 @@
-import cx from 'clsx-tw';
 import { FormProvider, useForm } from 'react-hook-form';
 import useSWR from 'swr';
-import type { AnalyticsEventsResponse } from 'types/Analytics.ts';
+import type { IAnalytics } from 'types/Analytics.ts';
 import { DataTable, Spinner, Table, type TableColumn } from 'ui';
 import { POST } from 'ui/api/fetchers.ts';
 import { Input } from 'ui/form';
@@ -17,9 +16,9 @@ type GoalsTableProps = {
 export const GoalsTable = ({ className, domains, from, to }: GoalsTableProps) => {
   const form = useForm({ defaultValues: { search: '' } });
   const search = form.watch('search');
-  const swr = useSWR<AnalyticsEventsResponse>(domains.length ? ['/analytics/events', { domains, from, to }] : null, POST, { keepPreviousData: true });
+  const swr = useSWR<IAnalytics.eventsResponse>(domains.length ? ['/analytics/events', { domains, from, to }] : null, POST, { keepPreviousData: true });
   const rows = (swr.data ?? []).filter((row) => row.event_name.toLowerCase().includes(search.toLowerCase().trim()));
-  const columns: TableColumn<AnalyticsEventsResponse[number]>[] = [
+  const columns: TableColumn<IAnalytics.eventsResponse[number]>[] = [
     { key: 'event_name', header: 'Event', render: (row) => row.event_name },
     { key: 'count', header: 'Count', render: (row) => `${toNumber(row.count)} (${toRate(row.percentage)})`, className: 'text-right tabular-nums' },
     { key: 'users', header: 'Users', render: (row) => toNumber(row.users), className: 'text-right tabular-nums' },

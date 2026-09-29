@@ -1,16 +1,9 @@
 import type { Hono } from 'hono';
 import { AppError, registerRoute } from 'nano-fw/docs/index.ts';
 import z from 'nano-fw/zod.ts';
-import {
-  UserAccountResponseSchema,
-  UserChangeEmailRequestSchema,
-  UserChangePasswordRequestSchema,
-  UserDeleteAccountRequestSchema,
-  UserListRequestSchema,
-  UserListResponseSchema,
-} from 'types/User.ts';
+import { UserSchemas } from 'types/User.ts';
 import { asyncStorage } from '#api/asyncStorage.ts';
-import { AuthService } from '#api/auth/AuthService.ts';
+import AuthService from '#api/auth/AuthService.ts';
 import { auth } from '#api/middleware.ts';
 import UserRepository from '#api/user/UserRepository.ts';
 import UserService from '#api/user/UserService.ts';
@@ -20,8 +13,8 @@ export const registerUserRoutes = (app: Hono) => {
     method: 'post',
     path: '/user/change-email',
     meta: { section: 'User', description: 'Change the authenticated user email address.' },
-    requestSchema: UserChangeEmailRequestSchema,
-    responseSchema: UserAccountResponseSchema,
+    requestSchema: UserSchemas.changeEmailRequest,
+    responseSchema: UserSchemas.accountResponse,
     middlewares: [auth('user')],
     handler: (params) => {
       const user_id = asyncStorage.getStore()?.user_id;
@@ -34,7 +27,7 @@ export const registerUserRoutes = (app: Hono) => {
     method: 'post',
     path: '/user/change-password',
     meta: { section: 'User', description: 'Change the authenticated user password.' },
-    requestSchema: UserChangePasswordRequestSchema,
+    requestSchema: UserSchemas.changePasswordRequest,
     responseSchema: z.literal(true),
     middlewares: [auth('user')],
     handler: async (params, c) => {
@@ -52,7 +45,7 @@ export const registerUserRoutes = (app: Hono) => {
     method: 'post',
     path: '/user/delete-account',
     meta: { section: 'User', description: 'Delete the authenticated user account.' },
-    requestSchema: UserDeleteAccountRequestSchema,
+    requestSchema: UserSchemas.deleteAccountRequest,
     responseSchema: z.literal(true),
     middlewares: [auth('user')],
     handler: async (params, c) => {
@@ -68,8 +61,8 @@ export const registerUserRoutes = (app: Hono) => {
     method: 'post',
     path: '/s/user/list',
     meta: { section: 'User', description: 'List users.' },
-    requestSchema: UserListRequestSchema,
-    responseSchema: UserListResponseSchema,
+    requestSchema: UserSchemas.listRequest,
+    responseSchema: UserSchemas.listResponse,
     middlewares: [auth('superadmin')],
     handler: (params) => UserRepository.getem(params),
   });

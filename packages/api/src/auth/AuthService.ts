@@ -2,26 +2,17 @@ import bcrypt from 'bcrypt';
 import jwt from 'jwt-simple';
 import { AppError } from 'nano-fw/docs/index.ts';
 import nodemailer from 'nodemailer';
-import type { User } from 'types/User.ts';
+import type { IAuth } from 'types/Auth.ts';
+import type { IUser } from 'types/User.ts';
 import { Email } from 'ui/email';
-
-import type { IAuth } from '#api/auth/AuthServiceSchema.ts';
 import ENV from '#api/env.ts';
+import SubscriptionRepository from '#api/misc/SubscriptionRepository.ts';
 import UserRepository from '#api/user/UserRepository.ts';
 
 const mailer = nodemailer.createTransport(ENV.SMTP_URI);
 const sessionCookieName = 'pulsio_session';
 
-export class AuthService {
-  static async grantSuperAdmin() {
-    try {
-      const user = await UserRepository.findBy({ email: ENV.SUPERADMIN_EMAIL });
-      if (user) return;
-      const password_hash = await AuthService.hashPassword(ENV.SUPERADMIN_PASSWORD);
-      await UserRepository.create({ email: ENV.SUPERADMIN_EMAIL, password_hash, role: 'superadmin' });
-    } catch {}
-  }
-
+export default class AuthService {
   static async hashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, 10);
   }
@@ -30,7 +21,7 @@ export class AuthService {
     return await bcrypt.compare(password, hash);
   }
 
-  static async generateToken(user: User): Promise<string> {
+  static async generateToken(user: IUser.user): Promise<string> {
     const issuedAt = Math.max(Date.now(), Date.parse(user.password_changed_at));
     const token = jwt.encode({ sub: user.id, iat: issuedAt }, ENV.JWT_SECRET, 'HS256');
     return token;
@@ -41,7 +32,7 @@ export class AuthService {
     return match ? match[1] : '';
   }
 
-  static generateCookie(token: string, clear = false) {
+  static generateCookie(token: string, clear = false): string {
     const parts = [`${sessionCookieName}=${clear ? '' : token}`, 'Path=/', 'HttpOnly', 'SameSite=Strict'];
     if (clear) parts.push('Max-Age=0');
     if (ENV.COOKIE_DOMAIN) parts.push(`Domain=${ENV.COOKIE_DOMAIN}`);
@@ -50,8 +41,11 @@ export class AuthService {
   }
 
   static async register({ email, password }: IAuth.registerRequest): Promise<IAuth.registerResponse> {
+    const existingUser = await UserRepository.findBy({ email });
+    if (existingUser) throw new AppError(409, 'EMAIL_ALREADY_IN_USE', 'Email address is already in use.');
     const password_hash = await AuthService.hashPassword(password);
     const user = await UserRepository.create({ email, password_hash });
+    await SubscriptionRepository.create({ user_id: user.id, plan: 'free', recurrence: 'month', status: 'active' });
     const token = await AuthService.generateToken(user);
     return token;
   }
@@ -72,7 +66,7 @@ export class AuthService {
     return token;
   }
 
-  static async me({ cookie }: { cookie: string }): Promise<User> {
+  static async me({ cookie }: { cookie: string }): Promise<IUser.user> {
     const token = AuthService.getCookie(cookie);
     const unauthorizedError = new AppError(401, 'UNAUTHORIZED', 'Authentication is required.');
 

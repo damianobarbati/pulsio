@@ -170,6 +170,9 @@ importers:
       es-toolkit:
         specifier: ^1.52.0
         version: 1.52.0
+      sql-formatter:
+        specifier: ^15.9.0
+        version: 15.9.0
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.5.14
@@ -206,7 +209,7 @@ importers:
         version: 1.23.1
       '@hono/node-server':
         specifier: ^2.1.1
-        version: 2.1.1(hono@4.13.9)
+        version: 2.1.1(hono@4.13.10)
       '@types/bcrypt':
         specifier: ^6.0.0
         version: 6.0.0
@@ -220,8 +223,8 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3(supports-color@10.2.2)
       hono:
-        specifier: ^4.13.9
-        version: 4.13.9
+        specifier: ^4.13.10
+        version: 4.13.10
       ioredis:
         specifier: ^6.0.0
         version: 6.0.0(supports-color@10.2.2)
@@ -241,8 +244,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       nodemailer:
-        specifier: ^10.0.11
-        version: 10.0.11
+        specifier: ^10.0.12
+        version: 10.0.12
       pg:
         specifier: ^8.22.0
         version: 8.23.0
@@ -283,9 +286,15 @@ importers:
       '@vitest/ui':
         specifier: 5.0.2
         version: 5.0.2(vitest@5.0.2)
+      api:
+        specifier: workspace:*
+        version: file:packages/api(@types/node@26.6.3)(@types/react@19.3.0)(clsx@2.1.1)(supports-color@8.1.1)(tailwind-merge@3.7.0)
       artillery:
         specifier: ^2.0.34
         version: 2.0.34(@types/node@26.6.3)(supports-color@8.1.1)
+      stripe:
+        specifier: ^22.6.2
+        version: 22.6.2(@types/node@26.6.3)
 
   packages/superadmin:
     dependencies:
@@ -536,8 +545,8 @@ importers:
         specifier: 16.3.6
         version: 16.3.6(@babel/core@8.0.5)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@26.6.3)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       nodemailer:
-        specifier: ^10.0.11
-        version: 10.0.11
+        specifier: ^10.0.12
+        version: 10.0.12
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -2904,6 +2913,9 @@ packages:
   anynum@1.0.1:
     resolution: {integrity: sha512-N6//FLET/tXYNM/F6ABca1oH6fWB+KlTt909Le28WMDBk8oaT4vY17DCrwg2MvmuqUKt3Ni4N5dGJ/EoBgcO6A==}
 
+  api@file:packages/api:
+    resolution: {directory: packages/api, type: directory}
+
   arch@2.2.0:
     resolution: {integrity: sha512-Of/R0wqp83cgHozfIYLbBMnej79U/SVGOOyuB3VVFv1NRM/PSFMK12x9KVtiYzJqmnU5WR2qp0Z5rHb7sWGnFQ==}
 
@@ -2912,6 +2924,9 @@ packages:
 
   argparse@1.0.10:
     resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
+
+  argparse@2.0.1:
+    resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
   aria-query@5.3.0:
     resolution: {integrity: sha512-b0P0sZPKtyu8HkeRAfCq0IfURZK+SuwMjY1UXGBU27wpAiTwQAIlq56IbIO+ytk/JjS1fMR14ee5WBBfKi5J6A==}
@@ -3179,6 +3194,9 @@ packages:
     resolution: {integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==}
     engines: {node: '>=14'}
 
+  commander@2.20.3:
+    resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
+
   compressible@2.0.18:
     resolution: {integrity: sha512-AF3r7P5dWxL8MxyITRMlORQNaOA2IkAFaTr4k7BUumjPtRpGDTZpl0Pb1XCO6JeDCBdp126Cgs9sMxqSjgYyRg==}
     engines: {node: '>= 0.6'}
@@ -3341,6 +3359,9 @@ packages:
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
+
+  discontinuous-range@1.0.0:
+    resolution: {integrity: sha512-c68LpLbO+7kP/b1Hr1qs8/BJ09F5khZGTxqxZuhzxpmwJKOgRFHJWIb9/KmqnqHhLdO55aOxFH/EGBvUQbL/RQ==}
 
   doctrine@3.0.0:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
@@ -3687,8 +3708,8 @@ packages:
     resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
 
-  hono@4.13.9:
-    resolution: {integrity: sha512-7dMkQmZoC4E6F7AtaQSPhlWAdnBti+j7rreMZl8QB4jFiEhP9TWbGWUMi8WYzBCgmgulxuvLQupKqo+Co6Omyg==}
+  hono@4.13.10:
+    resolution: {integrity: sha512-dQuLsa5oO+47QVMVMaaD9cIv8ctmVtK1iRvwWngkfloFJMeFeuoUFDswIqZGxmGX3hrRzREgEArjkK9OgsQEhA==}
     engines: {node: '>=16.9.0'}
 
   hot-shots@10.2.1:
@@ -4287,6 +4308,9 @@ packages:
   moment@2.30.1:
     resolution: {integrity: sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==}
 
+  moo@0.5.3:
+    resolution: {integrity: sha512-m2fmM2dDm7GZQsY7KK2cme8agi+AAljILjQnof7p1ZMDe6dQ4bdnSMx0cPppudoeNv5hEFQirN6u+O4fDE0IWA==}
+
   mrmime@2.0.1:
     resolution: {integrity: sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ==}
     engines: {node: '>=10'}
@@ -4326,6 +4350,10 @@ packages:
 
   nanotimer@0.3.14:
     resolution: {integrity: sha512-NpKXdP6ZLwZcODvDeyfoDBVoncbrgvC12txO3F4l9BxMycQjZD29AnasGAy7uSi3dcsTGnGn6/zzvQRwbjS4uw==}
+
+  nearley@2.20.1:
+    resolution: {integrity: sha512-+Mc8UaAebFzgV+KpI5n7DasuuQCHA89dmwm7JXw3TV43ukfNQ9DnBH3Mdb2g/I4Fdxc26pwimBWvjIw0UAILSQ==}
+    hasBin: true
 
   negotiator@0.6.4:
     resolution: {integrity: sha512-myRT3DiWPHqho5PrJaIRyaMv2kgYf0mUVgBNOYMuCH5Ki1yEiQaf/ZJuQ62nvpc44wL5WDbTX7yGJi1Neevw8w==}
@@ -4377,8 +4405,8 @@ packages:
     resolution: {integrity: sha512-OXdegQq03OmXEjt2hZP33W2YPs/E5BcFQks46+G2gAxs4gHOIVD1u7EqlYLYSKsaIpyKCK9Gbk0ta1/gjRSMRQ==}
     engines: {node: '>=6'}
 
-  nodemailer@10.0.11:
-    resolution: {integrity: sha512-/c4P7U7aGpiNu2Rl08q525q2zECkUpSaf2zQPgIStCcAjHAkkQQKwD4sTyi3l91mGcLQrKzL1syXPHymo+Ogtw==}
+  nodemailer@10.0.12:
+    resolution: {integrity: sha512-PQ46oNbNMuH/Sno7B5IWIU9etytwrO0xdTFvWXpIQFRXhBAXtzD48243AS+BCbQQTPD8y3fqUrgLn0tSo77gvg==}
     engines: {node: '>=20.0.0'}
 
   normalize-path@3.0.0:
@@ -4621,6 +4649,13 @@ packages:
     resolution: {integrity: sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==}
     engines: {node: '>=10'}
 
+  railroad-diagrams@1.0.0:
+    resolution: {integrity: sha512-cz93DjNeLY0idrCNOH6PviZGRN9GJhsdm9hpn1YCS879fj4W+x5IFJhhkRZcwVgMmFF7R82UA/7Oh+R8lLZg6A==}
+
+  randexp@0.4.6:
+    resolution: {integrity: sha512-80WNmd9DA0tmZrw9qQa62GPPWfuXJknrmVmLcxvq4uZBdYqb1wYoKTmnlGUchvVWe0XiLupYkBoXVOxz3C8DYQ==}
+    engines: {node: '>=0.12'}
+
   range-parser@1.2.0:
     resolution: {integrity: sha512-kA5WQoNVo4t9lNx2kQNFCxKeBl5IbbSNBl1M/tLkw9WCn+hxNBAW5Qh8gdhs63CJnhjJ2zQWFoqPJP2sK1AV5A==}
     engines: {node: '>= 0.6'}
@@ -4723,6 +4758,10 @@ packages:
   restore-cursor@3.1.0:
     resolution: {integrity: sha512-l+sSefzHpj5qimhFSE5a8nufZYAM3sBSVMAPtYkmC+4EH2anSGaEMXSD0izRQbu9nfyQ9y5JrVmp7E8oZrUjvA==}
     engines: {node: '>=8'}
+
+  ret@0.1.15:
+    resolution: {integrity: sha512-TTlYpa+OL+vMMNG24xSlQGEJ3B/RzEfUlLct7b5G/ytav+wPrplCpVMFuwzXbkecJrb6IYo1iFb0S9v37754mg==}
+    engines: {node: '>=0.12'}
 
   rolldown@1.2.11:
     resolution: {integrity: sha512-qpSwIyz0jHQq5qXBTNxFmE6664rJ7O+4TvPFOiOaBSrz8IOHc1koKKSqTM2H6u1UG1+TveuC6vaDHKXFOvb1Kw==}
@@ -4846,6 +4885,10 @@ packages:
 
   sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
+
+  sql-formatter@15.9.0:
+    resolution: {integrity: sha512-3A/N+v+mA5/PDU+FlO4uTFE0L/Mmg63c/Ny161Qv2b1Mxp9IX8War+LLmq17LA/Kgu4KXAR7iutK2JaHWJMMtw==}
+    hasBin: true
 
   sqs-consumer@6.0.2:
     resolution: {integrity: sha512-Y8ztFBc1VPj4q72j9Uji4XR6n2O88n9X83aOUaCvz9zZqjpGJaI4PBHBPnE8RDBgD0EQR8Dh+sQwH/+8mzr+Bg==}
@@ -5126,6 +5169,9 @@ packages:
   ua-parser-js@2.0.10:
     resolution: {integrity: sha512-t+3Ktbq0Ies2vaSezfOaWiolH4OigQIO1dk+1xDpOydB1COVPocVYOrEV5rqZ0kFY9XYG1v9LutCyMgYBpABcw==}
     hasBin: true
+
+  ui@file:packages/ui:
+    resolution: {directory: packages/ui, type: directory}
 
   uncrypto@0.1.3:
     resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
@@ -6427,21 +6473,21 @@ snapshots:
     dependencies:
       '@hapi/hoek': 9.3.0
 
-  '@hono/node-server@2.1.1(hono@4.13.9)':
+  '@hono/node-server@2.1.1(hono@4.13.10)':
     dependencies:
-      hono: 4.13.9
+      hono: 4.13.10
 
-  '@hono/zod-openapi@1.6.3(hono@4.13.9)(zod@4.6.5)':
+  '@hono/zod-openapi@1.6.3(hono@4.13.10)(zod@4.6.5)':
     dependencies:
       '@asteasolutions/zod-to-openapi': 9.1.0(zod@4.6.5)
-      '@hono/zod-validator': 0.9.1(hono@4.13.9)(zod@4.6.5)
-      hono: 4.13.9
+      '@hono/zod-validator': 0.9.1(hono@4.13.10)(zod@4.6.5)
+      hono: 4.13.10
       openapi3-ts: 4.6.1
       zod: 4.6.5
 
-  '@hono/zod-validator@0.9.1(hono@4.13.9)(zod@4.6.5)':
+  '@hono/zod-validator@0.9.1(hono@4.13.10)(zod@4.6.5)':
     dependencies:
-      hono: 4.13.9
+      hono: 4.13.10
       zod: 4.6.5
 
   '@img/colour@1.1.0':
@@ -7180,10 +7226,10 @@ snapshots:
 
   '@scalar/helpers@0.12.0': {}
 
-  '@scalar/hono-api-reference@0.12.2(hono@4.13.9)':
+  '@scalar/hono-api-reference@0.12.2(hono@4.13.10)':
     dependencies:
       '@scalar/client-side-rendering': 0.4.1
-      hono: 4.13.9
+      hono: 4.13.10
 
   '@scalar/schemas@0.10.0':
     dependencies:
@@ -7797,6 +7843,43 @@ snapshots:
 
   anynum@1.0.1: {}
 
+  api@file:packages/api(@types/node@26.6.3)(@types/react@19.3.0)(clsx@2.1.1)(supports-color@8.1.1)(tailwind-merge@3.7.0):
+    dependencies:
+      '@clickhouse/client': 1.23.1
+      '@hono/node-server': 2.1.1(hono@4.13.10)
+      '@types/bcrypt': 6.0.0
+      amaro: 1.2.1
+      bcrypt: 6.0.0
+      debug: 4.4.3(supports-color@8.1.1)
+      hono: 4.13.10
+      ioredis: 6.0.0(supports-color@8.1.1)
+      jwt-simple: 0.5.6
+      knex: 3.3.0(pg@8.23.0)(supports-color@8.1.1)
+      maxmind: 5.0.7
+      nano-fw: 1.2.0(supports-color@8.1.1)
+      node-schedule: 2.1.1
+      nodemailer: 10.0.12
+      pg: 8.23.0
+      stripe: 22.6.2(@types/node@26.6.3)
+      types: file:packages/types(supports-color@8.1.1)
+      ua-parser-js: 2.0.10
+      ui: file:packages/ui(@types/react@19.3.0)(clsx@2.1.1)(tailwind-merge@3.7.0)
+      zod: 4.6.5
+    transitivePeerDependencies:
+      - '@types/node'
+      - '@types/react'
+      - better-sqlite3
+      - clsx
+      - mariadb
+      - mysql
+      - mysql2
+      - pg-native
+      - pg-query-stream
+      - sqlite3
+      - supports-color
+      - tailwind-merge
+      - tedious
+
   arch@2.2.0: {}
 
   arg@5.0.2: {}
@@ -7804,6 +7887,8 @@ snapshots:
   argparse@1.0.10:
     dependencies:
       sprintf-js: 1.0.3
+
+  argparse@2.0.1: {}
 
   aria-query@5.3.0:
     dependencies:
@@ -8183,6 +8268,8 @@ snapshots:
 
   commander@10.0.1: {}
 
+  commander@2.20.3: {}
+
   compressible@2.0.18:
     dependencies:
       mime-db: 1.54.0
@@ -8351,6 +8438,8 @@ snapshots:
   detect-europe-js@0.1.2: {}
 
   detect-libc@2.1.2: {}
+
+  discontinuous-range@1.0.0: {}
 
   doctrine@3.0.0:
     dependencies:
@@ -8703,7 +8792,7 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
-  hono@4.13.9: {}
+  hono@4.13.10: {}
 
   hot-shots@10.2.1:
     optionalDependencies:
@@ -8793,6 +8882,17 @@ snapshots:
       '@ioredis/commands': 2.0.0
       cluster-key-slot: 1.1.1
       debug: 4.4.3(supports-color@10.2.2)
+      denque: 2.1.0
+      redis-errors: 1.2.0
+      standard-as-callback: 2.1.0
+    transitivePeerDependencies:
+      - supports-color
+
+  ioredis@6.0.0(supports-color@8.1.1):
+    dependencies:
+      '@ioredis/commands': 2.0.0
+      cluster-key-slot: 1.1.1
+      debug: 4.4.3(supports-color@8.1.1)
       denque: 2.1.0
       redis-errors: 1.2.0
       standard-as-callback: 2.1.0
@@ -9252,6 +9352,8 @@ snapshots:
 
   moment@2.30.1: {}
 
+  moo@0.5.3: {}
+
   mrmime@2.0.1: {}
 
   ms@2.0.0: {}
@@ -9270,13 +9372,13 @@ snapshots:
   nano-fw@1.2.0(supports-color@10.2.2):
     dependencies:
       '@asteasolutions/zod-to-openapi': 9.1.0(zod@4.6.5)
-      '@hono/node-server': 2.1.1(hono@4.13.9)
-      '@hono/zod-openapi': 1.6.3(hono@4.13.9)(zod@4.6.5)
-      '@scalar/hono-api-reference': 0.12.2(hono@4.13.9)
+      '@hono/node-server': 2.1.1(hono@4.13.10)
+      '@hono/zod-openapi': 1.6.3(hono@4.13.10)(zod@4.6.5)
+      '@scalar/hono-api-reference': 0.12.2(hono@4.13.10)
       dayjs: 1.11.23
       debug: 4.4.3(supports-color@10.2.2)
       find-up: 8.0.0
-      hono: 4.13.9
+      hono: 4.13.10
       knex: 3.3.0(pg@8.23.0)(supports-color@10.2.2)
       openapi3-ts: 4.6.1
       pg: 8.23.0
@@ -9296,13 +9398,13 @@ snapshots:
   nano-fw@1.2.0(supports-color@8.1.1):
     dependencies:
       '@asteasolutions/zod-to-openapi': 9.1.0(zod@4.6.5)
-      '@hono/node-server': 2.1.1(hono@4.13.9)
-      '@hono/zod-openapi': 1.6.3(hono@4.13.9)(zod@4.6.5)
-      '@scalar/hono-api-reference': 0.12.2(hono@4.13.9)
+      '@hono/node-server': 2.1.1(hono@4.13.10)
+      '@hono/zod-openapi': 1.6.3(hono@4.13.10)(zod@4.6.5)
+      '@scalar/hono-api-reference': 0.12.2(hono@4.13.10)
       dayjs: 1.11.23
       debug: 4.4.3(supports-color@8.1.1)
       find-up: 8.0.0
-      hono: 4.13.9
+      hono: 4.13.10
       knex: 3.3.0(pg@8.23.0)(supports-color@8.1.1)
       openapi3-ts: 4.6.1
       pg: 8.23.0
@@ -9324,6 +9426,13 @@ snapshots:
   nanoid@5.1.16: {}
 
   nanotimer@0.3.14: {}
+
+  nearley@2.20.1:
+    dependencies:
+      commander: 2.20.3
+      moo: 0.5.3
+      railroad-diagrams: 1.0.0
+      randexp: 0.4.6
 
   negotiator@0.6.4: {}
 
@@ -9371,7 +9480,7 @@ snapshots:
       long-timeout: 0.1.1
       sorted-array-functions: 1.3.0
 
-  nodemailer@10.0.11: {}
+  nodemailer@10.0.12: {}
 
   normalize-path@3.0.0: {}
 
@@ -9638,6 +9747,13 @@ snapshots:
 
   quick-lru@5.1.1: {}
 
+  railroad-diagrams@1.0.0: {}
+
+  randexp@0.4.6:
+    dependencies:
+      discontinuous-range: 1.0.0
+      ret: 0.1.15
+
   range-parser@1.2.0: {}
 
   rc@1.2.8:
@@ -9742,6 +9858,8 @@ snapshots:
     dependencies:
       onetime: 5.1.2
       signal-exit: 3.0.7
+
+  ret@0.1.15: {}
 
   rolldown@1.2.11:
     dependencies:
@@ -9904,6 +10022,11 @@ snapshots:
   split2@4.2.0: {}
 
   sprintf-js@1.0.3: {}
+
+  sql-formatter@15.9.0:
+    dependencies:
+      argparse: 2.0.1
+      nearley: 2.20.1
 
   sqs-consumer@6.0.2(@aws-sdk/client-sqs@3.1132.0)(supports-color@8.1.1):
     dependencies:
@@ -10175,6 +10298,23 @@ snapshots:
       is-standalone-pwa: 0.1.1
       ua-is-frozen: 0.1.2
 
+  ui@file:packages/ui(@types/react@19.3.0)(clsx@2.1.1)(tailwind-merge@3.7.0):
+    dependencies:
+      '@tanstack/react-table': 9.2.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      clsx-tw: 1.0.9(clsx@2.1.1)(tailwind-merge@3.7.0)
+      echarts: 6.1.0
+      eta: 4.6.0
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+      react-hook-form: 7.89.0(@types/react@19.3.0)(react@19.3.0)
+      react-icons: 5.7.0(react@19.3.0)
+      swr: 2.5.1(react@19.3.0)
+      wouter: 3.11.0(react@19.3.0)
+    transitivePeerDependencies:
+      - '@types/react'
+      - clsx
+      - tailwind-merge
+
   uncrypto@0.1.3: {}
 
   undici-types@8.9.0: {}
@@ -10270,32 +10410,6 @@ snapshots:
       '@vitest/coverage-v8': 5.0.2(@vitest/browser@5.0.2)(vitest@5.0.2)
       '@vitest/ui': 5.0.2(vitest@5.0.2)
       jsdom: 30.0.1
-    transitivePeerDependencies:
-      - msw
-
-  vitest@5.0.2(@opentelemetry/api@1.9.1)(@types/node@26.6.3)(@vitest/browser-playwright@5.0.2)(@vitest/coverage-v8@5.0.2)(@vitest/ui@5.0.2)(jsdom@30.1.1)(vite@8.3.1(@types/node@26.6.3)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)):
-    dependencies:
-      '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.2(vite@8.3.1(@types/node@26.6.3)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
-      chai: 6.2.2
-      es-module-lexer: 2.3.2
-      expect-type: 1.4.0
-      magic-string: 1.3.1
-      obug: 2.2.1
-      picomatch: 4.0.7
-      std-env: 4.2.0
-      tinybench: 6.1.4
-      tinyexec: 1.3.0
-      tinyglobby: 0.2.17
-      vite: 8.3.1(@types/node@26.6.3)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
-      why-is-node-running: 3.2.2
-    optionalDependencies:
-      '@opentelemetry/api': 1.9.1
-      '@types/node': 26.6.3
-      '@vitest/browser-playwright': 5.0.2(playwright@1.63.0)(vite@8.3.1(@types/node@26.6.3)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.0.2)
-      '@vitest/coverage-v8': 5.0.2(@vitest/browser@5.0.2)(vitest@5.0.2)
-      '@vitest/ui': 5.0.2(vitest@5.0.2)
-      jsdom: 30.1.1
     transitivePeerDependencies:
       - msw
 

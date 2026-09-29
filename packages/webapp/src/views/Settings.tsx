@@ -1,9 +1,11 @@
-import type { User } from 'types/User.ts';
-import api from 'ui/api/api.ts';
+import type { IUser } from 'types/User.ts';
+import { GET } from 'ui/api/fetchers.ts';
 import { useMe } from 'ui/hook/useMe.ts';
 
+const authMe = () => GET<IUser.user>(['/auth/me']);
+
 export const Settings = ({ className }: { className?: string }) => {
-  const { user } = useMe<User>(api.authMe);
+  const { user } = useMe<IUser.user>(authMe);
   return <div className={className}>Settings for {user.email}</div>;
 };
 

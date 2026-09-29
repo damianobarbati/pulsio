@@ -8,7 +8,7 @@ export async function seed(database: Knex): Promise<void> {
   if (ENV.APP_ENV !== 'local') throw new Error('Clean-up can only be run in the local environment, skipping.');
 
   const seed_present = await database('users').where({ id: JOHN_DOE.id }).first();
-  if (seed_present) return console.log('Skipping seeding...');
+  if (seed_present) return;
 
   // postgres
   const { rows } = await database.raw<QueryResult<{ tablename: string }>>("select tablename from pg_tables where schemaname = 'public'");

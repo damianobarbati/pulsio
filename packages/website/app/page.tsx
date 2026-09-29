@@ -51,7 +51,7 @@ export default async function Home({ className }: { className?: string }) {
             <Link href="/start-tracking" className="rounded-sm bg-pulsio-blue px-7 py-4 font-bold text-white">
               Get started free
             </Link>
-            <a href="#pricing" className="rounded-sm border border-pulsio-line bg-white px-7 py-4 font-bold">
+            <a href={`${config.WEBAPP_URL}/share/pulsio`} className="rounded-sm border border-pulsio-line bg-white px-7 py-4 font-bold">
               See live demo
             </a>
           </div>
@@ -74,7 +74,7 @@ export default async function Home({ className }: { className?: string }) {
             { title: 'Made for builders', text: 'All the data you need, none of the clutter.', Icon: IShield },
           ].map(({ title, text, Icon }) => {
             return (
-              <article key={title} className="flex gap-4 border-pulsio-line px-5 lg:border-r">
+              <article key={title} className="flex gap-4 border-pulsio-line px-5">
                 <span className="grid h-16 w-16 shrink-0 place-items-center rounded-sm bg-blue-100 text-pulsio-blue">
                   <Icon size={28} aria-hidden="true" />
                 </span>
@@ -89,7 +89,7 @@ export default async function Home({ className }: { className?: string }) {
       </section>
       <section id="pricing" className="mx-auto max-w-[1400px] scroll-mt-8 px-6 py-16 text-center">
         <p className="font-bold text-pulsio-blue text-xs uppercase tracking-wider">Simple, transparent pricing</p>
-        <h2 className="mt-3 font-bold text-3xl tracking-tight sm:text-4xl">Start free. Scale when you’re ready.</h2>
+        <h2 className="mt-3 font-bold text-3xl tracking-tight sm:text-4xl">Start free. Scale when needed.</h2>
         <p className="mt-2 text-pulsio-muted">All plans include real-time analytics, core reports, and privacy-friendly tracking.</p>
         <Pricing />
       </section>

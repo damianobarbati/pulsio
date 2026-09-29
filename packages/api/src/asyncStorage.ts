@@ -2,7 +2,8 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { AppError } from 'nano-fw/docs/index.ts';
 
 export type AsyncStore = {
-  user_id: string;
+  user_id?: string;
+  share_domain_id?: string;
 };
 
 export const asyncStorage = new AsyncLocalStorage<AsyncStore>();

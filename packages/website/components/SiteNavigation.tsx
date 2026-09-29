@@ -39,8 +39,8 @@ export const SiteNavigation = ({ className, dashboardUrl, loggedIn: initialLogge
       >
         <Link href="/how-to">How to</Link>
         <Link href="/documentation">Documentation</Link>
-        <Link href="/for-agency">For agencies</Link>
         <Link href="/#pricing">Pricing</Link>
+        <Link href="/contact-us">Contacts</Link>
         <a href={dashboardUrl} className="md:ml-auto">
           {loggedIn ? 'My Home' : 'Sign in'}
         </a>

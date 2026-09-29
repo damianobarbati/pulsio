@@ -1,14 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import { faker } from '@faker-js/faker';
 import type { Knex } from 'knex';
-import type { DomainRow } from 'types/Domain.ts';
-import type { EventRowInsert } from 'types/Event.ts';
-import type { UserRow } from 'types/User.ts';
+import type { IDomain } from 'types/Domain.ts';
+import type { IEvent } from 'types/Event.ts';
+import type { IUser } from 'types/User.ts';
+import DomainRepository from '#api/domain/DomainRepository.ts';
 import { createDomainRow } from '#api/domain/DomainSeeder.ts';
 import EventRepository from '#api/event/EventRepository.ts';
 import { createEventRow } from '#api/event/EventSeeder.ts';
-import PlanRepository from '#api/plan/PlanRepository.ts';
 import { createUserRow } from '#api/user/UserSeeder.ts';
+import { initScript } from '../../scripts/init.ts';
 
 const defaultUsers = [
   {
@@ -39,63 +40,35 @@ const EVENTS_PER_DOMAIN = { min: 2, max: 5_000 };
 
 export async function seed(database: Knex): Promise<void> {
   const seed_present = await database('users').where({ id: JOHN_DOE.id }).first();
-  if (seed_present) return console.log('Skipping seeding...');
+  if (seed_present) return;
 
-  await PlanRepository.create([
-    {
-      name: 'start',
-      monthly_price: 0,
-      yearly_price: 0,
-      valid_from: new Date().toISOString(),
-      description: 'Perfect for personal projects.',
-      features: ['Up to 10K pageviews/mo', '3 domains', 'Core analytics', 'Real-time visitors'],
-    },
-    {
-      name: 'grow',
-      monthly_price: 9,
-      yearly_price: 99,
-      valid_from: new Date().toISOString(),
-      description: 'For agencies.',
-      features: ['Up to 250K pageviews/mo', 'All Free features', '10 domains', 'Reports'],
-    },
-    {
-      name: 'scale',
-      monthly_price: 99,
-      yearly_price: 999,
-      valid_from: new Date().toISOString(),
-      description: 'For high-traffic businesses.',
-      features: ['Up to 1M pageviews/mo', 'All Pro features', '100 domains', 'Priority support'],
-    },
-    {
-      name: 'expand',
-      monthly_price: 199,
-      yearly_price: 1199,
-      valid_from: new Date().toISOString(),
-      description: 'For exceptional teams.',
-      features: ['Contact us for a custom solution'],
-    },
-  ]);
+  await initScript();
 
   const defaultUsersCreates = await Promise.all(defaultUsers.map(createUserRow));
 
   const userCreates = await Promise.all(Array.from({ length: USERS }, createUserRow));
   const users = await database('users')
     .insert([...defaultUsersCreates, ...userCreates])
-    .returning<UserRow[]>('*');
+    .returning<IUser.row[]>('*');
+
+  await database('subscriptions').insert(users.map(({ id: user_id }) => ({ user_id, plan: 'free', recurrence: 'month', status: 'active' })));
 
   // 1-3 domains for each user
-  const domains_rows: Partial<DomainRow>[] = [];
+  const domains_rows: Partial<IDomain.row>[] = [];
   for (const user of users) {
-    const rows: Partial<DomainRow>[] = Array.from({ length: faker.number.int(DOMAINS_PER_USER) }, (_, index) =>
-      createDomainRow({ user_id: user.id, ...(user.id === JOHN_DOE.id && index === 0 ? { domain: 'lvh.me' } : {}) }),
-    );
-    if (rows.length) domains_rows.push(...rows);
+    const rows: Partial<IDomain.row>[] = Array.from({ length: faker.number.int(DOMAINS_PER_USER) }, () => createDomainRow({ user_id: user.id }));
+    domains_rows.push(...rows);
   }
-  await database('domains').insert(domains_rows).returning<DomainRow[]>('*');
+
+  // john.doe has a lvh.me domain
+  const johndoe_domain_row = domains_rows.find((row) => row.user_id === JOHN_DOE.id);
+  if (johndoe_domain_row) johndoe_domain_row.domain = 'lvh.me';
+
+  await DomainRepository.create(domains_rows);
 
   // 2 to 5k events for each domain of John Doe and Fox Mulder
   const userIds = defaultUsers.map((u) => u.id);
-  const default_domains = await database('domains').whereRaw('user_id = any(?)', [userIds]).returning<DomainRow[]>('*');
+  const default_domains = await DomainRepository.getem({ user_id$in: userIds });
   for (const domain of default_domains) {
     const events_rows = await createDomainData(domain.user_id, domain.domain);
     await EventRepository.createAll(events_rows);
@@ -103,13 +76,13 @@ export async function seed(database: Knex): Promise<void> {
 }
 
 const createDomainData = async (user_id: string, domain: string) => {
-  const rows: EventRowInsert[] = await Promise.all(Array.from({ length: faker.number.int(EVENTS_PER_DOMAIN) }, () => createEventRow({ user_id, url: `https://${domain}/` })));
+  const rows: IEvent.rowInsert[] = await Promise.all(Array.from({ length: faker.number.int(EVENTS_PER_DOMAIN) }, () => createEventRow({ user_id, url: `https://${domain}/` })));
 
   // starting from a random date in last 3y
   const startDate = faker.date.recent({ days: 365 * 2 });
   const startTime = startDate.getTime();
   const endTime = Date.now();
-  const seeded_rows: EventRowInsert[] = [];
+  const seeded_rows: IEvent.rowInsert[] = [];
 
   // make the timeseries of events realistic
   const interval = rows.length > 1 ? (endTime - startTime) / (rows.length - 1) : 0;
@@ -129,7 +102,7 @@ const createDomainData = async (user_id: string, domain: string) => {
     if (faker.number.int({ min: 1, max: 20 }) === 1) {
       const engagement_ms = faker.number.int({ min: 1_000, max: 1_800_000 });
       const timestamp = new Date(Date.parse(event_row.timestamp) + engagement_ms).toISOString();
-      const activity_event_row: EventRowInsert = {
+      const activity_event_row: IEvent.rowInsert = {
         ...event_row,
         id: randomUUID(),
         timestamp,
@@ -143,7 +116,7 @@ const createDomainData = async (user_id: string, domain: string) => {
     // 5% of page views will have 1 of 3 custom events
     if (faker.number.int({ min: 1, max: 20 }) === 1) {
       const timestamp = new Date(Date.parse(event_row.timestamp) + 10).toISOString();
-      const activity_event_row: EventRowInsert = {
+      const activity_event_row: IEvent.rowInsert = {
         ...event_row,
         id: randomUUID(),
         timestamp,
@@ -157,7 +130,7 @@ const createDomainData = async (user_id: string, domain: string) => {
       const timestamp = new Date(Date.parse(event_row.timestamp) + 30_000).toISOString();
       const revenue_amount = faker.number.int({ min: 1, max: 50_000 }) / 100;
       const revenue_currency = 'USD';
-      const transaction_event_row: EventRowInsert = {
+      const transaction_event_row: IEvent.rowInsert = {
         ...event_row,
         id: randomUUID(),
         timestamp,

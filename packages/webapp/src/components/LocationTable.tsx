@@ -2,7 +2,7 @@ import cx from 'clsx-tw';
 import type { EChartsCoreOption } from 'echarts/core';
 import React from 'react';
 import useSWR from 'swr';
-import type { AnalyticsDemographicsDimension, AnalyticsDemographicsResponse } from 'types/Analytics.ts';
+import type { IAnalytics } from 'types/Analytics.ts';
 import { Spinner, Table, type TableColumn } from 'ui';
 import { POST } from 'ui/api/fetchers.ts';
 import { Chart } from 'ui/component/Chart.tsx';
@@ -24,10 +24,10 @@ const fetchMap = async (path: string) => {
   const data = await response.json();
   return data;
 };
-const dimensionForTab: Record<Exclude<LocationTab, 'map'>, AnalyticsDemographicsDimension> = { country: 'country', region: 'region', city: 'city' };
+const dimensionForTab: Record<Exclude<LocationTab, 'map'>, IAnalytics.demographicsDimension> = { country: 'country', region: 'region', city: 'city' };
 const labelForCountry = (name: string) => (/^[A-Z]{2}$/.test(name) ? countryNames.of(name) || name : name);
 const mapNameForCountry = (name: string) => (name === 'US' ? 'United States of America' : labelForCountry(name));
-const columns = (tab: LocationTab): TableColumn<AnalyticsDemographicsResponse[number]>[] => [
+const columns = (tab: LocationTab): TableColumn<IAnalytics.demographicsResponse[number]>[] => [
   {
     key: 'name',
     header: 'Name',
@@ -55,7 +55,7 @@ const columns = (tab: LocationTab): TableColumn<AnalyticsDemographicsResponse[nu
 export const LocationTable = ({ className, domains, from, to }: LocationDemographicsProps) => {
   const [tab, setTab] = React.useState<LocationTab>('map');
   const dimension = tab === 'map' ? 'country' : dimensionForTab[tab];
-  const report = useSWR<AnalyticsDemographicsResponse>(domains.length ? ['/analytics/demographics', { domains, from, to, dimension }] : null, POST, { keepPreviousData: true });
+  const report = useSWR<IAnalytics.demographicsResponse>(domains.length ? ['/analytics/demographics', { domains, from, to, dimension }] : null, POST, { keepPreviousData: true });
   const map = useSWR('/world.json', fetchMap);
   const rows = report.data ?? [];
   const max = Math.max(1, ...rows.map((row) => row.users));

@@ -1,10 +1,9 @@
 import { faker } from '@faker-js/faker';
-import type { UserRow, UserRowInsert } from 'types/User.ts';
-import { AuthService } from '#api/auth/AuthService.ts';
+import type { IUser } from 'types/User.ts';
+import AuthService from '#api/auth/AuthService.ts';
 
-export const createUserRow = async (params: Partial<UserRow> = {}): Promise<UserRowInsert> => {
-  const { email: _email } = params;
-  delete params.email;
+export const createUserRow = async (params: Partial<IUser.row> = {}): Promise<IUser.rowInsert> => {
+  const { email: _email, ...rest } = params;
 
   const email = _email || faker.internet.email().toLowerCase();
   const password_hash = await AuthService.hashPassword(email);
@@ -12,7 +11,7 @@ export const createUserRow = async (params: Partial<UserRow> = {}): Promise<User
   const result = {
     email,
     password_hash,
-    ...params,
+    ...rest,
   };
   return result;
 };

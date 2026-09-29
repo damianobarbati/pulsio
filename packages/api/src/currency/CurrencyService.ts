@@ -1,26 +1,25 @@
-import z from 'nano-fw/zod.ts';
-import type { CurrencyRatesResponse } from 'types/Currency.ts';
+import { CurrencySchemas, type ICurrency } from 'types/Currency.ts';
 
-type Rates = Record<string, number>;
+type Rates = ICurrency.ratesResponse['rates'];
 
-const RatesSchema = z.object({ rates: z.record(z.string(), z.number().positive()) });
+const ratesSchema = CurrencySchemas.ratesResponse.pick({ rates: true });
 
 const getToday = () => new Date().toISOString().slice(0, 10);
 
 export default class CurrencyService {
-  private static cachedDate = '';
-  private static ratesPromise: Promise<Rates> | null = null;
+  static cachedDate = '';
+  static ratesPromise: Promise<Rates> | null = null;
 
-  private static async fetchRates({ date }: { date: string }): Promise<Rates> {
+  static async fetchRates({ date }: { date: string }): Promise<Rates> {
     const response = await fetch(`https://api.frankfurter.dev/v1/${date}?base=USD`);
 
     if (!response.ok) throw new Error('CurrencyService.fetchRates failed.');
 
-    const data = RatesSchema.parse(await response.json());
+    const data = ratesSchema.parse(await response.json());
     return data.rates;
   }
 
-  static async getRates(): Promise<CurrencyRatesResponse> {
+  static async getRates(): Promise<ICurrency.ratesResponse> {
     const date = getToday();
 
     if (CurrencyService.cachedDate !== date || !CurrencyService.ratesPromise) {

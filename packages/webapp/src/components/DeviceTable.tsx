@@ -1,7 +1,7 @@
 import cx from 'clsx-tw';
 import React from 'react';
 import useSWR from 'swr';
-import type { AnalyticsDemographicsDimension, AnalyticsDemographicsResponse } from 'types/Analytics.ts';
+import type { IAnalytics } from 'types/Analytics.ts';
 import { Spinner, Table, type TableColumn } from 'ui';
 import { POST } from 'ui/api/fetchers.ts';
 import {
@@ -71,7 +71,7 @@ const getDeviceIcon = (name: string) => {
   return <IDesktop className="text-blue-500" aria-hidden="true" />;
 };
 
-const columns = (tab: DeviceTab): TableColumn<AnalyticsDemographicsResponse[number]>[] => [
+const columns = (tab: DeviceTab): TableColumn<IAnalytics.demographicsResponse[number]>[] => [
   {
     key: 'name',
     header: 'Name',
@@ -89,8 +89,8 @@ const columns = (tab: DeviceTab): TableColumn<AnalyticsDemographicsResponse[numb
 
 export const DeviceTable = ({ className, domains, from, to }: DeviceDemographicsProps) => {
   const [tab, setTab] = React.useState<DeviceTab>('browser');
-  const dimension = tab as AnalyticsDemographicsDimension;
-  const report = useSWR<AnalyticsDemographicsResponse>(domains.length ? ['/analytics/demographics', { domains, from, to, dimension }] : null, POST, { keepPreviousData: true });
+  const dimension = tab as IAnalytics.demographicsDimension;
+  const report = useSWR<IAnalytics.demographicsResponse>(domains.length ? ['/analytics/demographics', { domains, from, to, dimension }] : null, POST, { keepPreviousData: true });
   const rows = report.data ?? [];
 
   return (

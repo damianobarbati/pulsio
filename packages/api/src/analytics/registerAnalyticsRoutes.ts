@@ -1,32 +1,21 @@
 import type { Hono } from 'hono';
-import { registerRoute } from 'nano-fw/docs/index.ts';
-import {
-  AnalyticsAcquisitionRequestSchema,
-  AnalyticsAcquisitionResponseSchema,
-  AnalyticsDemographicsRequestSchema,
-  AnalyticsDemographicsResponseSchema,
-  AnalyticsEventsRequestSchema,
-  AnalyticsEventsResponseSchema,
-  AnalyticsKPIRequestSchema,
-  AnalyticsKPIResponseSchema,
-  AnalyticsLiveRequestSchema,
-  AnalyticsLiveResponseSchema,
-  AnalyticsTimeseriesRequestSchema,
-  AnalyticsTimeseriesResponseSchema,
-} from 'types/Analytics.ts';
-import { AnySchema } from 'types/common.ts';
+import { AppError, registerRoute } from 'nano-fw/docs/index.ts';
+import { AnalyticsSchemas, type IAnalytics } from 'types/Analytics.ts';
+import { CommonSchemas } from 'types/common.ts';
 import AnalyticsService from '#api/analytics/AnalyticsService.ts';
+import { asyncStorage } from '#api/asyncStorage.ts';
+import DomainRepository from '#api/domain/DomainRepository.ts';
 import EventRepository from '#api/event/EventRepository.ts';
-import { auth } from '#api/middleware.ts';
+import { auth, authOrShare } from '#api/middleware.ts';
 
 export const registerAnalyticsRoutes = (app: Hono) => {
   registerRoute(app, {
     method: 'post',
     path: '/analytics/kpis',
     meta: { section: 'Analytics', description: 'Get KPIs for selected domains and date range.' },
-    requestSchema: AnalyticsKPIRequestSchema,
-    responseSchema: AnalyticsKPIResponseSchema,
-    middlewares: [auth('user')],
+    requestSchema: AnalyticsSchemas.kpiRequest,
+    responseSchema: AnalyticsSchemas.kpiResponse,
+    middlewares: [authOrShare],
     handler: AnalyticsService.kpis,
   });
 
@@ -34,9 +23,9 @@ export const registerAnalyticsRoutes = (app: Hono) => {
     method: 'post',
     path: '/analytics/timeseries',
     meta: { section: 'Analytics', description: 'Get metric trend for selected domains and date range.' },
-    requestSchema: AnalyticsTimeseriesRequestSchema,
-    responseSchema: AnalyticsTimeseriesResponseSchema,
-    middlewares: [auth('user')],
+    requestSchema: AnalyticsSchemas.timeseriesRequest,
+    responseSchema: AnalyticsSchemas.timeseriesResponse,
+    middlewares: [authOrShare],
     handler: AnalyticsService.timeseries,
   });
 
@@ -44,19 +33,30 @@ export const registerAnalyticsRoutes = (app: Hono) => {
     method: 'post',
     path: '/analytics/live',
     meta: { section: 'Analytics', description: 'Get current visitors for selected domains.' },
-    requestSchema: AnalyticsLiveRequestSchema,
-    responseSchema: AnalyticsLiveResponseSchema,
-    middlewares: [auth('user')],
-    handler: EventRepository.getLiveVisitors,
+    requestSchema: AnalyticsSchemas.liveRequest,
+    responseSchema: AnalyticsSchemas.liveResponse,
+    middlewares: [authOrShare],
+    handler: async (params: IAnalytics.liveRequest) => {
+      const share_domain_id = asyncStorage.getStore()?.share_domain_id;
+      if (!share_domain_id) {
+        const result = await EventRepository.getLiveVisitors(params);
+        return result;
+      }
+      if (params.domains.length !== 1) throw new AppError(403, 'DOMAIN_NOT_FOUND', 'Some domains not found.');
+      const domain = await DomainRepository.get(share_domain_id);
+      if (!domain || params.domains[0] !== domain.domain) throw new AppError(403, 'DOMAIN_NOT_FOUND', 'Some domains not found.');
+      const result = await EventRepository.getLiveVisitors({ domains: [domain.domain] });
+      return result;
+    },
   });
 
   registerRoute(app, {
     method: 'post',
     path: '/analytics/acquisition',
     meta: { section: 'Analytics', description: 'Get acquisition statistics for selected domains, date range and dimension.' },
-    requestSchema: AnalyticsAcquisitionRequestSchema,
-    responseSchema: AnalyticsAcquisitionResponseSchema,
-    middlewares: [auth('user')],
+    requestSchema: AnalyticsSchemas.acquisitionRequest,
+    responseSchema: AnalyticsSchemas.acquisitionResponse,
+    middlewares: [authOrShare],
     handler: AnalyticsService.acquisition,
   });
 
@@ -64,9 +64,9 @@ export const registerAnalyticsRoutes = (app: Hono) => {
     method: 'post',
     path: '/analytics/demographics',
     meta: { section: 'Analytics', description: 'Get user demographics for selected domains, date range and dimension.' },
-    requestSchema: AnalyticsDemographicsRequestSchema,
-    responseSchema: AnalyticsDemographicsResponseSchema,
-    middlewares: [auth('user')],
+    requestSchema: AnalyticsSchemas.demographicsRequest,
+    responseSchema: AnalyticsSchemas.demographicsResponse,
+    middlewares: [authOrShare],
     handler: AnalyticsService.demographics,
   });
 
@@ -74,9 +74,9 @@ export const registerAnalyticsRoutes = (app: Hono) => {
     method: 'post',
     path: '/analytics/events',
     meta: { section: 'Analytics', description: 'Get custom event statistics for selected domains and date range.' },
-    requestSchema: AnalyticsEventsRequestSchema,
-    responseSchema: AnalyticsEventsResponseSchema,
-    middlewares: [auth('user')],
+    requestSchema: AnalyticsSchemas.eventsRequest,
+    responseSchema: AnalyticsSchemas.eventsResponse,
+    middlewares: [authOrShare],
     handler: AnalyticsService.events,
   });
 
@@ -84,8 +84,8 @@ export const registerAnalyticsRoutes = (app: Hono) => {
     method: 'get',
     path: '/settings/filter-presets',
     meta: { section: 'Analytics', description: 'Get saved filters presets.' },
-    requestSchema: AnySchema,
-    responseSchema: AnySchema,
+    requestSchema: CommonSchemas.any,
+    responseSchema: CommonSchemas.any,
     middlewares: [auth('user')],
     handler: () => [],
   });

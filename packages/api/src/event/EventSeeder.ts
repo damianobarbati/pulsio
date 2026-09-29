@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { ClientEvent, EventRowInsert } from 'types/Event.ts';
+import type { IEvent } from 'types/Event.ts';
 import EventService from '#api/event/EventService.ts';
 
 const clientProfiles = [
@@ -157,10 +157,10 @@ export const createClientHeaders = () => {
   };
 };
 
-export const createClientEvent = (params: Partial<ClientEvent>) => {
+export const createClientEvent = (params: Partial<IEvent.clientEvent>) => {
   const user_id = params.user_id || global.user.id;
 
-  const result: ClientEvent = {
+  const result: IEvent.clientEvent = {
     version: '1',
     user_id,
     event_name: faker.helpers.arrayElement(['view', 'interaction', 'signup', 'purchase']),
@@ -178,7 +178,7 @@ export const createClientEvent = (params: Partial<ClientEvent>) => {
   return result;
 };
 
-export const createEventRow = async (params: Partial<ClientEvent>): Promise<EventRowInsert> => {
+export const createEventRow = async (params: Partial<IEvent.clientEvent>): Promise<IEvent.rowInsert> => {
   const user_id = params.user_id || global.user.id;
 
   const result = await EventService.createEventRow({

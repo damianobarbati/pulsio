@@ -1,15 +1,15 @@
 import type { Hono } from 'hono';
 import { AppError, registerRoute } from 'nano-fw/docs/index.ts';
-import { AuthService } from '#api/auth/AuthService.ts';
-import { AuthSchema } from '#api/auth/AuthServiceSchema.ts';
+import { AuthSchemas } from 'types/Auth.ts';
+import AuthService from '#api/auth/AuthService.ts';
 
 export const registerAuthRoutes = (app: Hono) => {
   registerRoute(app, {
     method: 'post',
     path: '/auth/register',
     meta: { section: 'Auth', description: 'Create the user.' },
-    requestSchema: AuthSchema.registerRequest,
-    responseSchema: AuthSchema.registerResponse,
+    requestSchema: AuthSchemas.registerRequest,
+    responseSchema: AuthSchemas.registerResponse,
     middlewares: [],
     handler: async (params, c) => {
       const token = await AuthService.register(params);
@@ -23,8 +23,8 @@ export const registerAuthRoutes = (app: Hono) => {
     method: 'post',
     path: '/auth/login',
     meta: { section: 'Auth', description: 'Authenticate a user and create a session.' },
-    requestSchema: AuthSchema.loginRequest,
-    responseSchema: AuthSchema.loginResponse,
+    requestSchema: AuthSchemas.loginRequest,
+    responseSchema: AuthSchemas.loginResponse,
     middlewares: [],
     handler: async (params, c) => {
       const token = await AuthService.login(params);
@@ -38,8 +38,8 @@ export const registerAuthRoutes = (app: Hono) => {
     method: 'post',
     path: '/auth/logout',
     meta: { section: 'Auth', description: 'End the current user session.' },
-    requestSchema: AuthSchema.logoutRequest,
-    responseSchema: AuthSchema.logoutResponse,
+    requestSchema: AuthSchemas.logoutRequest,
+    responseSchema: AuthSchemas.logoutResponse,
     middlewares: [],
     handler: async (_params, c) => {
       c.header('Set-Cookie', AuthService.generateCookie('', true));
@@ -51,8 +51,8 @@ export const registerAuthRoutes = (app: Hono) => {
     method: 'get',
     path: '/auth/me',
     meta: { section: 'Auth', description: 'Get details for the authenticated user.' },
-    requestSchema: AuthSchema.meRequest,
-    responseSchema: AuthSchema.meResponse,
+    requestSchema: AuthSchemas.meRequest,
+    responseSchema: AuthSchemas.meResponse,
     handler: async (_params, c) => {
       const cookie = c.req.header('cookie');
       if (!cookie) throw new AppError(401, 'NO_SESSION', 'No session cookie found.');

@@ -22,6 +22,7 @@ export {
   HiOutlineChartBar as IChart,
   HiOutlineCheck as ICheck,
   HiOutlineChevronDown as ChevronDown,
+  HiOutlineClipboardDocument as ICopy,
   HiOutlineCog6Tooth as ISettings,
   HiOutlineCreditCard as ICard,
   HiOutlineDocumentText as IReport,

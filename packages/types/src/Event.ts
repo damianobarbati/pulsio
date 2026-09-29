@@ -1,6 +1,6 @@
 import z from 'nano-fw/zod.ts';
 
-export const ClientEventSchema = z.object({
+const ClientEventSchema = z.object({
   version: z.string().min(1),
   event_name: z.string().min(1),
   user_id: z.uuid(),
@@ -15,9 +15,9 @@ export const ClientEventSchema = z.object({
   revenue_currency: z.string().min(1).max(10).nullable(),
   items: z.object({ id: z.string().min(1).max(64), name: z.string().min(1).max(64), price: z.number().positive(), quantity: z.number().positive() }).array(),
 });
-export type ClientEvent = z.infer<typeof ClientEventSchema>;
+type ClientEvent = z.infer<typeof ClientEventSchema>;
 
-export const EventRowSchema = z.object({
+const EventRowSchema = z.object({
   id: z.uuid(),
   created_at: z.iso.datetime({ offset: true }),
   timestamp: z.iso.datetime({ offset: true }),
@@ -29,9 +29,9 @@ export const EventRowSchema = z.object({
   path: z.string(),
   query: z.string(),
   referrer_domain: z.string(),
-  interactive: z.number().int().min(0).max(255),
+  interactive: z.number().int().min(0).max(1),
   engagement_ms: z.number().int().nonnegative(),
-  scroll_depth: z.number().int().min(0).max(255).nullable(),
+  scroll_depth: z.number().int().min(0).max(100).nullable(),
   props: z.record(z.string(), z.string()),
   country_code: z.string().length(2),
   region_code: z.string(),
@@ -59,5 +59,18 @@ export const EventRowSchema = z.object({
 export type EventRow = z.infer<typeof EventRowSchema>;
 export type EventRowInsert = Omit<EventRow, 'created_at'>;
 
-export const EventSchema = EventRowSchema.clone();
+const EventSchema = EventRowSchema.clone();
 export type Event = z.infer<typeof EventSchema>;
+
+export const EventSchemas = {
+  clientEvent: ClientEventSchema,
+  row: EventRowSchema,
+  event: EventSchema,
+};
+
+export namespace IEvent {
+  export type clientEvent = ClientEvent;
+  export type row = EventRow;
+  export type event = Event;
+  export type rowInsert = EventRowInsert;
+}

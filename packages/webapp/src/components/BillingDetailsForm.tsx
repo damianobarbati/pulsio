@@ -1,6 +1,6 @@
 import cx from 'clsx-tw';
 import React from 'react';
-import type { Plan } from 'types/Plan.ts';
+import type { IPlan } from 'types/Plan.ts';
 import { Button, Card } from 'ui';
 import { ILock } from 'ui/icons.tsx';
 
@@ -9,7 +9,7 @@ type BillingCycle = 'monthly' | 'yearly';
 type BillingDetailsFormProps = {
   className?: string;
   initialValues: BillingDetails;
-  plan: Plan;
+  plan: IPlan.plan;
   cycle: BillingCycle;
   onCancel: () => void;
   onConfirm: (details: BillingDetails) => void;
@@ -70,7 +70,7 @@ export const BillingDetailsForm = ({ className, initialValues, plan, cycle, onCa
         </div>
         <div className="mt-6 flex flex-col-reverse gap-3 border-pulsio-line border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-pulsio-muted text-sm">
-            Total:{' '}
+            Total:
             <strong className="text-pulsio-ink">
               {currency.format(price)} / {cycle === 'yearly' ? 'year' : 'month'}
             </strong>

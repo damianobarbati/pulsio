@@ -1,7 +1,7 @@
 import type { Hono } from 'hono';
 import { AppError, registerRoute } from 'nano-fw/docs/index.ts';
-import { DomainIdRequestSchema } from 'types/Domain.ts';
-import { ReportSendResponseSchema } from 'types/Report.ts';
+import { DomainSchemas } from 'types/Domain.ts';
+import { ReportSchemas } from 'types/Report.ts';
 import { asyncStorage } from '#api/asyncStorage.ts';
 import { auth } from '#api/middleware.ts';
 import ReportService from './ReportService.ts';
@@ -11,8 +11,8 @@ export const registerReportRoutes = (app: Hono) => {
     method: 'post',
     path: '/domain/:domainId/report/send',
     meta: { section: 'Report', description: 'Send the current analytics report for a domain.' },
-    requestSchema: DomainIdRequestSchema,
-    responseSchema: ReportSendResponseSchema,
+    requestSchema: DomainSchemas.idRequest,
+    responseSchema: ReportSchemas.sendResponse,
     middlewares: [auth('user')],
     handler: async ({ domainId }) => {
       const user_id = asyncStorage.getStore()?.user_id;

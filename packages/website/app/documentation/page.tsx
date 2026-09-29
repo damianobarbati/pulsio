@@ -61,7 +61,7 @@ export default function Documentation({ className }: { className?: string }) {
         <section id="getting-started" className="scroll-mt-8 border-ink/15 border-b py-12">
           <h2 className="font-bold text-3xl tracking-tight">Getting started</h2>
           <p className="mt-4 text-ink/75 leading-relaxed">
-            Create an account with an email address, password, and website domain. Pulsio creates a unique tracking snippet for the website. Add it to the <code>&lt;head&gt;</code>{' '}
+            Create an account with an email address, password, and website domain. Pulsio creates a unique tracking snippet for the website. Add it to the <code>&lt;head&gt;</code>
             of every page, publish, then visit the website to confirm the first signal.
           </p>
           <p className="mt-4 text-ink/75 leading-relaxed">

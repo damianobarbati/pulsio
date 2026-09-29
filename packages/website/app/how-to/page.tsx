@@ -49,9 +49,7 @@ export default function HowTo({ className }: { className?: string }) {
       </ol>
       <div className="mt-10 rounded-2xl bg-ink/5 p-7">
         <h2 className="font-semibold text-xl">Always in control</h2>
-        <p className="mt-3 text-ink/75">
-          Manage multiple websites from one account. Each website has its own installation snippet and analytics. No payment or subscription is required.
-        </p>
+        <p className="mt-3 text-ink/75">Manage multiple websites from one account, one snippet. No payment or subscription is required.</p>
       </div>
       <div className="mt-10 rounded-2xl bg-ink/5 p-7">
         <h2 className="font-semibold text-xl">Revenue and campaigns</h2>

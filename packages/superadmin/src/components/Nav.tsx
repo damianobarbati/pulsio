@@ -1,12 +1,12 @@
 import cx from 'clsx-tw';
 import * as React from 'react';
 import useSWRMutation from 'swr/mutation';
-import api from 'ui/api/api.ts';
+import { MPOST } from 'ui/api/fetchers.ts';
 import { NavLink } from 'ui/component/NavLink.tsx';
 import { IGlobe, IHome, ILogoutLeft, IUsers } from 'ui/icons.tsx';
 
 export const Nav = ({ className }: { className?: string }) => {
-  const logout = useSWRMutation('authLogout', api.authLogout);
+  const logout = useSWRMutation('authLogout', (_key: string, { arg }: { arg: object }) => MPOST<boolean, object>('/auth/logout', { arg }));
   const [message, setMessage] = React.useState('');
 
   const signOut = async () => {

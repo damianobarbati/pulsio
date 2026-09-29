@@ -1,7 +1,7 @@
 import { AppError } from 'nano-fw/docs/index.ts';
 import nodemailer from 'nodemailer';
-import type { AnalyticsKPIResponse, Metric } from 'types/Analytics.ts';
-import type { ReportFrequency, ReportSendResponse } from 'types/Report.ts';
+import type { IAnalytics } from 'types/Analytics.ts';
+import type { IReport } from 'types/Report.ts';
 import { Email } from 'ui/email';
 import DomainRepository from '#api/domain/DomainRepository.ts';
 import ENV from '#api/env.ts';
@@ -9,7 +9,7 @@ import EventRepository from '#api/event/EventRepository.ts';
 
 const mailer = nodemailer.createTransport(ENV.SMTP_URI);
 
-const metricLabels: Record<Metric, string> = {
+const metricLabels: Record<IAnalytics.metric, string> = {
   users_count: 'Visitors',
   sessions_count: 'Visits',
   pageviews_count: 'Page views',
@@ -24,26 +24,26 @@ const metricLabels: Record<Metric, string> = {
   revenue_per_transaction_avg: 'Average transaction value',
 };
 
-const metrics = Object.keys(metricLabels) as Metric[];
+const metrics = Object.keys(metricLabels) as IAnalytics.metric[];
 type EmailKpi = { label: string; value: string; delta: string };
 type DateRange = { from: string; to: string };
 
 const startOfUtcDay = (date: Date) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 
-const getCurrentPeriodStart = (frequency: ReportFrequency, now: Date) => {
+const getCurrentPeriodStart = (frequency: IReport.frequency, now: Date) => {
   const day = startOfUtcDay(now);
   if (frequency === 'daily') return day;
   if (frequency === 'weekly') return new Date(day.getTime() - ((day.getUTCDay() + 6) % 7) * 86_400_000);
   return new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), 1));
 };
 
-const getPreviousPeriodStart = (frequency: ReportFrequency, currentStart: Date) => {
+const getPreviousPeriodStart = (frequency: IReport.frequency, currentStart: Date) => {
   if (frequency === 'daily') return new Date(currentStart.getTime() - 86_400_000);
   if (frequency === 'weekly') return new Date(currentStart.getTime() - 7 * 86_400_000);
   return new Date(Date.UTC(currentStart.getUTCFullYear(), currentStart.getUTCMonth() - 1, 1));
 };
 
-export const getReportPeriods = ({ frequency, now = new Date() }: { frequency: ReportFrequency; now?: Date }) => {
+export const getReportPeriods = ({ frequency, now = new Date() }: { frequency: IReport.frequency; now?: Date }) => {
   const currentStart = getCurrentPeriodStart(frequency, now);
   const previousStart = getPreviousPeriodStart(frequency, currentStart);
   const current: DateRange = { from: currentStart.toISOString(), to: now.toISOString() };
@@ -66,14 +66,14 @@ const getOwnedDomain = async ({ domainId, user_id }: { domainId: string; user_id
 };
 
 export default class ReportService {
-  static async send({ domainId, user_id }: { domainId: string; user_id: string }): Promise<ReportSendResponse> {
+  static async send({ domainId, user_id }: { domainId: string; user_id: string }): Promise<IReport.sendResponse> {
     const domain = await getOwnedDomain({ domainId, user_id });
     if (!domain.report_recipients.length) throw new AppError(422, 'REPORT_RECIPIENTS_REQUIRED', 'At least one report recipient is required.');
 
     const periods = getReportPeriods({ frequency: domain.report_frequency });
     const kpis = await EventRepository.getKPIs({ domains: [domain.domain], ...periods.current });
     const previousKpis = await EventRepository.getKPIs({ domains: [domain.domain], ...periods.previous });
-    const emailKpis = ReportService.getEmailKpis({ kpis, previousKpis });
+    const emailKpis = await ReportService.getEmailKpis({ kpis, previousKpis });
     const html = Email.render({
       template: 'report',
       data: {
@@ -97,7 +97,7 @@ export default class ReportService {
     return { sent: true, recipients: domain.report_recipients, frequency: domain.report_frequency, period_start: periods.current.from, period_end: periods.current.to, kpis };
   }
 
-  static getEmailKpis({ kpis, previousKpis }: { kpis: AnalyticsKPIResponse; previousKpis: AnalyticsKPIResponse }) {
+  static async getEmailKpis({ kpis, previousKpis }: { kpis: IAnalytics.kpiResponse; previousKpis: IAnalytics.kpiResponse }) {
     const result: EmailKpi[] = [];
     for (const metric of metrics) {
       const value = kpis[metric];

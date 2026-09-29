@@ -1,7 +1,7 @@
 import cx from 'clsx-tw';
 import React from 'react';
 import useSWR from 'swr';
-import type { AnalyticsAcquisitionDimension, AnalyticsAcquisitionResponse } from 'types/Analytics.ts';
+import type { IAnalytics } from 'types/Analytics.ts';
 import { Spinner, Table, type TableColumn } from 'ui';
 import { POST } from 'ui/api/fetchers.ts';
 import { IGlobe } from 'ui/icons.tsx';
@@ -14,7 +14,7 @@ type AcquisitionTableProps = {
   to: string;
 };
 
-const tabs: { label: string; dimension: AnalyticsAcquisitionDimension }[] = [
+const tabs: { label: string; dimension: IAnalytics.acquisitionDimension }[] = [
   { label: 'Sources', dimension: 'source' },
   { label: 'Channels', dimension: 'channel' },
   { label: 'utm_source', dimension: 'utm_source' },
@@ -24,7 +24,7 @@ const tabs: { label: string; dimension: AnalyticsAcquisitionDimension }[] = [
   { label: 'utm_term', dimension: 'utm_term' },
 ];
 
-const columns: TableColumn<AnalyticsAcquisitionResponse[number]>[] = [
+const columns: TableColumn<IAnalytics.acquisitionResponse[number]>[] = [
   {
     key: 'name',
     header: 'Source',
@@ -39,8 +39,10 @@ const columns: TableColumn<AnalyticsAcquisitionResponse[number]>[] = [
 ];
 
 export const AcquisitionTable = ({ className, domains, from, to }: AcquisitionTableProps) => {
-  const [tab, setTab] = React.useState<AnalyticsAcquisitionDimension>('source');
-  const report = useSWR<AnalyticsAcquisitionResponse>(domains.length ? ['/analytics/acquisition', { domains, from, to, dimension: tab }] : null, POST, { keepPreviousData: true });
+  const [tab, setTab] = React.useState<IAnalytics.acquisitionDimension>('source');
+  const report = useSWR<IAnalytics.acquisitionResponse>(domains.length ? ['/analytics/acquisition', { domains, from, to, dimension: tab }] : null, POST, {
+    keepPreviousData: true,
+  });
   const rows = report.data ?? [];
   const activeTab = tabs.find((item) => item.dimension === tab);
 

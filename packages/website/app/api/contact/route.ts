@@ -2,7 +2,11 @@ import nodemailer from 'nodemailer';
 import { Email } from 'ui/email';
 import { z } from 'zod';
 
-const contactSchema = z.object({ name: z.string().trim().min(1).max(120), email: z.email(), message: z.string().trim().min(10).max(5000) });
+const contactSchema = z.object({
+  name: z.string().min(1).max(120),
+  email: z.email().min(10).max(50),
+  message: z.string().min(10).max(5000),
+});
 
 export async function POST(request: Request) {
   try {

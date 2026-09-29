@@ -13,6 +13,7 @@ pnpm -F api db:migrate
 pnpm -F api db:seed
 pnpm -r test
 pnpm -r build
+pnpm -F nfr e2e src/happy.spec.ts
 ```
 
 If frontend code was actually changed, then verify the following all the following commands succeed:
@@ -20,6 +21,7 @@ If frontend code was actually changed, then verify the following all the followi
 pnpm lint
 pnpm tsc
 pnpm -r build
+pnpm -F nfr e2e src/happy.spec.ts
 ```
 
 Use the following files as reference for the style when coding backend:
@@ -46,5 +48,6 @@ packages/api/dao/ch-schema.sql
 EventService.ts
 EventRepository.ts
 ```
+Changes by the `pnpm lint` and `pnpm format` are ok.   
 
 Do not change the `scripts` inside any package.json if not explicitly consented.

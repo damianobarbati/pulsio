@@ -14,16 +14,15 @@ export default function Privacy({ className }: { className?: string }) {
   return (
     <article className={cx('mx-auto max-w-3xl px-6 py-16 text-ink', className)}>
       <Link href="/" className="mb-6 block font-semibold text-pulsio-blue text-sm underline underline-offset-2">
-        {'<- go back'}
+        ← Go back
       </Link>
-      <p className="font-bold text-pulsio-blue text-xs uppercase tracking-widest">Legal</p>
       <h1 className="mt-4 font-semibold text-5xl tracking-tight">Privacy Policy</h1>
       <p className="mt-5 text-ink/65">Last updated: 16 September 2026</p>
       <div className="mt-12 space-y-10 text-ink/80 leading-relaxed">
         <section>
           <h2 className="font-semibold text-2xl text-ink">1. Controller</h2>
           <p className="mt-3">
-            Damiano Barbati, VAT number IT15365071008, Via dalle Palle 123, [POSTAL CODE AND CITY], Italy, is the controller for personal data processed through Pulsio. Contact:{' '}
+            Damiano Barbati, VAT number IT15365071008, Via dalle Palle 123, [POSTAL CODE AND CITY], Italy, is the controller for personal data processed through Pulsio. Contact:
             <a className="font-semibold text-pulsio-blue underline" href="mailto:info@pulsio.live">
               info@pulsio.live
             </a>

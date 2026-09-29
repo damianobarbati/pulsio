@@ -1,13 +1,15 @@
-import type { User } from 'types/User.ts';
-import api from 'ui/api/api.ts';
+import type { IUser } from 'types/User.ts';
+import { GET } from 'ui/api/fetchers.ts';
 import { useMe } from 'ui/hook/useMe.ts';
 import { IShield } from 'ui/icons.tsx';
 import { AccountDangerZone } from '#webapp/components/AccountDangerZone.tsx';
 import { AccountEmailForm } from '#webapp/components/AccountEmailForm.tsx';
 import { AccountPasswordForm } from '#webapp/components/AccountPasswordForm.tsx';
 
+const authMe = () => GET<IUser.user>(['/auth/me']);
+
 export const Account = ({ className }: { className?: string }) => {
-  const { mutate } = useMe<User>(api.authMe, 'user');
+  const { mutate } = useMe<IUser.user>(authMe);
 
   return (
     <div className={className}>

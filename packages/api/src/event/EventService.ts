@@ -2,7 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { setTimeout } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { type CityResponse, open, validate } from 'maxmind';
-import type { ClientEvent, EventRowInsert } from 'types/Event.ts';
+import type { IEvent } from 'types/Event.ts';
 import { UAParser } from 'ua-parser-js';
 import CurrencyService from '#api/currency/CurrencyService.ts';
 import DomainRepository from '#api/domain/DomainRepository.ts';
@@ -10,7 +10,7 @@ import EventRepository from '#api/event/EventRepository.ts';
 import UserRepository from '#api/user/UserRepository.ts';
 
 type EventHeaders = Record<string, string | undefined>;
-type IngestParams = ClientEvent & { headers: EventHeaders; domain_id?: string };
+type IngestParams = IEvent.clientEvent & { headers: EventHeaders; domain_id?: string };
 
 const geoReader = open<CityResponse>(fileURLToPath(new URL('../../GeoLite2-City.mmdb', import.meta.url)));
 
@@ -111,7 +111,7 @@ export default class EventService {
     }
   }
 
-  static async createEventRow({ headers, domain_id = undefined, ...clientEvent }: IngestParams): Promise<EventRowInsert> {
+  static async createEventRow({ headers, domain_id = undefined, ...clientEvent }: IngestParams): Promise<IEvent.rowInsert> {
     const id = randomUUIDv7();
 
     if (!headers) throw new Error('EventService.createEventRow failed.');
@@ -134,7 +134,7 @@ export default class EventService {
     const fingerprint = getFingerprint({ domain: url.hostname, headers, ip, timestamp });
     const usd_rate = clientEvent.revenue_currency ? await EventService.getUSDRate(clientEvent.revenue_currency) : 1;
 
-    const event_row: EventRowInsert = {
+    const event_row: IEvent.rowInsert = {
       id,
       user_id: clientEvent.user_id,
       domain_id: domain_id || clientEvent.user_id,

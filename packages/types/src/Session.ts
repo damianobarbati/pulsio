@@ -1,6 +1,6 @@
 import z from 'nano-fw/zod.ts';
 
-export const SessionRowSchema = z
+const SessionRowSchema = z
   .object({
     id: z.uuid().openapi({ example: '01a0af49-49a7-7c68-8b35-12a3e7804984' }),
     user_id: z.uuid().openapi({ example: '01a0af49-49a7-7c68-8b35-12a3e7804984' }),
@@ -9,7 +9,17 @@ export const SessionRowSchema = z
     expires_at: z.iso.datetime({ offset: true }),
   })
   .openapi('Session');
-export type SessionRow = z.infer<typeof SessionRowSchema>;
+type SessionRow = z.infer<typeof SessionRowSchema>;
 
-export const SessionSchema = SessionRowSchema.clone();
-export type Session = z.infer<typeof SessionRowSchema>;
+const SessionSchema = SessionRowSchema.clone();
+type Session = z.infer<typeof SessionRowSchema>;
+
+export const SessionSchemas = {
+  row: SessionRowSchema,
+  session: SessionSchema,
+};
+
+export namespace ISession {
+  export type row = SessionRow;
+  export type session = Session;
+}

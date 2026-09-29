@@ -1,14 +1,16 @@
 import cx from 'clsx-tw';
 import type React from 'react';
-import type { User } from 'types/User.ts';
-import api from 'ui/api/api.ts';
+import type { IUser } from 'types/User.ts';
+import { GET } from 'ui/api/fetchers.ts';
 import { useMe } from 'ui/hook/useMe.ts';
 import { Nav } from '#superadmin/components/Nav.tsx';
 
 type LayoutProps = { className?: string; children: React.ReactNode };
 
+const authMe = () => GET<IUser.user>(['/auth/me']);
+
 export const Layout = ({ className, children }: LayoutProps) => {
-  useMe<User>(api.authMe, 'superadmin');
+  useMe<IUser.user>(authMe, 'superadmin');
 
   return (
     <div className={cx('min-h-screen lg:flex', className)}>

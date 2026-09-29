@@ -16,9 +16,8 @@ export default function Terms({ className }: { className?: string }) {
   return (
     <article className={cx('mx-auto max-w-3xl px-6 py-16 text-ink', className)}>
       <Link href="/" className="mb-6 block font-semibold text-pulsio-blue text-sm underline underline-offset-2">
-        {'<- go back'}
+        ← Go back
       </Link>
-      <p className="font-bold text-pulsio-blue text-xs uppercase tracking-widest">Legal</p>
       <h1 className="mt-4 font-semibold text-5xl tracking-tight">Terms of Service</h1>
       <p className="mt-5 text-ink/65">Last updated: {lastUpdated}</p>
       <div className="mt-12 space-y-10 text-ink/80 leading-relaxed">
@@ -69,10 +68,10 @@ export default function Terms({ className }: { className?: string }) {
             provide, maintain, and improve the Service, prevent abuse, and comply with law. You must not submit data that you are not authorised to provide.
           </p>
           <p className="mt-3">
-            Our{' '}
+            Our
             <Link className="font-semibold text-pulsio-blue underline" href="/privacy">
               Privacy Policy
-            </Link>{' '}
+            </Link>
             explains how we process personal data. Business customers must contact us before submitting personal data that requires a data processing agreement.
           </p>
         </section>
@@ -161,7 +160,7 @@ export default function Terms({ className }: { className?: string }) {
             applicable law.
           </p>
           <p className="mt-3">
-            Contact:{' '}
+            Contact:
             <a className="font-semibold text-pulsio-blue underline" href="mailto:info@pulsio.live">
               info@pulsio.live
             </a>

@@ -1,19 +1,5 @@
-import type {
-  AnalyticsAcquisitionDimension,
-  AnalyticsAcquisitionRequest,
-  AnalyticsAcquisitionResponse,
-  AnalyticsDemographicsDimension,
-  AnalyticsDemographicsRequest,
-  AnalyticsDemographicsResponse,
-  AnalyticsEventsRequest,
-  AnalyticsEventsResponse,
-  AnalyticsKPIRequest,
-  AnalyticsKPIResponse,
-  AnalyticsTimeseriesRequest,
-  AnalyticsTimeseriesResponse,
-  Metric,
-} from 'types/Analytics.ts';
-import type { EventRow, EventRowInsert } from 'types/Event.ts';
+import type { IAnalytics } from 'types/Analytics.ts';
+import type { IEvent } from 'types/Event.ts';
 import { ch } from '#dao/ch.ts';
 
 const metricsQuery = `
@@ -62,7 +48,7 @@ const sessionTotals = `
 
 const purchaseTotals = `toUInt64(count()) AS transactions_count, toFloat64(sum(amount_usd)) AS revenue_sum`;
 
-const metricExpressions: Record<Metric, string> = {
+const metricExpressions: Record<IAnalytics.metric, string> = {
   users_count: 'users_count',
   sessions_count: 'sessions_count',
   pageviews_count: 'pageviews_count',
@@ -77,10 +63,10 @@ const metricExpressions: Record<Metric, string> = {
   revenue_per_transaction_avg: 'if(transactions_count > 0, revenue_sum / transactions_count, 0)',
 };
 
-const metricNames = Object.keys(metricExpressions) as Metric[];
+const metricNames = Object.keys(metricExpressions) as IAnalytics.metric[];
 
 export default class EventRepository {
-  static async getKPIs({ domains, from, to }: AnalyticsKPIRequest): Promise<AnalyticsKPIResponse> {
+  static async getKPIs({ domains, from, to }: IAnalytics.kpiRequest): Promise<IAnalytics.kpiResponse> {
     const columns = metricNames.map((metric) => `${metricExpressions[metric]} AS ${metric}`).join(', ');
     const result = await ch.query({
       query: `${metricsQuery}
@@ -91,12 +77,12 @@ export default class EventRepository {
       query_params: { domains, from, to },
       format: 'JSONEachRow',
     });
-    const [row] = await result.json<AnalyticsKPIResponse>();
-    const kpis = Object.fromEntries(metricNames.map((metric) => [metric, Number(row[metric])])) as AnalyticsKPIResponse;
+    const [row] = await result.json<IAnalytics.kpiResponse>();
+    const kpis = Object.fromEntries(metricNames.map((metric) => [metric, Number(row[metric])])) as IAnalytics.kpiResponse;
     return kpis;
   }
 
-  static async getMetricTimeseries({ domains, from, to, interval, metric }: AnalyticsTimeseriesRequest): Promise<AnalyticsTimeseriesResponse> {
+  static async getMetricTimeseries({ domains, from, to, interval, metric }: IAnalytics.timeseriesRequest): Promise<IAnalytics.timeseriesResponse> {
     const query = `
       ${metricsQuery},
       event_buckets AS (
@@ -140,7 +126,7 @@ export default class EventRepository {
     return rows;
   }
 
-  static async getCustomEvents({ domains, from, to }: AnalyticsEventsRequest): Promise<AnalyticsEventsResponse> {
+  static async getCustomEvents({ domains, from, to }: IAnalytics.eventsRequest): Promise<IAnalytics.eventsResponse> {
     const result = await ch.query({
       query: `
         WITH filtered AS (
@@ -171,12 +157,12 @@ export default class EventRepository {
       query_params: { domains, from, to },
       format: 'JSONEachRow',
     });
-    const rows = await result.json<AnalyticsEventsResponse[number]>();
+    const rows = await result.json<IAnalytics.eventsResponse[number]>();
     return rows.map((row) => ({ ...row, count: Number(row.count), users: Number(row.users), conversion_rate: Number(row.conversion_rate), percentage: Number(row.percentage) }));
   }
 
-  static async getDemographics({ domains, from, to, dimension }: AnalyticsDemographicsRequest): Promise<AnalyticsDemographicsResponse> {
-    const dimensions: Record<AnalyticsDemographicsDimension, string> = {
+  static async getDemographics({ domains, from, to, dimension }: IAnalytics.demographicsRequest): Promise<IAnalytics.demographicsResponse> {
+    const dimensions: Record<IAnalytics.demographicsDimension, string> = {
       browser: "if(browser = '', 'Unknown', browser)",
       os: "if(os = '', 'Unknown', os)",
       device: "if(screen_width < 768, 'Mobile', if(screen_width < 1024, 'Tablet', 'Desktop'))",
@@ -207,12 +193,12 @@ export default class EventRepository {
       query_params: { domains, from, to },
       format: 'JSONEachRow',
     });
-    const rows = await result.json<AnalyticsDemographicsResponse[number]>();
+    const rows = await result.json<IAnalytics.demographicsResponse[number]>();
     return rows.map((row) => ({ ...row, users: Number(row.users), percentage: Number(row.percentage) }));
   }
 
-  static async getAcquisition({ domains, from, to, dimension }: AnalyticsAcquisitionRequest): Promise<AnalyticsAcquisitionResponse> {
-    const dimensions: Record<AnalyticsAcquisitionDimension, string> = {
+  static async getAcquisition({ domains, from, to, dimension }: IAnalytics.acquisitionRequest): Promise<IAnalytics.acquisitionResponse> {
+    const dimensions: Record<IAnalytics.acquisitionDimension, string> = {
       source: "ifNull(nullIf(source, ''), 'Direct')",
       channel: "ifNull(nullIf(channel, ''), 'Direct')",
       utm_source: "if(utm_source = '', 'None', utm_source)",
@@ -244,7 +230,7 @@ export default class EventRepository {
       query_params: { domains, from, to },
       format: 'JSONEachRow',
     });
-    const rows = await result.json<AnalyticsAcquisitionResponse[number]>();
+    const rows = await result.json<IAnalytics.acquisitionResponse[number]>();
     return rows.map((row) => ({ ...row, users: Number(row.users), percentage: Number(row.percentage) }));
   }
 
@@ -256,13 +242,26 @@ export default class EventRepository {
     return value;
   }
 
-  static async create(event: EventRowInsert) {
+  static async getEventCounts({ domains }: { domains: string[] }): Promise<Record<string, number>> {
+    if (domains.length === 0) return {};
+
+    const result = await ch.query({
+      query: 'SELECT domain, toUInt64(count()) AS events_count FROM events WHERE domain IN {domains:Array(String)} GROUP BY domain',
+      query_params: { domains },
+      format: 'JSONEachRow',
+    });
+    const rows = await result.json<{ domain: string; events_count: number }>();
+    const counts = Object.fromEntries(rows.map((row) => [row.domain, Number(row.events_count)]));
+    return counts;
+  }
+
+  static async create(event: IEvent.rowInsert) {
     const result = await ch.insert({ table: 'events', values: [event], format: 'JSONEachRow' });
     const row = result.executed;
     return row;
   }
 
-  static async createAll(events: EventRowInsert[]) {
+  static async createAll(events: IEvent.rowInsert[]) {
     const result = await ch.insert({ table: 'events', values: events, format: 'JSONEachRow' });
     const rows = result.executed;
     return rows;
@@ -270,8 +269,18 @@ export default class EventRepository {
 
   static async get(id: string) {
     const result = await ch.query({ query: `SELECT * FROM events WHERE id = {id:UUID} LIMIT 1`, query_params: { id }, format: 'JSONEachRow' });
-    const [row] = await result.json<EventRow>();
+    const [row] = await result.json<IEvent.row>();
     return row ?? null;
+  }
+
+  static async exportByDomain(domain: string): Promise<string> {
+    const result = await ch.query({
+      query: 'SELECT * FROM events WHERE domain = {domain:String} ORDER BY timestamp, id',
+      query_params: { domain },
+      format: 'CSVWithNames',
+    });
+    const csv = await result.text();
+    return csv;
   }
 
   static async remove(id: string) {

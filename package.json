@@ -13,6 +13,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "pnpm audit --audit-level critical",
+    "format": "sql-formatter '**/*.sql' '!**/*/ch-schema.sql'",
     "lint": "biome check --write",
     "tsc": "tsc",
     "env:up": "docker compose up -d --wait --quiet-pull --remove-orphans",
@@ -33,6 +34,7 @@
     "vitest": "^5.0.2"
   },
   "dependencies": {
-    "es-toolkit": "^1.52.0"
+    "es-toolkit": "^1.52.0",
+    "sql-formatter": "^15.9.0"
   }
 }

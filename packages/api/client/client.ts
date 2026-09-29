@@ -1,13 +1,13 @@
-import type { ClientEvent } from 'types/Event.ts';
+import type { IEvent } from 'types/Event.ts';
 
 type EventOptions = {
-  scroll_depth?: ClientEvent['scroll_depth'];
-  engagement_ms?: ClientEvent['engagement_ms'];
-  props?: ClientEvent['props'];
-  revenue_amount?: ClientEvent['revenue_amount'];
-  revenue_currency?: ClientEvent['revenue_currency'];
+  scroll_depth?: IEvent.clientEvent['scroll_depth'];
+  engagement_ms?: IEvent.clientEvent['engagement_ms'];
+  props?: IEvent.clientEvent['props'];
+  revenue_amount?: IEvent.clientEvent['revenue_amount'];
+  revenue_currency?: IEvent.clientEvent['revenue_currency'];
   transaction_id?: string;
-  items?: ClientEvent['items'];
+  items?: IEvent.clientEvent['items'];
 };
 
 declare global {
@@ -44,7 +44,7 @@ let currentViewUrl = cleanUrl(location.href);
 const send = (name = 'view', options: EventOptions = {}) => {
   if (!user_id) return;
 
-  const payload: ClientEvent = {
+  const payload: IEvent.clientEvent = {
     version: '1',
     event_name: name,
     user_id,

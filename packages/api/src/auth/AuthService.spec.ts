@@ -3,8 +3,9 @@ import { faker } from '@faker-js/faker';
 import jwt from 'jwt-simple';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import ENV from '#api/env.ts';
+import SubscriptionRepository from '#api/misc/SubscriptionRepository.ts';
 import UserRepository from '#api/user/UserRepository.ts';
-import { AuthService } from './AuthService.ts';
+import AuthService from './AuthService.ts';
 
 const email = faker.internet.email().toLowerCase();
 const password = email;
@@ -12,7 +13,10 @@ const domain = faker.internet.domainName();
 
 const cleanUp = async () => {
   const user = await UserRepository.findBy({ email });
-  if (user) await UserRepository.remove(user.id);
+  if (!user) return;
+  const subscriptions = await SubscriptionRepository.getem({ user_id: user.id });
+  for (const subscription of subscriptions) await SubscriptionRepository.remove(subscription.id);
+  await UserRepository.remove(user.id);
 };
 
 describe('AuthService', () => {
@@ -34,25 +38,25 @@ describe('AuthService', () => {
   });
 
   describe('getSessionCookieValue', () => {
-    it('returns the session token', () => {
+    it('returns the session token', async () => {
       const cookie = AuthService.generateCookie('xyz');
       const result = AuthService.getCookie(cookie);
       expect(result).toEqual('xyz');
     });
 
-    it('returns an empty token when session cookie is missing', () => {
+    it('returns an empty token when session cookie is missing', async () => {
       const result = AuthService.getCookie('other=value');
       expect(result).toEqual('');
     });
   });
 
   describe('generateCookie', () => {
-    it('returns the session cookie', () => {
+    it('returns the session cookie', async () => {
       const result = AuthService.generateCookie('xyz');
       expect(result).toContain(`pulsio_session=xyz; Path=/; HttpOnly; SameSite=Strict`);
     });
 
-    it('clears the session cookie', () => {
+    it('clears the session cookie', async () => {
       const result = AuthService.generateCookie('xyz', true);
       expect(result).toContain('Max-Age=0');
     });
@@ -65,12 +69,13 @@ describe('AuthService', () => {
       const authenticatedUser = await AuthService.me({ cookie: AuthService.generateCookie(token) });
       expect(user).toMatchObject({ email });
       expect(authenticatedUser).toMatchObject({ id: user.id });
+      await expect(SubscriptionRepository.findBy({ user_id: user.id })).resolves.toMatchObject({ plan: 'free', status: 'active' });
       expect(token).toMatch(/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
     });
 
     it('fails when email already exists', async () => {
       await AuthService.register({ email, password });
-      await expect(AuthService.register({ email, password })).rejects.toMatchObject({ code: '23505' });
+      await expect(AuthService.register({ email, password })).rejects.toMatchObject({ code: 'EMAIL_ALREADY_IN_USE', status: 409 });
     });
   });
 

@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import * as React from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import useSWR from 'swr';
-import type { DomainListResponse } from 'types/Domain.ts';
+import type { IDomain } from 'types/Domain.ts';
 import { POST } from 'ui/api/fetchers.ts';
 import { Checkbox, Select, SelectMulti } from 'ui/form';
 import { ICalendar, IGlobe } from 'ui/icons.tsx';
@@ -87,7 +87,7 @@ const getSyncedSearch = ({ search, domains, period, compare }: { search: string;
 export const DashboardFilters = ({ className, onChange }: DashboardFiltersProps) => {
   const [location, navigate] = useLocation();
   const search = useSearch();
-  const domainsSWR = useSWR<DomainListResponse>(['/domain/list'], POST, { suspense: true, shouldRetryOnError: false });
+  const domainsSWR = useSWR<IDomain.listResponse>(['/domain/list'], POST, { suspense: true, shouldRetryOnError: false });
   const domainOptions = (domainsSWR.data ?? []).map((domain) => ({ value: domain.domain, label: domain.domain }));
   const defaultValues = getDefaultValues({ search, domainOptions });
 

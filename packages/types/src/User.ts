@@ -1,12 +1,13 @@
 import z from 'nano-fw/zod.ts';
 
-export const UserRowSchema = z
+const UserRowSchema = z
   .object({
     id: z.uuid().openapi({ example: '01a0af49-49a7-7c68-8b35-12a3e7804984' }),
     created_at: z.iso.datetime({ offset: true }),
     updated_at: z.iso.datetime({ offset: true }),
-    email: z.email().openapi({ example: 'john.doe@example.com' }),
-    password_hash: z.string().min(1),
+    deleted_at: z.iso.datetime({ offset: true }).nullable().optional(),
+    email: z.email().min(10).max(50).toLowerCase().openapi({ example: 'john.doe@example.com' }),
+    password_hash: z.string().min(1).max(100),
     role: z.enum(['user', 'superadmin']),
     login_at: z.iso.datetime({ offset: true }).nullable(),
     password_changed_at: z.iso.datetime({ offset: true }),
@@ -15,12 +16,13 @@ export const UserRowSchema = z
     email_verification_token_hash: z.string().nullable(),
     email_verification_expires_at: z.iso.datetime({ offset: true }).nullable(),
     trial_ends_at: z.iso.datetime({ offset: true }),
-    name: z.string().nullable(),
-    logo: z.url().nullable(),
+    name: z.string().min(1).max(80).nullable(),
+    logo: z.url().max(200).nullable(),
     autodiscover_enabled: z.boolean(),
+    stripe_customer_id: z.string().min(1).max(255).nullable().optional(),
   })
   .openapi('User');
-export type UserRow = z.infer<typeof UserRowSchema>;
+type UserRow = z.infer<typeof UserRowSchema>;
 
 const systemKeys = { id: true, created_at: true, updated_at: true } as const;
 
@@ -35,66 +37,100 @@ const nullableKeys = {
   email_verification_token_hash: true,
   email_verification_expires_at: true,
   trial_ends_at: true,
+  stripe_customer_id: true,
+  deleted_at: true,
   autodiscover_enabled: true,
 } as const;
 
-export const UserRowInsertSchema = UserRowSchema.omit(systemKeys).partial(nullableKeys);
-export type UserRowInsert = z.infer<typeof UserRowInsertSchema>;
+const UserRowInsertSchema = UserRowSchema.omit(systemKeys).partial(nullableKeys);
+type UserRowInsert = z.infer<typeof UserRowInsertSchema>;
 
-export const UserRowUpdateSchema = UserRowSchema.omit(systemKeys).partial();
-export type UserRowUpdate = z.infer<typeof UserRowUpdateSchema>;
+const UserRowUpdateSchema = UserRowSchema.omit(systemKeys).partial();
+type UserRowUpdate = z.infer<typeof UserRowUpdateSchema>;
 
-export const UserSchema = UserRowSchema.clone();
-export type User = z.infer<typeof UserSchema>;
+const UserSchema = UserRowSchema.clone();
+type User = z.infer<typeof UserSchema>;
 
-export const UserAccountResponseSchema = UserSchema.omit({ password_hash: true, email_verification_token_hash: true });
-export type UserAccountResponse = z.infer<typeof UserAccountResponseSchema>;
+const UserAccountResponseSchema = UserSchema.omit({ password_hash: true, email_verification_token_hash: true });
+type UserAccountResponse = z.infer<typeof UserAccountResponseSchema>;
 
-export const UserChangeEmailRequestSchema = z.object({
-  email: z.email().openapi({ example: 'new.email@example.com' }),
-  current_password: z.string().min(1).max(20),
+const UserChangeEmailRequestSchema = z.object({
+  email: z.email().min(10).max(50).toLowerCase().openapi({ example: 'new.email@example.com' }),
+  current_password: z.string().min(8).max(50).openapi({ example: 'Password123!' }),
 });
-export type UserChangeEmailRequest = z.infer<typeof UserChangeEmailRequestSchema>;
+type UserChangeEmailRequest = z.infer<typeof UserChangeEmailRequestSchema>;
 
-export const UserChangePasswordRequestSchema = z.object({
-  current_password: z.string().min(1).max(20),
-  new_password: z.string().min(1).max(20),
+const UserChangePasswordRequestSchema = z.object({
+  current_password: z.string().min(8).max(50).openapi({ example: 'Password123!' }),
+  new_password: z.string().min(8).max(50).openapi({ example: 'Password123!' }),
 });
-export type UserChangePasswordRequest = z.infer<typeof UserChangePasswordRequestSchema>;
+type UserChangePasswordRequest = z.infer<typeof UserChangePasswordRequestSchema>;
 
-export const UserDeleteAccountRequestSchema = z.object({
-  current_password: z.string().min(1).max(20),
+const UserDeleteAccountRequestSchema = z.object({
+  current_password: z.string().min(8).max(50).openapi({ example: 'Password123!' }),
   confirmation: z.literal('DELETE'),
 });
-export type UserDeleteAccountRequest = z.infer<typeof UserDeleteAccountRequestSchema>;
+type UserDeleteAccountRequest = z.infer<typeof UserDeleteAccountRequestSchema>;
 
-export const UserListSchema = z.array(UserSchema);
-export type UserList = z.infer<typeof UserListSchema>;
+const UserListSchema = z.array(UserSchema);
+type UserList = z.infer<typeof UserListSchema>;
 
-export const UserCreateRequestSchema = UserRowSchema.pick({
+const UserCreateRequestSchema = UserRowSchema.pick({
   email: true,
 }).required();
-export type UserCreateRequest = z.infer<typeof UserCreateRequestSchema>;
+type UserCreateRequest = z.infer<typeof UserCreateRequestSchema>;
 
-export const UserGetRequestSchema = z.object({
+const UserGetRequestSchema = z.object({
   id: z.uuid().openapi({ param: { in: 'path', name: 'id' }, example: 1 }),
 });
-export type UserGetRequest = z.infer<typeof UserGetRequestSchema>;
+type UserGetRequest = z.infer<typeof UserGetRequestSchema>;
 
-export const UserListRequestSchema = z
+const UserListRequestSchema = z
   .object({
-    search: z.string().trim().max(200),
+    search: z.string().max(200),
     limit: z.number().int().min(1).max(100),
     offset: z.number().int().min(0),
     sort: z.array(z.tuple([z.enum(['id', 'email', 'created_at', 'login_at', 'trial_ends_at']), z.enum(['asc', 'desc'])])).max(2),
   })
   .partial();
-export type UserListRequest = z.infer<typeof UserListRequestSchema>;
+type UserListRequest = z.infer<typeof UserListRequestSchema>;
 
-export const UserListResponseSchema = UserSchema.omit({
+const UserListResponseSchema = UserSchema.omit({
   password_hash: true,
   email_verification_token_hash: true,
 })
   .strip()
   .array();
-export type UserListResponse = z.infer<typeof UserListResponseSchema>;
+type UserListResponse = z.infer<typeof UserListResponseSchema>;
+
+export const UserSchemas = {
+  row: UserRowSchema,
+  rowInsert: UserRowInsertSchema,
+  rowUpdate: UserRowUpdateSchema,
+  user: UserSchema,
+  accountResponse: UserAccountResponseSchema,
+  changeEmailRequest: UserChangeEmailRequestSchema,
+  changePasswordRequest: UserChangePasswordRequestSchema,
+  deleteAccountRequest: UserDeleteAccountRequestSchema,
+  list: UserListSchema,
+  createRequest: UserCreateRequestSchema,
+  getRequest: UserGetRequestSchema,
+  listRequest: UserListRequestSchema,
+  listResponse: UserListResponseSchema,
+};
+
+export namespace IUser {
+  export type row = UserRow;
+  export type rowInsert = UserRowInsert;
+  export type rowUpdate = UserRowUpdate;
+  export type user = User;
+  export type accountResponse = UserAccountResponse;
+  export type changeEmailRequest = UserChangeEmailRequest;
+  export type changePasswordRequest = UserChangePasswordRequest;
+  export type deleteAccountRequest = UserDeleteAccountRequest;
+  export type list = UserList;
+  export type createRequest = UserCreateRequest;
+  export type getRequest = UserGetRequest;
+  export type listRequest = UserListRequest;
+  export type listResponse = UserListResponse;
+}

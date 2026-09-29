@@ -16,6 +16,7 @@
 - Prefer pure single-purpose functions; consider splitting functions beyond ~40 lines.
 - Use object-destructured named parameters. Define named input and return types for multiple values/complex objects; do not for a simple single-primitive return. Prefer readable, not overcomplicated, typings.
 - Define each entity/pg schema and controller request/response payload in `services/types`.
+- Never use `private` methods or properties in classes.
 
 ## Entities
 
@@ -47,12 +48,19 @@ cli.ts                        # CLI commands definitions
 ```
 - Use `console.log`/`console.error` appropriately. Throw `new <HttpError>(<code>, <message>)` in controllers/services/repositories; thrown errors are constants. Validate request input and response output. Document API inputs/outputs. Provide API health-check endpoint returning API state.
 - Do not repeat resource name in method names: `UserService.greetUser()` incorrect; `UserService.greet()` correct.
-- Don't create custom repository methods unless strictly necessary, use the Repository baseclass for datasource access.
-- Assume all timestamp columns are returned from postgres as iso8601 by the parsers applied.
+- Don't create custom repository methods unless strictly necessary, use the custom ResourceRepository extending the Repository baseclass exported by `nano-fw` for datasource access.
+- Assume all timestamp columns are returned from postgres as iso8601.
+- Every `packages/api/src/**/*Service.ts` must export `default class <Resource>Service`; service methods must be `static async`. Services must not access database clients directly and must use repositories. 
+- Every `packages/api/src/**/*Repository.ts` must extend `Repository` from `nano-fw/database/Repository.ts` and export a configured singleto (repository uses postgres)
+- Never use `pg` object outside of repositories.
 
 ## Frontend
 
-- React: functional components/hooks. Each component: own named file; `export const Component = () => {}`; `<ComponentName>Props` type above; built-in hooks via `React` namespace (e.g., `React.useState()`). Use `useMemo`/`useCallback` only when React Compiler does not optimize them and performance benefit exceeds maintenance cost; custom hooks only when reuse/performance benefit exceeds maintenance cost. Avoid external libraries unless strictly necessary; always assess bundle-size impact. No nested JSX ternaries; use early-return/guard clauses for multi-branch rendering or clean single-level conditions.
+- React: functional components/hooks. Each component: own named file; `export const Component = () => {}`; `<ComponentName>Props` type above; built-in hooks via `React` namespace (e.g., `React.useState()`). 
+- Use `useMemo`/`useCallback` only when React Compiler does not optimize them and performance benefit exceeds maintenance cost; custom hooks only when reuse/performance benefit exceeds maintenance cost. 
+- Avoid external libraries unless strictly necessary; always assess bundle-size impact. 
+- No ternaries in JSX; use single-line if conditions to render or not render blocks.
+- No nested JSX ternaries; use early-return/guard clauses for multi-branch rendering or clean single-level conditions.
 - Style: Tailwind utilities. Put frequent reused styles in reusable `ui/` components. Avoid inline `style` unless dynamically computed; avoid CSS-in-JS. 
 - Classname: every component accepts am optional `className` prop as the first prop, which is passed after the default classes to the root element of the component.
 - Use `cx` from `classnames` to combine multiple classnames, cx is imported from `clsx-tw`; don't use string interpolation.

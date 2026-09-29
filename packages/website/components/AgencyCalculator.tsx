@@ -6,10 +6,10 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Input } from 'ui/form';
 
 const plans = [
-  { name: 'Start', sites: 1, price: 4 },
-  { name: 'Grow', sites: 5, price: 10 },
-  { name: 'Scale', sites: 20, price: 30 },
-  { name: 'Expand', sites: Infinity, price: 99 },
+  { name: 'Free', sites: 1, price: 0 },
+  { name: 'Solo', sites: 3, price: 12 },
+  { name: 'Agency', sites: 15, price: 39 },
+  { name: 'Studio', sites: 50, price: 99 },
 ];
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
@@ -50,7 +50,7 @@ export const AgencyCalculator = ({ className }: { className?: string }) => {
         </div>
         <div className="mt-8 rounded-2xl bg-white p-6 text-pulsio-ink">
           <p className="text-pulsio-muted text-sm">
-            Minimum Pulsio plan:{' '}
+            Minimum Pulsio plan:
             <strong className="text-pulsio-ink">
               {plan.name} · {money.format(plan.price)}/month
             </strong>
