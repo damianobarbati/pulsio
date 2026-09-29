@@ -18,7 +18,7 @@ const envSchema = z
     STRIPE_WS_SECRET_KEY: z.string().min(1),
     SUPERADMIN_EMAIL: z.email().min(1),
     COOKIE_DOMAIN: z.string().nullable(),
-    JWT_SECRET: z.string().min(7),
+    JWT_SECRET: z.string().min(6),
     API_URL: z.url().min(1),
     WEBSITE_URL: z.url().min(1),
     WEBAPP_URL: z.url().min(1),
