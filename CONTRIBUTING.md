@@ -116,7 +116,7 @@ views/                  # route-level components (except shared layouts)
 ## Communication
 
 - If requirements unclear, ask clarification; ask confirmation on design decisions. English and ASD-STE100 Simplified Technical English (STE) only, for answers/code.
-- Be concise/direct; no chatty/verbose text, dashes, emojis, or wall of text. Complex plan: use HTML visualization. Clarification request: ELI12 mode. Never install dependencies without user confirmation.
+- Be concise/direct; no chatty/verbose text, dashes, emojis, or wall of text. Complex plan: use HTML visualization. Clarification request: ELI12 mode.
 
 ## Specs
 
