@@ -284,18 +284,18 @@ export default class EventRepository {
   }
 
   static async remove(id: string) {
-    await ch.query({ query: `ALTER TABLE events DELETE WHERE id = {id:UUID}`, query_params: { id }, clickhouse_settings: { mutations_sync: '1' } });
+    await ch.command({ query: `ALTER TABLE events DELETE WHERE id = {id:UUID}`, query_params: { id }, clickhouse_settings: { mutations_sync: '1' } });
     return true;
   }
 
   static async removeByUserID(id: string) {
-    await ch.query({ query: `ALTER TABLE events DELETE WHERE user_id = {id:UUID}`, query_params: { id }, clickhouse_settings: { mutations_sync: '1' } });
+    await ch.command({ query: `ALTER TABLE events DELETE WHERE user_id = {id:UUID}`, query_params: { id }, clickhouse_settings: { mutations_sync: '1' } });
     return true;
   }
 
   // domain is a string
   static async removeByDomain(domain: string) {
-    await ch.query({ query: `ALTER TABLE events DELETE WHERE domain = {domain:String}`, query_params: { domain }, clickhouse_settings: { mutations_sync: '1' } });
+    await ch.command({ query: `ALTER TABLE events DELETE WHERE domain = {domain:String}`, query_params: { domain }, clickhouse_settings: { mutations_sync: '1' } });
     return true;
   }
 }

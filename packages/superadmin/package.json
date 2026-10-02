@@ -23,7 +23,7 @@
     "swr": "^2.4.1",
     "tailwindcss": "^4.3.0",
     "ui": "workspace:*",
-    "wouter": "^3.11.0",
+    "wouter": "^3.13.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -36,8 +36,8 @@
     "jsdom": "^30.1.1",
     "rollup-plugin-visualizer": "^7.0.1",
     "serve": "^14.2.6",
-    "vite-plugin-static-copy": "^4.1.1",
     "types": "workspace:*",
-    "vite-plugin-compression2": "^2.5.3"
+    "vite-plugin-compression2": "^2.5.3",
+    "vite-plugin-static-copy": "^4.1.1"
   }
 }

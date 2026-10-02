@@ -8,9 +8,9 @@
     "test:load": "for f in load-scenarios/*.yml; do artillery run --config artillery.yml \"$f\" || exit 1; done"
   },
   "devDependencies": {
-    "@vitest/ui": "5.0.2",
+    "@vitest/ui": "5.0.3",
     "api": "workspace:*",
     "artillery": "^2.0.34",
-    "stripe": "^22.6.2"
+    "stripe": "^23.0.0"
   }
 }
