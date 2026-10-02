@@ -40,6 +40,7 @@ export {
   HiOutlineXMark as IClose,
 } from 'react-icons/hi2';
 export { PiTildeLight as ISame } from 'react-icons/pi';
+export { RiPulseAiFill as IUptime } from 'react-icons/ri';
 export {
   SiAndroid as IAndroid,
   SiApple as IApple,

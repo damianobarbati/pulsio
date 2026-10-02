@@ -67,6 +67,7 @@ export const Pricing = ({ className, interval: controlledInterval, onIntervalCha
             const price = isCustom ? 'Custom' : new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(rawPrice);
             const websites = isCustom ? 'Custom' : plan.max_domains.toLocaleString('en-US', { notation: 'compact' });
             const events = isCustom ? 'Custom events' : plan.max_events.toLocaleString('en-US', { notation: 'compact' });
+            const monitors = isCustom ? 'Custom uptime monitors' : `${(plan.max_domains * 3).toLocaleString('en-US')} uptime monitors`;
             const isHighlightedPlan = (isCurrentPlan && !isSelectedPlan) || isSelectedPlan;
 
             return (
@@ -95,6 +96,10 @@ export const Pricing = ({ className, interval: controlledInterval, onIntervalCha
                   <li>
                     <span className="mr-2 text-pulsio-blue">✓</span>
                     <strong>{events} events/mo</strong>
+                  </li>
+                  <li>
+                    <span className="mr-2 text-pulsio-blue">✓</span>
+                    <strong>{monitors}</strong>
                   </li>
                   {plan.features.map((feature) => (
                     <li key={feature}>

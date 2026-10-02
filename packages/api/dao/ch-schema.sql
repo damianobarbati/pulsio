@@ -47,6 +47,18 @@ CREATE TABLE IF NOT EXISTS events
 PRIMARY KEY (domain_id, toDate(timestamp), name, user_id)
 ORDER BY (domain_id, toDate(timestamp), name, user_id, timestamp, id);
 
+CREATE TABLE IF NOT EXISTS pings
+(
+    monitor_id UUID,
+    timestamp DateTime64(3, 'UTC'),
+    success Bool,
+    status Nullable(UInt16),
+    duration_ms UInt32,
+    failure_reason String
+) ENGINE = MergeTree
+PARTITION BY toYYYYMM(timestamp)
+ORDER BY (monitor_id, timestamp);
+
 CREATE TABLE IF NOT EXISTS transactions
 (
     created_at     DateTime64(3, 'UTC') DEFAULT now64(3) CODEC(Delta(8), LZ4), -- Time when ClickHouse stored the event.

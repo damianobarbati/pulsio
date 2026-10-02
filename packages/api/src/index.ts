@@ -15,6 +15,7 @@ import { registerDomainRoutes } from '#api/domain/registerDomainRoutes.ts';
 import { registerEventRoutes } from '#api/event/registerEventRoutes.ts';
 import { registerPlanRoutes } from '#api/plan/registerPlanRoutes.ts';
 import { registerReportRoutes } from '#api/report/registerReportRoutes.ts';
+import { registerUptimeRoutes } from '#api/uptime/registerUptimeRoutes.ts';
 import { registerUserRoutes } from '#api/user/registerUserRoutes.ts';
 import { initScript } from '../scripts/init.ts';
 import ENV from './env.ts';
@@ -48,6 +49,7 @@ registerCurrencyRoutes(app);
 registerAnalyticsRoutes(app);
 registerReportRoutes(app);
 registerPlanRoutes(app);
+registerUptimeRoutes(app);
 
 // NB: keep after registering all the application routes or docs won't be generated!
 registerDocsRoute(app, '/', './docs-assets', {

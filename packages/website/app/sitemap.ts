@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: siteUrl.toString(), changeFrequency: 'weekly', priority: 1 },
     { url: new URL('/why-pulsio', siteUrl).toString(), changeFrequency: 'monthly', priority: 0.9 },
     { url: new URL('/for-agency', siteUrl).toString(), changeFrequency: 'monthly', priority: 0.9 },
+    { url: new URL('/uptime', siteUrl).toString(), changeFrequency: 'monthly', priority: 0.9 },
     { url: new URL('/how-to', siteUrl).toString(), changeFrequency: 'monthly', priority: 0.8 },
     { url: new URL('/terms', siteUrl).toString(), changeFrequency: 'yearly', priority: 0.3 },
     { url: new URL('/privacy', siteUrl).toString(), changeFrequency: 'yearly', priority: 0.3 },

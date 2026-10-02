@@ -15,6 +15,8 @@ import Home from '#webapp/views/Home.tsx';
 import HowTo from '#webapp/views/HowTo.tsx';
 import { Layout } from '#webapp/views/Layout.tsx';
 import Settings from '#webapp/views/Settings.tsx';
+import Status from '#webapp/views/Status.tsx';
+import Uptime from '#webapp/views/Uptime.tsx';
 
 await initializeI18n();
 
@@ -53,6 +55,7 @@ root.render(
                 <Route path="/share/:token">
                   <Home publicShare className="min-h-screen bg-slate-50 px-5 pt-5 pb-15 sm:px-8 lg:px-9" />
                 </Route>
+                <Route path="/status/:slug">{(params) => <Status slug={params.slug} />}</Route>
                 <Route path="/auth">
                   <Auth title="Pulsio Login" role="user" />
                 </Route>
@@ -67,6 +70,9 @@ root.render(
                       </Route>
                       <Route path="/domains">
                         <Domains />
+                      </Route>
+                      <Route path="/uptime">
+                        <Uptime />
                       </Route>
                       <Route path="/settings">
                         <Settings />

@@ -228,6 +228,37 @@ create table plans (
   unique (name, valid_from)
 );
 
+create table uptime_groups (
+  id uuid primary key default uuidv7(),
+  created_at timestamptz(0) not null default now()::timestamptz(0),
+  updated_at timestamptz(0) not null default now()::timestamptz(0),
+  user_id uuid not null references users (id) on delete cascade,
+  label text not null,
+  public boolean not null default false,
+  slug text not null unique
+);
+
+create index uptime_groups_user_id on uptime_groups (user_id);
+
+create table uptime_monitors (
+  id uuid primary key default uuidv7(),
+  created_at timestamptz(0) not null default now()::timestamptz(0),
+  updated_at timestamptz(0) not null default now()::timestamptz(0),
+  group_id uuid not null references uptime_groups (id) on delete cascade,
+  label text not null,
+  url text not null,
+  auth_mode text not null check (auth_mode in ('none', 'headers')) default 'none',
+  headers jsonb not null default '[]',
+  recipients text[] not null default '{}',
+  enabled boolean not null default true,
+  threshold_seconds numeric not null,
+  state text not null check (state in ('up', 'down')) default 'up',
+  failed_at timestamptz(0),
+  notified_at timestamptz(0)
+);
+
+create index uptime_monitors_group_id on uptime_monitors (group_id);
+
 alter table plans
 add constraint plans_monthly_price_check_positive check (monthly_price>=0);
 
@@ -252,4 +283,12 @@ execute function set_updated_at ();
 
 create trigger checkout_attempts_set_updated_at
 before update on checkout_attempts for each row
+execute function set_updated_at ();
+
+create trigger uptime_groups_set_updated_at
+before update on uptime_groups for each row
+execute function set_updated_at ();
+
+create trigger uptime_monitors_set_updated_at
+before update on uptime_monitors for each row
 execute function set_updated_at ();

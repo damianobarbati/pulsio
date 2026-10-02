@@ -3,7 +3,7 @@ import * as React from 'react';
 import useSWRMutation from 'swr/mutation';
 import { MPOST } from 'ui/api/fetchers.ts';
 import { NavLink } from 'ui/component/NavLink.tsx';
-import { ICard, IChart, ICode, IGlobe, ILogoutLeft, ISettings } from 'ui/icons.tsx';
+import { ICard, IChart, ICode, IGlobe, ILogoutLeft, ISettings, IUptime } from 'ui/icons.tsx';
 
 export const Nav = ({ className }: { className?: string }) => {
   const logout = useSWRMutation('/auth/logout', MPOST);
@@ -33,6 +33,10 @@ export const Nav = ({ className }: { className?: string }) => {
         <NavLink className="nav-btn" to="/domains">
           <IGlobe size={20} />
           Domains
+        </NavLink>
+        <NavLink className="nav-btn" to="/uptime">
+          <IUptime size={20} />
+          Uptime
         </NavLink>
         <NavLink className="nav-btn" to="/billing">
           <ICard size={20} />
