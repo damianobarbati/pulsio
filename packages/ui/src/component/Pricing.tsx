@@ -111,13 +111,11 @@ export const Pricing = ({ className, interval: controlledInterval, onIntervalCha
           })}
         </div>
       )}
-      <p className="mt-4 font-bold text-sm">
+      <a className="m-auto mt-4 flex w-max flex-row gap-1 font-bold text-sm" href="/contact-us">
         <span>Need more? Contact us</span>
-        <a className="text-pulsio-blue" href="/contact">
-          here
-        </a>
+        <span className="text-pulsio-blue">here</span>
         <span>.</span>
-      </p>
+      </a>
     </div>
   );
 };

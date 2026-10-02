@@ -4,12 +4,12 @@ import { faker } from '@faker-js/faker';
 import { type Browser, type BrowserContext, chromium, type Page } from 'playwright';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-const JOHN_DOE_ID = '1a0af49-49a7-7c68-8b35-12a3e7804984';
+const FOX_MULDER_ID = '01a0e80e-8409-7649-a5ae-01f82be03c60';
 
 const html = `
 <html lang="en">
   <head>
-    <script async src="https://api.pulsio.live/client.dist.js" data-pulsio-id="${JOHN_DOE_ID}"></script>
+    <script async src="https://api.pulsio.live/client.dist.js" data-pulsio-id="${FOX_MULDER_ID}"></script>
   </head>
   <body>
     <h1>Tracking script test</h1>
@@ -21,7 +21,7 @@ const html = `
 const domApiHtml = `
 <html lang="en">
   <head>
-    <script async src="https://api.pulsio.live/client.dist.js" data-pulsio-id="${JOHN_DOE_ID}"></script>
+    <script async src="https://api.pulsio.live/client.dist.js" data-pulsio-id="${FOX_MULDER_ID}"></script>
   </head>
   <body>
     <span hidden data-pulsio-event="subscription" data-pulsio-trigger="present" data-pulsio-props='{"newsletter":"Dogs & Cats"}'></span>
@@ -36,7 +36,7 @@ const domApiHtml = `
 const jsApiHtml = `
 <html lang="en">
   <head>
-    <script async src="https://api.pulsio.live/client.dist.js" data-pulsio-id="${JOHN_DOE_ID}"></script>
+    <script async src="https://api.pulsio.live/client.dist.js" data-pulsio-id="${FOX_MULDER_ID}"></script>
   </head>
   <body></body>
 </html>
@@ -79,7 +79,7 @@ describe('client.ts', () => {
     expect(eventSent).toMatchObject({
       version: '1',
       event_name: 'view',
-      user_id: '1a0af49-49a7-7c68-8b35-12a3e7804984',
+      user_id: FOX_MULDER_ID,
       url: 'https://app.test/',
       referrer: null,
       width: 1366,
@@ -145,7 +145,7 @@ describe('client.ts', () => {
     expect(interactionEvent).toMatchObject({
       version: '1',
       event_name: 'interaction',
-      user_id: '1a0af49-49a7-7c68-8b35-12a3e7804984',
+      user_id: FOX_MULDER_ID,
       url: 'https://app.test/',
       referrer: null,
       width: 1366,

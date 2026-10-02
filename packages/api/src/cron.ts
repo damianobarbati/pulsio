@@ -1,5 +1,6 @@
 import { scheduleJob } from 'node-schedule';
 import DomainService from '#api/domain/DomainService.ts';
+import ReportService from '#api/report/ReportService.ts';
 import { ch } from '#dao/ch.ts';
 
 const printClickhouseLatency = async () => {
@@ -12,3 +13,11 @@ const printClickhouseLatency = async () => {
 
 scheduleJob('*/1 * * * *', printClickhouseLatency);
 scheduleJob('*/1 * * * *', DomainService.syncEventCounts);
+scheduleJob('*/1 * * * *', async () => {
+  try {
+    const sent = await ReportService.sendScheduled();
+    if (sent) console.log(`Reports sent: ${sent}`);
+  } catch (error) {
+    console.error('Scheduled report sending failed:', error);
+  }
+});

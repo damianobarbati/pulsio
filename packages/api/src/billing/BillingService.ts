@@ -46,6 +46,12 @@ export default class BillingService {
     const user = await UserRepository.getBy({ id: user_id });
     const customer_email = user.email;
 
+    const checkoutAttempt = await CheckoutAttemptRepository.create({
+      user_id,
+      plan: input.plan as ICheckoutAttempt.rowInsert['plan'],
+      recurrence: input.recurrence,
+    });
+
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [
@@ -70,16 +76,11 @@ export default class BillingService {
     });
     if (!session.url) throw new AppError(502, 'STRIPE_CHECKOUT_UNAVAILABLE', 'Stripe did not return a checkout URL.');
 
-    const checkoutAttempt: ICheckoutAttempt.rowInsert = {
-      user_id,
-      plan: input.plan as ICheckoutAttempt.rowInsert['plan'],
-      recurrence: input.recurrence,
+    await CheckoutAttemptRepository.update(checkoutAttempt.id, {
       stripe_session_id: session.id,
       url: session.url,
       expires_at: new Date(session.expires_at * 1000).toISOString(),
-    };
-
-    await CheckoutAttemptRepository.create(checkoutAttempt);
+    });
 
     return { url: session.url };
   }

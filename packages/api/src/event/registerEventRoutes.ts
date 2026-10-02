@@ -1,7 +1,18 @@
-import type { Hono } from 'hono';
+import type { Hono, MiddlewareHandler } from 'hono';
 import { registerRoute } from 'nano-fw/docs/index.ts';
+import z from 'nano-fw/zod.ts';
 import { CommonSchemas } from 'types/common.ts';
-import EventService from '#api/event/EventService.ts';
+import EventService, { randomUUIDv7 } from '#api/event/EventService.ts';
+
+const MAX_EVENT_BODY_BYTES = 64_000;
+
+const eventBodyLimit: MiddlewareHandler = async (c, next) => {
+  const contentLength = Number(c.req.header('content-length') || 0);
+  if (contentLength > MAX_EVENT_BODY_BYTES) {
+    return c.json(randomUUIDv7());
+  }
+  await next();
+};
 
 export const registerEventRoutes = (app: Hono) => {
   registerRoute(app, {
@@ -9,8 +20,8 @@ export const registerEventRoutes = (app: Hono) => {
     path: '/event',
     meta: { section: 'Event', description: 'Ingest the event.' },
     requestSchema: CommonSchemas.any,
-    responseSchema: CommonSchemas.any,
-    middlewares: [],
+    responseSchema: z.uuid(),
+    middlewares: [eventBodyLimit],
     handler: async (params, c) => {
       const headers = {
         ip: c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for')?.split(',')[0].trim() || null,

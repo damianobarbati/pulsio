@@ -43,23 +43,19 @@ export default async function Home({ className }: { className?: string }) {
             <span className="text-pulsio-blue">made simple.</span>
           </h1>
           <p className="mt-7 max-w-xl text-ink/75 text-lg leading-relaxed">
-            See what’s happening on your website in real time.
+            Understand what happens on your website with live, privacy-friendly analytics.
             <br />
-            Privacy-first, developer-friendly, fairly priced.
+            Track pages, sources, events, conversions, and revenue without adding a visitor profile.
+            <br />
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-5">
             <Link href="/start-tracking" className="rounded-sm bg-pulsio-blue px-7 py-4 font-bold text-white">
-              Get started free
+              Use for free
             </Link>
             <a href={`${config.WEBAPP_URL}/share/pulsio`} className="rounded-sm border border-pulsio-line bg-white px-7 py-4 font-bold">
               See live demo
             </a>
           </div>
-          <ul className="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-pulsio-muted text-sm">
-            <li>✓ No credit card required</li>
-            <li>✓ Set up in minutes</li>
-            <li>✓ Privacy-friendly</li>
-          </ul>
         </div>
         <div className="bg-blue-100">
           <img src={screenshot.src} />
@@ -68,10 +64,10 @@ export default async function Home({ className }: { className?: string }) {
       <section className="bg-pulsio-nav py-7">
         <div className="mx-auto grid max-w-[1400px] gap-5 px-6 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { title: 'Real-time insights', text: 'See what’s happening as it happens.', Icon: IChart },
-            { title: 'Privacy by design', text: 'No cookies, no personal data, no compromises.', Icon: ILock },
-            { title: 'Blazing fast', text: 'Lightweight, modern and built for performance.', Icon: IBolt },
-            { title: 'Made for builders', text: 'All the data you need, none of the clutter.', Icon: IShield },
+            { title: 'Live website data', text: 'Monitor current visitors and recent activity from one dashboard.', Icon: IChart },
+            { title: 'Cookieless tracking', text: 'Measure website activity without tracking cookies or a cookie banner.', Icon: ILock },
+            { title: 'Small client script', text: 'Send page views and events with a lightweight asynchronous script.', Icon: IBolt },
+            { title: 'Useful reports', text: 'Explore sources, content, technology, locations, events, and revenue.', Icon: IShield },
           ].map(({ title, text, Icon }) => {
             return (
               <article key={title} className="flex gap-4 border-pulsio-line px-5">
@@ -87,11 +83,21 @@ export default async function Home({ className }: { className?: string }) {
           })}
         </div>
       </section>
-      <section id="pricing" className="mx-auto max-w-[1400px] scroll-mt-8 px-6 py-16 text-center">
+      <section className="mx-auto max-w-[1400px] px-6 py-16 text-center">
         <p className="font-bold text-pulsio-blue text-xs uppercase tracking-wider">Simple, transparent pricing</p>
         <h2 className="mt-3 font-bold text-3xl tracking-tight sm:text-4xl">Start free. Scale when needed.</h2>
         <p className="mt-2 text-pulsio-muted">All plans include real-time analytics, core reports, and privacy-friendly tracking.</p>
-        <Pricing />
+        <div id="pricing" className="scroll-mt-0">
+          <Pricing />
+        </div>
+        <aside className="mx-auto mt-12 max-w-3xl rounded-sm bg-pulsio-ink px-6 py-10 text-white sm:px-12">
+          <p className="font-bold text-pulsio-blue text-xs uppercase tracking-wider">Start today</p>
+          <h2 className="mt-3 font-bold text-3xl tracking-tight">Get started with Pulsio for free.</h2>
+          <p className="mx-auto mt-3 max-w-xl text-white/75">Create your account, add one small script, and start seeing your website data.</p>
+          <Link href="/start-tracking" className="mt-7 inline-flex rounded-sm bg-pulsio-blue px-7 py-4 font-bold text-white">
+            Use for free
+          </Link>
+        </aside>
       </section>
     </div>
   );

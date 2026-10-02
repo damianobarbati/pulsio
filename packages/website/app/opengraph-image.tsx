@@ -26,7 +26,7 @@ export default function OpenGraphImage() {
         <div style={{ display: 'flex', fontSize: 32, opacity: 0.76 }}>Privacy-first. Developer-friendly. Fairly priced.</div>
       </div>
       <div style={{ alignItems: 'center', background: '#d4f47d', borderRadius: 999, display: 'flex', fontSize: 24, fontWeight: 700, padding: '16px 28px', width: 'auto' }}>
-        From $4 per month
+        Free to start. Clear pricing as you grow.
       </div>
     </div>,
     size,

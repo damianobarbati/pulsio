@@ -20,7 +20,7 @@ export default function ForAgency({ className }: { className?: string }) {
           <p className="font-bold text-pulsio-blue text-xs uppercase tracking-wider">Pulsio for agencies</p>
           <h1 className="mt-4 font-bold text-5xl leading-[1.02] tracking-tighter sm:text-6xl">Turn client analytics into a service.</h1>
           <p className="mt-7 max-w-2xl text-ink/75 text-lg leading-relaxed">
-            Track every client site in one place, launch campaigns, and measure revenue precisely. Give clients branded dashboards and automatic reports without extra tools.
+            Track every client site in one place, measure campaign traffic and revenue events, and give clients branded dashboards with automatic reports.
           </p>
           <div className="mt-9 flex flex-wrap gap-4">
             <Link href="/start-tracking" className="rounded-sm bg-pulsio-blue px-7 py-4 font-bold text-white">
@@ -35,8 +35,8 @@ export default function ForAgency({ className }: { className?: string }) {
           {[
             ['All clients, one workspace', 'Switch between every client website and campaign without changing tools.'],
             ['Branded shared dashboards', 'Create revocable, password-free links that use your agency name and logo.'],
-            ['Automatic reports', 'Send weekly or monthly summaries with essential metrics, top pages, and sources.'],
-            ['Revenue you can prove', 'Track conversions and revenue accurately, then show the results to clients.'],
+            ['Automatic reports', 'Send daily, weekly, or monthly summaries with essential metrics, top pages, and sources.'],
+            ['Revenue reporting', 'Track conversion events and revenue events, then share the results with clients.'],
           ].map(([title, text]) => (
             <article key={title} className="rounded-2xl bg-white p-5">
               <h2 className="font-bold">{title}</h2>

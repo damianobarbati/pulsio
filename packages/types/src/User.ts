@@ -17,7 +17,7 @@ const UserRowSchema = z
     email_verification_expires_at: z.iso.datetime({ offset: true }).nullable(),
     trial_ends_at: z.iso.datetime({ offset: true }),
     name: z.string().min(1).max(80).nullable(),
-    logo: z.url().max(200).nullable(),
+    primary_color: z.string().max(10).nullable(),
     autodiscover_enabled: z.boolean(),
     stripe_customer_id: z.string().min(1).max(255).nullable().optional(),
   })
@@ -29,7 +29,7 @@ const systemKeys = { id: true, created_at: true, updated_at: true } as const;
 const nullableKeys = {
   role: true,
   name: true,
-  logo: true,
+  primary_color: true,
   login_at: true,
   password_changed_at: true,
   suspended_at: true,
@@ -54,6 +54,9 @@ type User = z.infer<typeof UserSchema>;
 const UserAccountResponseSchema = UserSchema.omit({ password_hash: true, email_verification_token_hash: true });
 type UserAccountResponse = z.infer<typeof UserAccountResponseSchema>;
 
+const UserBrandResponseSchema = UserSchema.pick({ name: true, primary_color: true });
+type UserBrandResponse = z.infer<typeof UserBrandResponseSchema>;
+
 const UserChangeEmailRequestSchema = z.object({
   email: z.email().min(10).max(50).toLowerCase().openapi({ example: 'new.email@example.com' }),
   current_password: z.string().min(8).max(50).openapi({ example: 'Password123!' }),
@@ -71,6 +74,15 @@ const UserDeleteAccountRequestSchema = z.object({
   confirmation: z.literal('DELETE'),
 });
 type UserDeleteAccountRequest = z.infer<typeof UserDeleteAccountRequestSchema>;
+
+const UserBrandUpdateRequestSchema = z.object({
+  name: z.string().trim().min(1).max(80).nullable(),
+  primary_color: z.string().max(10).nullable(),
+});
+type UserBrandUpdateRequest = z.infer<typeof UserBrandUpdateRequestSchema>;
+
+const UserSettingsUpdateRequestSchema = z.object({ autodiscover_enabled: z.boolean() });
+type UserSettingsUpdateRequest = z.infer<typeof UserSettingsUpdateRequestSchema>;
 
 const UserListSchema = z.array(UserSchema);
 type UserList = z.infer<typeof UserListSchema>;
@@ -109,9 +121,12 @@ export const UserSchemas = {
   rowUpdate: UserRowUpdateSchema,
   user: UserSchema,
   accountResponse: UserAccountResponseSchema,
+  brandResponse: UserBrandResponseSchema,
   changeEmailRequest: UserChangeEmailRequestSchema,
   changePasswordRequest: UserChangePasswordRequestSchema,
   deleteAccountRequest: UserDeleteAccountRequestSchema,
+  brandUpdateRequest: UserBrandUpdateRequestSchema,
+  settingsUpdateRequest: UserSettingsUpdateRequestSchema,
   list: UserListSchema,
   createRequest: UserCreateRequestSchema,
   getRequest: UserGetRequestSchema,
@@ -125,9 +140,12 @@ export namespace IUser {
   export type rowUpdate = UserRowUpdate;
   export type user = User;
   export type accountResponse = UserAccountResponse;
+  export type brandResponse = UserBrandResponse;
   export type changeEmailRequest = UserChangeEmailRequest;
   export type changePasswordRequest = UserChangePasswordRequest;
   export type deleteAccountRequest = UserDeleteAccountRequest;
+  export type brandUpdateRequest = UserBrandUpdateRequest;
+  export type settingsUpdateRequest = UserSettingsUpdateRequest;
   export type list = UserList;
   export type createRequest = UserCreateRequest;
   export type getRequest = UserGetRequest;

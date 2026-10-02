@@ -1,0 +1,79 @@
+{
+  "periods": {
+    "today": "Aujourd’hui",
+    "yesterday": "Hier",
+    "last7Days": "7 derniers jours",
+    "last30Days": "30 derniers jours",
+    "last90Days": "90 derniers jours",
+    "last12Months": "12 derniers mois",
+    "monthToDate": "Mois en cours",
+    "yearToDate": "Année en cours",
+    "allTime": "Depuis toujours"
+  },
+  "filters": { "selectedWebsites": "Sites sélectionnés", "selectWebsites": "Sélectionner des sites", "datePeriod": "Période", "compare": "Comparer" },
+  "home": {
+    "choosePlan": "Choisissez une offre pour voir vos analyses",
+    "accountLimit": "Votre compte possède {{domains}} et {{events}}. Cela dépasse les limites de votre offre {{plan}} actuelle.",
+    "goToBilling": "Accéder à la facturation",
+    "noEventsTitle": "Aucun événement reçu",
+    "noEventsDescription": "Aucun événement n’a été reçu. Ajoutez ce snippet dans le <head> de votre site, publiez-le, puis consultez votre site.",
+    "selectWebsite": "Sélectionnez un site pour voir les analyses.",
+    "loadAnalyticsError": "Impossible de charger les analyses. Réessayez.",
+    "liveNow": "En direct",
+    "users": "Utilisateurs",
+    "sessions": "Sessions",
+    "sessionViews": "Vues de session",
+    "sessionTime": "Durée de session",
+    "engagement": "Engagement",
+    "conversion": "Conversion",
+    "transactions": "Transactions",
+    "revenue": "Revenus",
+    "transactionRevenue": "Revenus par transaction",
+    "updatingChart": "Mise à jour du graphique",
+    "accountLogo": "Logo du compte"
+  },
+  "counts": { "domains_one": "{{count}} domaine", "domains_other": "{{count}} domaines", "events_one": "{{count}} événement", "events_other": "{{count}} événements" },
+  "acquisition": {
+    "reports": "Rapports d’acquisition",
+    "sources": "Sources",
+    "channels": "Canaux",
+    "source": "Source",
+    "uniqueVisitors": "Visiteurs uniques",
+    "visits": "Visites",
+    "loadError": "Impossible de charger les données d’acquisition. Réessayez.",
+    "empty": "Aucune donnée d’acquisition pour cette période."
+  },
+  "device": {
+    "demographics": "Données des appareils",
+    "browsers": "Navigateurs",
+    "operatingSystem": "Système d’exploitation",
+    "device": "Appareil",
+    "name": "Nom",
+    "users": "Utilisateurs",
+    "loadError": "Impossible de charger les données des appareils. Réessayez.",
+    "empty": "Aucune donnée pour cette période."
+  },
+  "location": {
+    "demographics": "Données de localisation",
+    "worldMap": "Carte du monde",
+    "countries": "Pays",
+    "regions": "Régions",
+    "cities": "Villes",
+    "name": "Nom",
+    "users": "Utilisateurs",
+    "usersByCountry": "Utilisateurs par pays",
+    "loadError": "Impossible de charger les données de localisation. Réessayez.",
+    "empty": "Aucune donnée pour cette période."
+  },
+  "goals": {
+    "title": "Objectifs",
+    "searchEvents": "Rechercher des événements",
+    "event": "Événement",
+    "count": "Nombre",
+    "users": "Utilisateurs",
+    "conversionRate": "Taux de conversion %",
+    "loadError": "Impossible de charger les événements. Réessayez.",
+    "matching": "Aucun événement correspondant.",
+    "empty": "Aucun événement personnalisé trouvé."
+  }
+}

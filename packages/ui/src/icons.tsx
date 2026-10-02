@@ -23,6 +23,7 @@ export {
   HiOutlineCheck as ICheck,
   HiOutlineChevronDown as ChevronDown,
   HiOutlineClipboardDocument as ICopy,
+  HiOutlineCodeBracket as ICode,
   HiOutlineCog6Tooth as ISettings,
   HiOutlineCreditCard as ICard,
   HiOutlineDocumentText as IReport,

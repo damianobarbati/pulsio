@@ -199,39 +199,80 @@ export default class EventRepository {
 
   static async getAcquisition({ domains, from, to, dimension }: IAnalytics.acquisitionRequest): Promise<IAnalytics.acquisitionResponse> {
     const dimensions: Record<IAnalytics.acquisitionDimension, string> = {
-      source: "ifNull(nullIf(source, ''), 'Direct')",
-      channel: "ifNull(nullIf(channel, ''), 'Direct')",
-      utm_source: "if(utm_source = '', 'None', utm_source)",
-      utm_medium: "if(utm_medium = '', 'None', utm_medium)",
-      utm_campaign: "if(utm_campaign = '', 'None', utm_campaign)",
-      utm_content: "if(utm_content = '', 'None', utm_content)",
-      utm_term: "if(utm_term = '', 'None', utm_term)",
+      source: "ifNull(nullIf(first_source, ''), 'Direct')",
+      channel: "ifNull(nullIf(first_channel, ''), 'Direct')",
+      utm_source: "if(first_utm_source = '', 'None', first_utm_source)",
+      utm_medium: "if(first_utm_medium = '', 'None', first_utm_medium)",
+      utm_campaign: "if(first_utm_campaign = '', 'None', first_utm_campaign)",
+      utm_content: "if(first_utm_content = '', 'None', first_utm_content)",
+      utm_term: "if(first_utm_term = '', 'None', first_utm_term)",
     };
     const result = await ch.query({
       query: `
-        WITH filtered AS (
-          SELECT domain, visitor_hash, ${dimensions[dimension]} AS name
+        WITH ordered AS (
+          SELECT *, lagInFrame(timestamp, 1, toDateTime64('1970-01-01 00:00:00', 3, 'UTC')) OVER visitor AS previous_timestamp
           FROM events
           WHERE domain IN {domains:Array(String)}
             AND timestamp >= parseDateTime64BestEffort({from:String}, 3, 'UTC')
             AND timestamp < parseDateTime64BestEffort({to:String}, 3, 'UTC')
-        ), total_users AS (
-          SELECT uniqExact((domain, visitor_hash)) AS users FROM filtered
+          WINDOW visitor AS (PARTITION BY domain, visitor_hash, toDate(timestamp) ORDER BY timestamp, id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+        ), marked AS (
+          SELECT *, if(timestamp > previous_timestamp + INTERVAL 30 MINUTE, 1, 0) AS new_session
+          FROM ordered
+        ), numbered AS (
+          SELECT *, sum(new_session) OVER (PARTITION BY domain, visitor_hash, toDate(timestamp) ORDER BY timestamp, id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS session_number
+          FROM marked
+        ), sessions AS (
+          SELECT
+            domain,
+            visitor_hash,
+            session_number,
+            argMinIf(channel, tuple(timestamp, id), name = 'view') AS first_pageview_channel,
+            argMinIf(source, tuple(timestamp, id), name = 'view') AS first_pageview_source,
+            argMinIf(utm_source, tuple(timestamp, id), name = 'view') AS first_pageview_utm_source,
+            argMinIf(utm_medium, tuple(timestamp, id), name = 'view') AS first_pageview_utm_medium,
+            argMinIf(utm_campaign, tuple(timestamp, id), name = 'view') AS first_pageview_utm_campaign,
+            argMinIf(utm_content, tuple(timestamp, id), name = 'view') AS first_pageview_utm_content,
+            argMinIf(utm_term, tuple(timestamp, id), name = 'view') AS first_pageview_utm_term,
+            argMin(channel, tuple(timestamp, id)) AS first_event_channel,
+            argMin(source, tuple(timestamp, id)) AS first_event_source,
+            argMin(utm_source, tuple(timestamp, id)) AS first_event_utm_source,
+            argMin(utm_medium, tuple(timestamp, id)) AS first_event_utm_medium,
+            argMin(utm_campaign, tuple(timestamp, id)) AS first_event_utm_campaign,
+            argMin(utm_content, tuple(timestamp, id)) AS first_event_utm_content,
+            argMin(utm_term, tuple(timestamp, id)) AS first_event_utm_term
+          FROM numbered
+          GROUP BY domain, visitor_hash, toDate(timestamp), session_number
+        ), attributed AS (
+          SELECT
+            domain,
+            visitor_hash,
+            if(first_pageview_channel = '', first_event_channel, first_pageview_channel) AS first_channel,
+            if(first_pageview_source = '', first_event_source, first_pageview_source) AS first_source,
+            if(first_pageview_utm_source = '', first_event_utm_source, first_pageview_utm_source) AS first_utm_source,
+            if(first_pageview_utm_medium = '', first_event_utm_medium, first_pageview_utm_medium) AS first_utm_medium,
+            if(first_pageview_utm_campaign = '', first_event_utm_campaign, first_pageview_utm_campaign) AS first_utm_campaign,
+            if(first_pageview_utm_content = '', first_event_utm_content, first_pageview_utm_content) AS first_utm_content,
+            if(first_pageview_utm_term = '', first_event_utm_term, first_pageview_utm_term) AS first_utm_term
+          FROM sessions
+        ), total_visits AS (
+          SELECT count() AS visits FROM attributed
         )
         SELECT
-          name,
+          ${dimensions[dimension]} AS name,
           toUInt64(uniqExact((domain, visitor_hash))) AS users,
-          toFloat64(if(total_users.users > 0, 100 * users / total_users.users, 0)) AS percentage
-        FROM filtered
-        CROSS JOIN total_users
-        GROUP BY name, total_users.users
-        ORDER BY users DESC, name ASC
+          toUInt64(count()) AS visits,
+          toFloat64(if(total_visits.visits > 0, 100 * visits / total_visits.visits, 0)) AS percentage
+        FROM attributed
+        CROSS JOIN total_visits
+        GROUP BY name, total_visits.visits
+        ORDER BY visits DESC, name ASC
       `,
       query_params: { domains, from, to },
       format: 'JSONEachRow',
     });
     const rows = await result.json<IAnalytics.acquisitionResponse[number]>();
-    return rows.map((row) => ({ ...row, users: Number(row.users), percentage: Number(row.percentage) }));
+    return rows.map((row) => ({ ...row, users: Number(row.users), visits: Number(row.visits), percentage: Number(row.percentage) }));
   }
 
   static async getLiveVisitors({ domains }: { domains: string[] }): Promise<number> {

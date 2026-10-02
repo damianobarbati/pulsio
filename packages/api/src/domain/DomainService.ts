@@ -22,6 +22,17 @@ export default class DomainService {
     return domains;
   }
 
+  static async create({ user_id, domain }: IDomain.createRequest & { user_id: string }): Promise<IDomain.domain> {
+    const existingDomain = await DomainRepository.findBy({ domain });
+    if (existingDomain) {
+      if (existingDomain.user_id !== user_id) throw new AppError(409, 'DOMAIN_ALREADY_IN_USE', 'Domain is already in use.');
+      return existingDomain;
+    }
+
+    const createdDomain = await DomainRepository.create({ domain, user_id });
+    return createdDomain;
+  }
+
   static async update({ user_id, domainId, ...input }: IDomain.updateRequest & { user_id: string }): Promise<IDomain.domain> {
     const domain = await DomainService.getOwned({ domainId, user_id });
     const report_enabled = input.report_enabled ?? domain.report_enabled;

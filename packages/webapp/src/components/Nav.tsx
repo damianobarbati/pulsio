@@ -3,7 +3,7 @@ import * as React from 'react';
 import useSWRMutation from 'swr/mutation';
 import { MPOST } from 'ui/api/fetchers.ts';
 import { NavLink } from 'ui/component/NavLink.tsx';
-import { ICard, IChart, IGlobe, ILogoutLeft, ISettings } from 'ui/icons.tsx';
+import { ICard, IChart, ICode, IGlobe, ILogoutLeft, ISettings } from 'ui/icons.tsx';
 
 export const Nav = ({ className }: { className?: string }) => {
   const logout = useSWRMutation('/auth/logout', MPOST);
@@ -51,6 +51,11 @@ export const Nav = ({ className }: { className?: string }) => {
             {message}
           </p>
         )}
+        <div role="separator" className="my-2 border-pulsio-line border-t" />
+        <NavLink className="nav-btn" to="/how-to">
+          <ICode size={20} />
+          How to
+        </NavLink>
       </nav>
     </aside>
   );

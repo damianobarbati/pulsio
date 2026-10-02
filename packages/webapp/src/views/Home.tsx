@@ -1,12 +1,14 @@
 import cx from 'clsx-tw';
 import dayjs from 'dayjs';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
 import type { IAnalytics } from 'types/Analytics.ts';
 import type { IBilling } from 'types/Billing.ts';
 import type { IDomain } from 'types/Domain.ts';
+import type { IUser } from 'types/User.ts';
 import { Button, Card, Pulser, Spinner, TrackingSnippet } from 'ui';
-import { GET, POST } from 'ui/api/fetchers.ts';
+import { DOWNLOAD, GET, POST } from 'ui/api/fetchers.ts';
 import { ChartLine } from 'ui/component/ChartLine.tsx';
 import { toAmount, toDuration, toNumber, toRate } from '#webapp/helpers.ts';
 import { AcquisitionTable } from '../components/AcquisitionTable.tsx';
@@ -16,18 +18,6 @@ import { DeviceTable } from '../components/DeviceTable.tsx';
 import { GoalsTable } from '../components/GoalsTable.tsx';
 import { LocationTable } from '../components/LocationTable.tsx';
 
-const metricToFormatter = {
-  users_count: toNumber,
-  sessions_count: toNumber,
-  pageviews_per_session_avg: toNumber,
-  duration_per_session_avg: toDuration,
-  engagement_rate: toRate,
-  conversion_rate: toRate,
-  transactions_count: toNumber,
-  revenue_sum: (value) => toAmount(value, 'USD'),
-  revenue_per_transaction_avg: (value: number) => toAmount(value, 'USD'),
-};
-
 const defaultFilters = {
   domains: [] as string[],
   from: dayjs().startOf('year').toISOString(),
@@ -35,8 +25,18 @@ const defaultFilters = {
   compare: false,
 };
 
-export const Home = ({ className, publicShare = false }: { className?: string; publicShare?: boolean }) => {
-  const userSWR = useSWR<{ id: string }>(publicShare ? null : ['/auth/me'], GET, { suspense: !publicShare, shouldRetryOnError: false });
+type HomeProps = {
+  className?: string;
+  primaryColor?: string;
+  publicShare?: boolean;
+};
+
+export const Home = ({ className, primaryColor = '#055dfe', publicShare = false }: HomeProps) => {
+  const { t, i18n } = useTranslation();
+  const userSWR = useSWR<IUser.user | IUser.brandResponse>(publicShare ? ['/user/brand'] : ['/auth/me'], GET, {
+    suspense: true,
+    shouldRetryOnError: false,
+  });
   const billingSWR = useSWR<IBilling.summary>(publicShare ? null : ['/billing/summary'], GET, { suspense: true, shouldRetryOnError: false });
   const domainsSWR = useSWR<IDomain.listResponse>(['/domain/list'], POST, { suspense: true, shouldRetryOnError: false });
 
@@ -60,8 +60,39 @@ export const Home = ({ className, publicShare = false }: { className?: string; p
   const summary = billingSWR.data;
   const totalEvents = domains.reduce((total, domain) => total + domain.events_count, 0);
   const blocked = !publicShare && !!summary && (totalEvents > summary.plan.max_events || domains.length > summary.plan.max_domains);
-  const user = userSWR.data;
-  const snippet = user ? `<script async src="${new URL('/client.js', window.config.API_URL)}" data-pulsio-id="${user.id}"></script>` : '';
+  const user = userSWR.data ?? { name: null, primary_color: null };
+  const logoSWR = useSWR<Blob>(['/user/logo'], ([path]) => DOWNLOAD(path), { shouldRetryOnError: false });
+  const dashboardPrimaryColor = user.primary_color ?? primaryColor;
+  const authenticatedUser = userSWR.data && 'id' in userSWR.data ? userSWR.data : null;
+  const snippet = !publicShare && authenticatedUser ? `<script async src="${new URL('/client.js', window.config.API_URL)}" data-pulsio-id="${authenticatedUser.id}"></script>` : '';
+  const [logoUrl, setLogoUrl] = React.useState<string>();
+  const formatNumber = (value: number) => toNumber(value, '', i18n.language);
+  const formatDuration = (value: number) => toDuration(value);
+  const formatRate = (value: number) => toRate(value, '', i18n.language);
+  const formatAmount = (value: number) => toAmount(value, 'USD', '', i18n.language);
+  const metricToFormatter = {
+    users_count: formatNumber,
+    sessions_count: formatNumber,
+    pageviews_per_session_avg: formatNumber,
+    duration_per_session_avg: formatDuration,
+    engagement_rate: formatRate,
+    conversion_rate: formatRate,
+    transactions_count: formatNumber,
+    revenue_sum: formatAmount,
+    revenue_per_transaction_avg: formatAmount,
+  };
+
+  React.useEffect(() => {
+    if (!logoSWR.data) {
+      setLogoUrl(undefined);
+      return;
+    }
+
+    const url = URL.createObjectURL(logoSWR.data);
+    setLogoUrl(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [logoSWR.data]);
 
   const swrOptions = { keepPreviousData: true };
 
@@ -86,40 +117,47 @@ export const Home = ({ className, publicShare = false }: { className?: string; p
   }, [timeseries, selectedMetric, interval]);
 
   return (
-    <main className={className}>
-      <DashboardFilters className="w-full" onChange={setFilters} />
+    <main className={className} style={{ '--home-primary-color': dashboardPrimaryColor } as React.CSSProperties}>
+      <header className="space-between flex h-14 flex-row">
+        <DashboardFilters className="w-full" onChange={setFilters} />
+        {logoUrl && <img src={logoUrl} alt={t('home.accountLogo')} className="h-full max-w-48 object-contain p-1" />}
+      </header>
 
       <div className="relative">
         {blocked && (
           <div className="absolute inset-0 z-10 flex items-start justify-center bg-white/70 p-6 backdrop-blur-sm">
             <Card className="border-amber-200 bg-amber-50 text-center shadow-lg">
-              <h1 className="font-bold text-xl">Choose a plan to view your analytics</h1>
+              <h1 className="font-bold text-xl">{t('home.choosePlan')}</h1>
               <p className="mx-auto mt-2 max-w-xl text-pulsio-muted text-sm">
-                Your account has {domains.length} domains and {totalEvents.toLocaleString('en-US')} events. This is above the limits of your current {summary.plan.name} plan.
+                {t('home.accountLimit', {
+                  domains: t('counts.domains', { count: domains.length }),
+                  events: t('counts.events', { count: totalEvents }),
+                  plan: summary.plan.name,
+                })}
               </p>
               <Button className="mt-5" onClick={() => window.location.assign('/billing')}>
-                Go to Billing
+                {t('home.goToBilling')}
               </Button>
             </Card>
           </div>
         )}
 
-        {!publicShare && !domains.length && user && (
+        {!publicShare && !domains.length && authenticatedUser && (
           <TrackingSnippet
             className="mb-5"
             snippet={snippet}
-            title="No events received yet"
-            description="No events have been received. Add this snippet inside your website’s <head>, publish it, then visit your site."
+            title={t('home.noEventsTitle')}
+            description={t('home.noEventsDescription')}
             temporarySnippetUrl={`${window.config.WEBSITE_URL}/api/snippet`}
             temporarySnippetReplacements={{
               '${process.env.API_URL}': window.config.API_URL,
               '${process.env.WEBAPP_URL}': window.location.origin,
-              '${process.env.PULSIO_USER_ID}': user.id,
+              '${process.env.PULSIO_USER_ID}': authenticatedUser.id,
             }}
           />
         )}
-        {!filters.domains.length && <p className="text-center text-gray-600 text-sm">Select a website to view analytics.</p>}
-        {!!error && <p className="text-red-600 text-sm">Could not load analytics. Please try again.</p>}
+        {!filters.domains.length && <p className="text-center text-gray-600 text-sm">{t('home.selectWebsite')}</p>}
+        {!!error && <p className="text-red-600 text-sm">{t('home.loadAnalyticsError')}</p>}
         {!!filters.domains.length && !kpisSWR.data && !error && <Spinner size="lg" />}
 
         {!!kpis && (
@@ -130,83 +168,83 @@ export const Home = ({ className, publicShare = false }: { className?: string; p
                   label={
                     <span>
                       <Pulser className={cx('-ml-1', liveSWR.data ? 'text-emerald-500' : 'text-red-500')} active={!!liveSWR.data} />
-                      Live Now
+                      {t('home.liveNow')}
                     </span>
                   }
                   value={liveSWR.data ?? '...'}
                   selected={false}
-                  valueFormatter={toNumber}
+                  valueFormatter={formatNumber}
                 />
 
                 <DashboardKpi
-                  label="Users"
+                  label={t('home.users')}
                   value={kpis.users_count}
                   previousValue={previousKpisSWR.data?.users_count}
-                  valueFormatter={toNumber}
+                  valueFormatter={formatNumber}
                   selected={selectedMetric === 'users_count'}
                   onSelect={() => setSelectedMetric('users_count')}
                 />
                 <DashboardKpi
-                  label="Sessions"
+                  label={t('home.sessions')}
                   value={kpis.sessions_count}
                   previousValue={previousKpisSWR.data?.sessions_count}
-                  valueFormatter={toNumber}
+                  valueFormatter={formatNumber}
                   selected={selectedMetric === 'sessions_count'}
                   onSelect={() => setSelectedMetric('sessions_count')}
                 />
                 <DashboardKpi
-                  label="Session Views"
+                  label={t('home.sessionViews')}
                   value={kpis.pageviews_per_session_avg}
                   previousValue={previousKpisSWR.data?.pageviews_per_session_avg}
-                  valueFormatter={toNumber}
+                  valueFormatter={formatNumber}
                   selected={selectedMetric === 'pageviews_per_session_avg'}
                   onSelect={() => setSelectedMetric('pageviews_per_session_avg')}
                 />
                 <DashboardKpi
-                  label="Session Time"
+                  label={t('home.sessionTime')}
                   value={kpis.duration_per_session_avg}
                   previousValue={previousKpisSWR.data?.duration_per_session_avg}
-                  valueFormatter={toDuration}
+                  valueFormatter={formatDuration}
                   selected={selectedMetric === 'duration_per_session_avg'}
                   onSelect={() => setSelectedMetric('duration_per_session_avg')}
                 />
                 <DashboardKpi
-                  label="Engagement"
+                  label={t('home.engagement')}
                   value={kpis.engagement_rate}
                   previousValue={previousKpisSWR.data?.engagement_rate}
-                  valueFormatter={toRate}
+                  valueFormatter={formatRate}
                   selected={selectedMetric === 'engagement_rate'}
                   onSelect={() => setSelectedMetric('engagement_rate')}
                 />
                 <DashboardKpi
-                  label="Conversion"
+                  label={t('home.conversion')}
                   value={kpis.conversion_rate}
                   previousValue={previousKpisSWR.data?.conversion_rate}
-                  valueFormatter={toRate}
+                  valueFormatter={formatRate}
                   selected={selectedMetric === 'conversion_rate'}
                   onSelect={() => setSelectedMetric('conversion_rate')}
                 />
                 <DashboardKpi
-                  label="Transactions"
+                  label={t('home.transactions')}
                   value={kpis.transactions_count}
                   previousValue={previousKpisSWR.data?.transactions_count}
-                  valueFormatter={toNumber}
+                  valueFormatter={formatNumber}
                   selected={selectedMetric === 'transactions_count'}
                   onSelect={() => setSelectedMetric('transactions_count')}
                 />
                 <DashboardKpi
-                  label="Revenue"
+                  label={t('home.revenue')}
                   value={kpis.revenue_sum}
                   previousValue={previousKpisSWR.data?.revenue_sum}
-                  valueFormatter={(value) => toAmount(value, 'USD')}
+                  valueFormatter={formatAmount}
                   selected={selectedMetric === 'revenue_sum'}
                   onSelect={() => setSelectedMetric('revenue_sum')}
                 />
                 <DashboardKpi
-                  label="Trans. revenue"
+                  label={t('home.transactionRevenue')}
                   value={kpis.revenue_per_transaction_avg}
                   previousValue={previousKpisSWR.data?.revenue_per_transaction_avg}
-                  valueFormatter={(value) => toAmount(value, 'USD')}
+                  valueFormatter={formatAmount}
                   selected={selectedMetric === 'revenue_per_transaction_avg'}
                   onSelect={() => setSelectedMetric('revenue_per_transaction_avg')}
                 />
@@ -224,10 +262,11 @@ export const Home = ({ className, publicShare = false }: { className?: string; p
                   data={displayedTimeseries.data}
                   compareData={filters.compare ? comparisonTimeseries : undefined}
                   interval={displayedTimeseries.interval}
-                  valueFormatter={metricToFormatter[displayedTimeseries.metric] || toNumber}
+                  primaryColor={dashboardPrimaryColor}
+                  valueFormatter={metricToFormatter[displayedTimeseries.metric] || formatNumber}
                 />
                 {(timeseriesSWR.isValidating || previousTimeseriesSWR.isValidating) && (
-                  <div className="absolute top-3 right-3" role="status" aria-label="Updating chart">
+                  <div className="absolute top-3 right-3" role="status" aria-label={t('home.updatingChart')}>
                     <Spinner size="sm" />
                   </div>
                 )}
@@ -237,10 +276,10 @@ export const Home = ({ className, publicShare = false }: { className?: string; p
         )}
         {!!filters.domains.length && (
           <div className="grid grid-cols-2 items-stretch gap-4">
-            <GoalsTable domains={filters.domains} from={filters.from} to={filters.to} />
             <AcquisitionTable domains={filters.domains} from={filters.from} to={filters.to} />
             <DeviceTable domains={filters.domains} from={filters.from} to={filters.to} />
-            <LocationTable domains={filters.domains} from={filters.from} to={filters.to} />
+            <LocationTable domains={filters.domains} from={filters.from} to={filters.to} primaryColor={dashboardPrimaryColor} />
+            <GoalsTable domains={filters.domains} from={filters.from} to={filters.to} />
           </div>
         )}
       </div>

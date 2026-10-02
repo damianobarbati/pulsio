@@ -1,0 +1,79 @@
+{
+  "periods": {
+    "today": "Oggi",
+    "yesterday": "Ieri",
+    "last7Days": "Ultimi 7 giorni",
+    "last30Days": "Ultimi 30 giorni",
+    "last90Days": "Ultimi 90 giorni",
+    "last12Months": "Ultimi 12 mesi",
+    "monthToDate": "Mese corrente",
+    "yearToDate": "Anno corrente",
+    "allTime": "Sempre"
+  },
+  "filters": { "selectedWebsites": "Siti selezionati", "selectWebsites": "Seleziona siti", "datePeriod": "Periodo", "compare": "Confronta" },
+  "home": {
+    "choosePlan": "Scegli un piano per visualizzare le analisi",
+    "accountLimit": "Il tuo account ha {{domains}} e {{events}}. Questo supera i limiti del piano {{plan}} attuale.",
+    "goToBilling": "Vai alla fatturazione",
+    "noEventsTitle": "Nessun evento ricevuto",
+    "noEventsDescription": "Non è stato ricevuto alcun evento. Aggiungi questo snippet nel <head> del tuo sito, pubblicalo e visita il sito.",
+    "selectWebsite": "Seleziona un sito per visualizzare le analisi.",
+    "loadAnalyticsError": "Impossibile caricare le analisi. Riprova.",
+    "liveNow": "In tempo reale",
+    "users": "Utenti",
+    "sessions": "Sessioni",
+    "sessionViews": "Visualizzazioni sessione",
+    "sessionTime": "Durata sessione",
+    "engagement": "Coinvolgimento",
+    "conversion": "Conversione",
+    "transactions": "Transazioni",
+    "revenue": "Entrate",
+    "transactionRevenue": "Entrate per transazione",
+    "updatingChart": "Aggiornamento grafico",
+    "accountLogo": "Logo account"
+  },
+  "counts": { "domains_one": "{{count}} dominio", "domains_other": "{{count}} domini", "events_one": "{{count}} evento", "events_other": "{{count}} eventi" },
+  "acquisition": {
+    "reports": "Report acquisizione",
+    "sources": "Sorgenti",
+    "channels": "Canali",
+    "source": "Sorgente",
+    "uniqueVisitors": "Visitatori unici",
+    "visits": "Visite",
+    "loadError": "Impossibile caricare i dati di acquisizione. Riprova.",
+    "empty": "Nessun dato di acquisizione per questo periodo."
+  },
+  "device": {
+    "demographics": "Dati dispositivo",
+    "browsers": "Browser",
+    "operatingSystem": "Sistema operativo",
+    "device": "Dispositivo",
+    "name": "Nome",
+    "users": "Utenti",
+    "loadError": "Impossibile caricare i dati dei dispositivi. Riprova.",
+    "empty": "Nessun dato per questo periodo."
+  },
+  "location": {
+    "demographics": "Dati geografici",
+    "worldMap": "Mappa del mondo",
+    "countries": "Paesi",
+    "regions": "Regioni",
+    "cities": "Città",
+    "name": "Nome",
+    "users": "Utenti",
+    "usersByCountry": "Utenti per paese",
+    "loadError": "Impossibile caricare i dati geografici. Riprova.",
+    "empty": "Nessun dato per questo periodo."
+  },
+  "goals": {
+    "title": "Obiettivi",
+    "searchEvents": "Cerca eventi",
+    "event": "Evento",
+    "count": "Conteggio",
+    "users": "Utenti",
+    "conversionRate": "Tasso di conversione %",
+    "loadError": "Impossibile caricare gli eventi. Riprova.",
+    "matching": "Nessun evento corrispondente.",
+    "empty": "Nessun evento personalizzato trovato."
+  }
+}

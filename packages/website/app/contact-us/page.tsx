@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { FormProvider, useForm } from 'react-hook-form';
 import useSWRMutation from 'swr/mutation';
 import { Input } from 'ui/form';
+import { getConfig } from '../../components/config';
 
-type ContactValues = { name: string; email: string; message: string };
-const sendMessage = async (url: string, { arg }: { arg: ContactValues }) => {
-  const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(arg) });
+type ContactValues = { email: string; message: string };
+const sendMessage = async (_key: string, { arg }: { arg: ContactValues }) => {
+  const config = await getConfig();
+  const response = await fetch(new URL('/contact', config.API_URL), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(arg) });
   const result = await response.json();
   if (!response.ok) throw new Error(result.message);
   return result as { message: string };
@@ -16,7 +18,7 @@ const sendMessage = async (url: string, { arg }: { arg: ContactValues }) => {
 
 export const ContactUs = ({ className }: { className?: string }) => {
   const form = useForm<ContactValues>();
-  const message = useSWRMutation('/api/contact', sendMessage);
+  const message = useSWRMutation('contact', sendMessage);
   const submit = form.handleSubmit(async (values) => {
     try {
       await message.trigger(values);
@@ -52,7 +54,6 @@ export const ContactUs = ({ className }: { className?: string }) => {
       <FormProvider {...form}>
         <form onSubmit={submit} className="rounded-lg border border-pulsio-line bg-white p-7 shadow-pulsio">
           <div className="space-y-5">
-            <Input label="Name" name="name" required autoComplete="name" />
             <Input label="Email" name="email" required type="email" autoComplete="email" />
             <label className="block font-semibold text-sm">
               Message

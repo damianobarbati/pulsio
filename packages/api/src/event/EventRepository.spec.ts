@@ -84,4 +84,49 @@ describe('EventRepository analytics', () => {
       { timestamp: hour.toISOString().replace('.000Z', 'Z'), value: 1 },
     ]);
   });
+
+  it('attributes each visit to its first pageview channel and counts visits', async () => {
+    const domain = `${randomUUID()}.example.com`;
+    const visitor = randomUUID();
+    const start = new Date(Date.now() - 60_000);
+    const base = await createEventRow({ event_name: 'view', url: `https://${domain}/` });
+    const firstView = {
+      ...base,
+      id: randomUUID(),
+      domain,
+      visitor_hash: visitor,
+      timestamp: start.toISOString(),
+      name: 'view',
+      channel: 'Organic Search',
+      source: 'google.com',
+    };
+    const event = {
+      ...firstView,
+      id: randomUUID(),
+      timestamp: new Date(start.getTime() + 10_000).toISOString(),
+      name: 'engagement',
+      channel: 'Referral',
+      source: 'partner.example.com',
+    };
+    const secondView = {
+      ...firstView,
+      id: randomUUID(),
+      timestamp: new Date(start.getTime() + 31 * 60_000).toISOString(),
+      channel: 'Referral',
+      source: 'partner.example.com',
+    };
+    await EventRepository.createAll([firstView, event, secondView]);
+
+    const acquisition = await EventRepository.getAcquisition({
+      dimension: 'channel',
+      domains: [domain],
+      from: new Date(start.getTime() - 1_000).toISOString(),
+      to: new Date(start.getTime() + 40 * 60_000).toISOString(),
+    });
+
+    expect(acquisition).toEqual([
+      { name: 'Organic Search', users: 1, visits: 1, percentage: 50 },
+      { name: 'Referral', users: 1, visits: 1, percentage: 50 },
+    ]);
+  });
 });

@@ -22,6 +22,21 @@ export const registerDomainRoutes = (app: Hono) => {
 
   registerRoute(app, {
     method: 'post',
+    path: '/domain',
+    meta: { section: 'Domain', description: 'Create a domain.' },
+    requestSchema: DomainSchemas.createRequest,
+    responseSchema: DomainSchemas.domain,
+    middlewares: [auth('user')],
+    handler: async (params) => {
+      const user_id = asyncStorage.getStore()?.user_id;
+      if (!user_id) throw new AppError(403, 'FORBIDDEN', 'This account cannot access this resource.');
+      const result = await DomainService.create({ ...params, user_id });
+      return result;
+    },
+  });
+
+  registerRoute(app, {
+    method: 'post',
     path: '/domain/list',
     meta: { section: 'Domain', description: 'List domains.' },
     requestSchema: DomainSchemas.listRequest,

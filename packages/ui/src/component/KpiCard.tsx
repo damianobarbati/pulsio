@@ -19,9 +19,9 @@ export const KpiCard = ({ className, label, value, detail, delta, live }: KpiCar
       {label}
     </p>
     <div className="mt-4 flex items-baseline gap-2">
-      <p className="font-semibold text-3xl tabular-nums tracking-tight">{value}</p>
+      <p className="font-semibold text-3xl tracking-tight">{value}</p>
       {delta !== null && delta !== undefined && (
-        <span className={cx('font-semibold text-sm tabular-nums', delta > 0 ? 'text-emerald-600' : delta < 0 ? 'text-red-600' : 'text-pulsio-muted')}>{formatDelta(delta)}</span>
+        <span className={cx('font-semibold text-sm', delta > 0 ? 'text-emerald-600' : delta < 0 ? 'text-red-600' : 'text-pulsio-muted')}>{formatDelta(delta)}</span>
       )}
     </div>
     {detail && <p className="mt-1 text-pulsio-muted text-sm">{detail}</p>}

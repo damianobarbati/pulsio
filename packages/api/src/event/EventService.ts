@@ -2,8 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import { setTimeout } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { type CityResponse, open, validate } from 'maxmind';
-import { AppError } from 'nano-fw/docs/index.ts';
-import type { IEvent } from 'types/Event.ts';
+import { EventSchemas, type IEvent } from 'types/Event.ts';
 import { UAParser } from 'ua-parser-js';
 import CurrencyService from '#api/currency/CurrencyService.ts';
 import DomainRepository from '#api/domain/DomainRepository.ts';
@@ -14,6 +13,24 @@ import { cache } from '#dao/cache.ts';
 
 type EventHeaders = Record<string, string | undefined>;
 type IngestParams = IEvent.clientEvent & { event_id?: string; timestamp?: string; headers: EventHeaders; domain_id?: string };
+
+const IP_RATE_LIMIT = 60;
+const USER_RATE_LIMIT = 600;
+const BURST_RATE_LIMIT = 10;
+const RATE_WINDOW_SECONDS = 60;
+const BURST_WINDOW_SECONDS = 1;
+
+const getRandomEventId = () => randomUUIDv7();
+
+const consumeRateLimit = async ({ key, limit, windowSeconds }: { key: string; limit: number; windowSeconds: number }) => {
+  try {
+    const count = await cache.incr(key);
+    if (count === 1) await cache.expire(key, windowSeconds);
+    return count <= limit;
+  } catch {
+    return false;
+  }
+};
 
 const geoReader = open<CityResponse>(fileURLToPath(new URL('../../GeoLite2-City.mmdb', import.meta.url)));
 
@@ -223,21 +240,38 @@ export default class EventService {
     return event_row;
   }
 
-  static async ingest(params: IngestParams): Promise<string> {
-    const user_exists = await UserRepository.exists({ id: params.user_id });
-    if (!user_exists) throw new Error('User does not exist');
+  static async ingest(params: unknown): Promise<string> {
+    const unsafeParams = params as Partial<IngestParams>;
+    const input = EventSchemas.clientEvent.safeParse(unsafeParams);
+    if (!input.success || !unsafeParams.headers) return getRandomEventId();
 
-    const url = new URL(params.url);
+    const ip = getIp({ headers: unsafeParams.headers });
+    const ipKey = `event-rate:ip:${ip || 'unknown'}`;
+    const burstAllowed = await consumeRateLimit({ key: `${ipKey}:burst`, limit: BURST_RATE_LIMIT, windowSeconds: BURST_WINDOW_SECONDS });
+    const ipAllowed = await consumeRateLimit({ key: ipKey, limit: IP_RATE_LIMIT, windowSeconds: RATE_WINDOW_SECONDS });
+    if (!burstAllowed || !ipAllowed) return getRandomEventId();
+
+    const clientEvent = input.data;
+    const user_id = clientEvent.user_id;
+    const user = await UserRepository.findBy({ id: user_id }, true);
+    if (!user) return getRandomEventId();
+
+    const userAllowed = await consumeRateLimit({ key: `event-rate:user:${user_id}`, limit: USER_RATE_LIMIT, windowSeconds: RATE_WINDOW_SECONDS });
+    if (!userAllowed) return getRandomEventId();
+
+    const url = new URL(clientEvent.url);
     let domain = await DomainRepository.findBy({ domain: url.hostname });
-    if (!domain) domain = await DomainRepository.create({ domain: url.hostname, user_id: params.user_id });
+    if (domain && domain.user_id !== user_id) return getRandomEventId();
+    if (!domain && !user.autodiscover_enabled) return getRandomEventId();
+    if (!domain) domain = await DomainRepository.create({ domain: url.hostname, user_id });
 
-    const event_row = await EventService.createEventRow({ ...params, domain_id: domain.id });
+    const event_row = await EventService.createEventRow({ ...clientEvent, headers: unsafeParams.headers, domain_id: domain.id });
     let marker: string | null;
 
     try {
       marker = await cache.set(`event:${event_row.id}`, '1', 'EX', 3600, 'NX');
     } catch {
-      throw new AppError(500, 'EVENT_QUEUE_UNAVAILABLE', 'Event queue is unavailable.');
+      return getRandomEventId();
     }
 
     if (!marker) return event_row.id;
@@ -245,7 +279,7 @@ export default class EventService {
     try {
       await cache.xadd(ENV.QUEUE_NAME, '*', 'event', JSON.stringify(event_row));
     } catch {
-      throw new AppError(500, 'EVENT_QUEUE_UNAVAILABLE', 'Event queue is unavailable.');
+      return getRandomEventId();
     }
 
     return event_row.id;

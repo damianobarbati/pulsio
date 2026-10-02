@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { setTimeout } from 'node:timers/promises';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import DomainRepository from '#api/domain/DomainRepository.ts';
 import EventRepository from '#api/event/EventRepository.ts';
 import { createClientEvent, createClientHeaders } from '#api/event/EventSeeder.ts';
+import UserRepository from '#api/user/UserRepository.ts';
 import EventService from './EventService.ts';
 
 const HEAVY_LOAD_EVENTS_PER_SECOND = 10;
@@ -10,7 +12,14 @@ const HEAVY_LOAD_DURATION_SECONDS = 5;
 const HEAVY_LOAD_MAX_LATENCY_MS = 1_000;
 const HEAVY_LOAD_POLL_INTERVAL_MS = 100;
 const HEAVY_LOAD_POLL_TIMEOUT_MS = 60_000;
-const HEAVY_LOAD_DOMAIN = 'heavy-load-test.pulsio.live';
+const INGEST_DOMAIN = `real-xyz-${randomUUID()}.com`;
+const HEAVY_LOAD_DOMAIN = `heavy-load-test-${randomUUID()}.pulsio.live`;
+
+const removeTestDomain = async (domain: string) => {
+  await EventRepository.removeByDomain(domain);
+  const domainRow = await DomainRepository.findBy({ domain, user_id: global.user2.id });
+  if (domainRow) await DomainRepository.remove(domainRow.id);
+};
 
 const waitForEvents = async (eventIds: string[]) => {
   const deadline = Date.now() + HEAVY_LOAD_POLL_TIMEOUT_MS;
@@ -50,12 +59,20 @@ describe('EventService', () => {
     expect(event).toMatchObject({ name: 'engagement', engagement_ms: 10_000, interactive: 0 });
   });
 
+  it('returns a random id for an invalid ingest payload', async () => {
+    const firstId = await EventService.ingest({ headers: createClientHeaders() });
+    const secondId = await EventService.ingest({ headers: createClientHeaders() });
+
+    expect(firstId).toMatch(/[0-9a-f-]{36}/);
+    expect(secondId).not.toEqual(firstId);
+  });
+
   describe('ingest', async () => {
     let controller: AbortController;
     let worker: Promise<void>;
 
     beforeEach(async () => {
-      await EventRepository.removeByDomain('real-xyz.com');
+      await removeTestDomain(INGEST_DOMAIN);
       controller = new AbortController();
       worker = EventService.startWorker({ signal: controller.signal });
     });
@@ -63,12 +80,12 @@ describe('EventService', () => {
     afterEach(async () => {
       controller.abort();
       await worker;
-      await EventRepository.removeByDomain('real-xyz.com');
+      await removeTestDomain(INGEST_DOMAIN);
     });
 
     it('should work with non-existing domain', async () => {
       const headers = createClientHeaders();
-      const params = createClientEvent({ url: 'https://real-xyz.com' });
+      const params = createClientEvent({ url: `https://${INGEST_DOMAIN}` });
       const id = await EventService.ingest({ headers, ...params });
       expect(id).toBeTypeOf('string');
       const [event] = await waitForEvents([id]);
@@ -77,7 +94,7 @@ describe('EventService', () => {
 
     it('should work with existing domain', async () => {
       const headers = createClientHeaders();
-      const params = createClientEvent({ url: 'https://real-xyz.com' });
+      const params = createClientEvent({ url: `https://${INGEST_DOMAIN}` });
       const event_id1 = await EventService.ingest({ headers, ...params });
       const event_id2 = await EventService.ingest({ headers, ...params });
       const [event1, event2] = await waitForEvents([event_id1, event_id2]);
@@ -89,11 +106,28 @@ describe('EventService', () => {
       expect(event1.user_id).toEqual(event2.user_id);
       expect(event1.domain_id).toEqual(event2.domain_id);
     });
+
+    it('does not create a domain when autodiscovery is disabled', async () => {
+      const domain = `disabled-${randomUUID()}.com`;
+      const user = await UserRepository.get(global.user2.id);
+
+      try {
+        await UserRepository.update(user.id, { autodiscover_enabled: false });
+        const eventId = await EventService.ingest({ headers: createClientHeaders(), ...createClientEvent({ url: `https://${domain}` }) });
+        const storedDomain = await DomainRepository.findBy({ domain });
+
+        expect(eventId).toMatch(/[0-9a-f-]{36}/);
+        expect(storedDomain).toBeNull();
+      } finally {
+        await UserRepository.update(user.id, { autodiscover_enabled: user.autodiscover_enabled });
+        await removeTestDomain(domain);
+      }
+    });
   });
 
   describe('heavy load', () => {
     it('processes configured event rate within the latency limit', async () => {
-      await EventRepository.removeByDomain(HEAVY_LOAD_DOMAIN);
+      await removeTestDomain(HEAVY_LOAD_DOMAIN);
 
       const controller = new AbortController();
       const worker = EventService.startWorker({ signal: controller.signal });
@@ -140,7 +174,7 @@ describe('EventService', () => {
       } finally {
         controller.abort();
         await worker;
-        await EventRepository.removeByDomain(HEAVY_LOAD_DOMAIN);
+        await removeTestDomain(HEAVY_LOAD_DOMAIN);
       }
     });
   });

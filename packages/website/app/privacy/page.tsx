@@ -22,7 +22,8 @@ export default function Privacy({ className }: { className?: string }) {
         <section>
           <h2 className="font-semibold text-2xl text-ink">1. Controller</h2>
           <p className="mt-3">
-            Damiano Barbati, VAT number IT15365071008, Via dalle Palle 123, [POSTAL CODE AND CITY], Italy, is the controller for personal data processed through Pulsio. Contact:
+            Damiano Barbati, VAT number IT15365071008, registered office at Via Da Qui 123, 00100 Rome, Italy, is the controller for personal data processed through Pulsio.
+            Contact:
             <a className="font-semibold text-pulsio-blue underline" href="mailto:info@pulsio.live">
               info@pulsio.live
             </a>
@@ -49,9 +50,8 @@ export default function Privacy({ className }: { className?: string }) {
         <section>
           <h2 className="font-semibold text-2xl text-ink">4. Providers and transfers</h2>
           <p className="mt-3">
-            We use Hetzner for hosting and infrastructure, Stripe for payment processing, and email or other technical providers needed to operate support and delivery. These
-            providers may process data only under appropriate contractual arrangements. Where data leaves the EEA, we use an adequacy decision or another lawful transfer mechanism
-            required by GDPR.
+            We use European infrastructure for hosting and analytics data, Stripe for payment processing, and email or other technical providers needed to operate support and
+            delivery. Pulsio analytics data remains in Europe. Providers process data only under appropriate contractual arrangements.
           </p>
         </section>
         <section>

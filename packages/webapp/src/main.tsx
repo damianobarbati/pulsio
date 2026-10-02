@@ -1,17 +1,22 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { I18nextProvider } from 'react-i18next';
 import { SWRConfig } from 'swr';
 import { ScreenGuard, Spinner } from 'ui';
 import { MPOST } from 'ui/api/fetchers.ts';
 import { Auth } from 'ui/component/Auth.tsx';
 import NotFound from 'ui/component/NotFound.tsx';
 import { Route, Router, Switch } from 'wouter';
+import i18n, { initializeI18n } from '#webapp/i18n.ts';
 import Account from '#webapp/views/Account.tsx';
 import Billing from '#webapp/views/Billing.tsx';
 import Domains from '#webapp/views/Domains.tsx';
 import Home from '#webapp/views/Home.tsx';
+import HowTo from '#webapp/views/HowTo.tsx';
 import { Layout } from '#webapp/views/Layout.tsx';
 import Settings from '#webapp/views/Settings.tsx';
+
+await initializeI18n();
 
 const response = await fetch('/config.json', { cache: 'no-store' });
 if (!response.ok) throw new Error('Could not load application runtime configuration');
@@ -39,45 +44,50 @@ const root = createRoot(container);
 
 root.render(
   <React.StrictMode>
-    <SWRConfig value={{ revalidateOnFocus: false, revalidateOnReconnect: false, revalidateIfStale: false }}>
-      <ScreenGuard>
-        <Router>
-          <React.Suspense fallback={<Spinner size="lg" />}>
-            <Switch>
-              <Route path="/share/:token">
-                <Home publicShare className="min-h-screen bg-slate-50 px-5 pt-5 pb-15 sm:px-8 lg:px-9" />
-              </Route>
-              <Route path="/auth">
-                <Auth title="Pulsio Login" role="user" />
-              </Route>
-              <Route path="/" nest>
-                <Layout>
-                  <Switch>
-                    <Route path="/">
-                      <Home />
-                    </Route>
-                    <Route path="/billing">
-                      <Billing />
-                    </Route>
-                    <Route path="/domains">
-                      <Domains />
-                    </Route>
-                    <Route path="/settings">
-                      <Settings />
-                    </Route>
-                    <Route path="/account">
-                      <Account />
-                    </Route>
-                    <Route>
-                      <NotFound />
-                    </Route>
-                  </Switch>
-                </Layout>
-              </Route>
-            </Switch>
-          </React.Suspense>
-        </Router>
-      </ScreenGuard>
-    </SWRConfig>
+    <I18nextProvider i18n={i18n}>
+      <SWRConfig value={{ revalidateOnFocus: false, revalidateOnReconnect: false, revalidateIfStale: false }}>
+        <ScreenGuard>
+          <Router>
+            <React.Suspense fallback={<Spinner size="lg" />}>
+              <Switch>
+                <Route path="/share/:token">
+                  <Home publicShare className="min-h-screen bg-slate-50 px-5 pt-5 pb-15 sm:px-8 lg:px-9" />
+                </Route>
+                <Route path="/auth">
+                  <Auth title="Pulsio Login" role="user" />
+                </Route>
+                <Route path="/" nest>
+                  <Layout>
+                    <Switch>
+                      <Route path="/">
+                        <Home />
+                      </Route>
+                      <Route path="/billing">
+                        <Billing />
+                      </Route>
+                      <Route path="/domains">
+                        <Domains />
+                      </Route>
+                      <Route path="/settings">
+                        <Settings />
+                      </Route>
+                      <Route path="/account">
+                        <Account />
+                      </Route>
+                      <Route path="/how-to">
+                        <HowTo />
+                      </Route>
+                      <Route>
+                        <NotFound />
+                      </Route>
+                    </Switch>
+                  </Layout>
+                </Route>
+              </Switch>
+            </React.Suspense>
+          </Router>
+        </ScreenGuard>
+      </SWRConfig>
+    </I18nextProvider>
   </React.StrictMode>,
 );

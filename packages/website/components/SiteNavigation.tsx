@@ -37,8 +37,8 @@ export const SiteNavigation = ({ className, dashboardUrl, loggedIn: initialLogge
           'basis-full flex-col items-stretch gap-4 py-3 font-medium text-sm md:ml-8 md:flex md:grow md:flex-row md:flex-wrap md:items-center md:justify-items-start md:gap-6 md:py-0',
         )}
       >
+        <Link href="/why-pulsio">Why Pulsio</Link>
         <Link href="/how-to">How to</Link>
-        <Link href="/documentation">Documentation</Link>
         <Link href="/#pricing">Pricing</Link>
         <Link href="/contact-us">Contacts</Link>
         <a href={dashboardUrl} className="md:ml-auto">

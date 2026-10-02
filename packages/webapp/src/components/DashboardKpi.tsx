@@ -37,7 +37,7 @@ export const DashboardKpi = ({ className, label, value, previousValue, valueForm
     >
       <span className="flex flex-row items-center gap-2 text-nowrap text-gray-500 uppercase">{label}</span>
       <span className="mt-1 flex flex-row items-baseline gap-2">
-        <span className="text-nowrap text-lg tabular-nums tracking-tight">{valueFormatter(value)}</span>
+        <span className="text-nowrap text-lg tracking-tight">{valueFormatter(value)}</span>
         {change !== null && (
           <span className={cx('flex items-center', change > 0 ? 'text-emerald-600' : change < 0 ? 'text-red-600' : 'text-gray-500')}>
             {change > 0 && <IUp />}

@@ -127,7 +127,7 @@ describe('AuthService', () => {
 
   describe('sendVerificationEmail', () => {
     it('works', async () => {
-      const token = await AuthService.generateToken(global.user);
+      const token = await AuthService.generateToken(global.user2);
       const result = await AuthService.sendVerificationEmail({ email, token, domain });
       expect(result).toEqual(undefined);
     });

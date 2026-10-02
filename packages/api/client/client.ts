@@ -171,108 +171,6 @@ history.replaceState = (...args) => {
  */
 send('view');
 
-/** Browser Client API **/
-/**
-Use these attributes on any HTML element:
-data-pulsio-event="event_name"
-data-pulsio-trigger="present|visible|click"
-
-- present: send once when element exists in DOM. Works with hidden.
-- visible: send once when element enters viewport.
-- click: send on each user click on element or its children.
-
-Optional data:
-data-pulsio-props='{"key":"value","quantity":1}'
-data-pulsio-transaction-id="order_123"
-data-pulsio-revenue-amount="49.90"
-data-pulsio-revenue-currency="EUR"
-data-pulsio-items='[{"id":"pro","name":"Pro plan","quantity":1,"price":49.90}]'
-
-Props must be a JSON object with string, number, or boolean values.
-checkout and purchase require transaction-id, revenue-amount, and revenue-currency together.
-items is optional.
-
-## Custom goal
-
-DOM API =>
-<span
-  hidden
-  data-pulsio-event="subscription"
-  data-pulsio-trigger="present"
-  data-pulsio-props='{"newsletter":"Dogs & Cats"}'
-></span>
-
-JS API =>
-window.pulsio('subscription', { props: { newsletter: 'Dogs & Cats' } });
-
----
-
-Ecommerce funnel example is:
-
-1. PRODUCT LISTING
-
-DOM API =>
-<input type="hidden"
-  data-pulsio-event="listing"
-  data-pulsio-trigger="present"
-  data-pulsio-props='{"product_id":"123","unit_price":1000,"currency":"EUR"}'
-/>
-JS API =>
-window.pulsio('listing', { props: { product_id: '123', unit_price: 1000, currency: 'EUR' } });
-
-2. ADD TO CART
-
-DOM API =>
-<button
-  data-pulsio-event="add"
-  data-pulsio-trigger="click"
-  data-pulsio-props='{"product_id":"123","quantity":1,"unit_price":1000,"currency":"EUR"}'
-/>
-
-JS API =>
-window.pulsio('add', { props: { product_id: '123', quantity: 1, unit_price: 1000, currency: 'EUR' } });
-
-3. CHECKOUT STARTED
-
-DOM API =>
-<button
-  data-pulsio-event="checkout"
-  data-pulsio-trigger="click"
-  data-pulsio-transaction-id="checkout_123"
-  data-pulsio-revenue-amount="1000"
-  data-pulsio-revenue-currency="EUR"
-  data-pulsio-items='[{"id":"123","name":"Product 123","quantity":1,"price":1000}]'
-/>
-
-JS API =>
-window.pulsio('checkout', {
-  transaction_id: 'checkout_456',
-  revenue: { amount: 1000, currency: 'EUR' },
-  items: [{ id: '123', name: 'Product 123', quantity: 1, price: 1000 }],
-});
-
-4. PURCHASE COMPLETED
-
-DOM API =>
-<input
-  type="hidden"
-  data-pulsio-event="purchase"
-  data-pulsio-trigger="present"
-  data-pulsio-transaction-id="order_789"
-  data-pulsio-revenue-amount="1000"
-  data-pulsio-revenue-currency="EUR"
-  data-pulsio-items='[{"id":"123","name":"Product 123","quantity":1,"price":1000}]'
-/>
-
-JS API =>
-window.pulsio('purchase', {
-  transaction_id: 'order_456',
-  revenue: { amount: 1000, currency: 'EUR' },
-  items: [{ id: '123', name: 'Product 123', quantity: 1, price: 1000 }],
-});
-
-*/
-
 const isProps = (value: unknown): value is NonNullable<EventOptions['props']> => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
 
@@ -400,7 +298,6 @@ document.addEventListener('click', (event) => {
   if (!element) return;
   const eventName = element.dataset.pulsioEvent;
   if (!eventName) return;
-
   const options = domOptions(element, eventName);
   if (options) send(eventName, options);
 });

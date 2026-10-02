@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import * as React from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
 import type { IDomain } from 'types/Domain.ts';
 import { POST } from 'ui/api/fetchers.ts';
@@ -10,19 +11,9 @@ import { useLocation, useSearch } from 'wouter';
 
 type DashboardFiltersProps = { className?: string; onChange: (filters: DashboardFilterValues) => void };
 
-const periodLabels = {
-  today: 'Today',
-  yesterday: 'Yesterday',
-  last7Days: 'Last 7 Days',
-  last30Days: 'Last 30 Days',
-  last90Days: 'Last 90 Days',
-  last12Months: 'Last 12 Months',
-  monthToDate: 'Month to Date',
-  yearToDate: 'Year to Date',
-  allTime: 'All time',
-} as const;
+const periodKeys = ['today', 'yesterday', 'last7Days', 'last30Days', 'last90Days', 'last12Months', 'monthToDate', 'yearToDate', 'allTime'] as const;
 
-type PeriodKey = keyof typeof periodLabels;
+type PeriodKey = (typeof periodKeys)[number];
 
 export type DashboardFilterValues = {
   domains: string[];
@@ -54,7 +45,7 @@ const getPeriodRange = (period: PeriodKey) => {
 };
 
 const getPeriod = (value: string | null): PeriodKey => {
-  if (value && value in periodLabels) return value as PeriodKey;
+  if (value && periodKeys.includes(value as PeriodKey)) return value as PeriodKey;
   return defaultPeriod;
 };
 
@@ -85,6 +76,7 @@ const getSyncedSearch = ({ search, domains, period, compare }: { search: string;
 };
 
 export const DashboardFilters = ({ className, onChange }: DashboardFiltersProps) => {
+  const { t } = useTranslation();
   const [location, navigate] = useLocation();
   const search = useSearch();
   const domainsSWR = useSWR<IDomain.listResponse>(['/domain/list'], POST, { suspense: true, shouldRetryOnError: false });
@@ -112,18 +104,18 @@ export const DashboardFilters = ({ className, onChange }: DashboardFiltersProps)
       <div className={className}>
         <div className="mb-5 flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-2">
-            <IGlobe className="text-violet-500" size={21} />
-            <span className="sr-only">Selected websites</span>
-            <SelectMulti className="w-60" name="domains" options={domainOptions} placeholder="Select websites" />
+            <IGlobe className="text-pulsio-blue" size={21} />
+            <span className="sr-only">{t('filters.selectedWebsites')}</span>
+            <SelectMulti className="w-60" name="domains" options={domainOptions} placeholder={t('filters.selectWebsites')} />
           </label>
-          <Select name="period" className="w-54" aria-label="Date period" leftIcon={<ICalendar size={18} />}>
-            {Object.entries(periodLabels).map(([value, label]) => (
+          <Select name="period" className="w-54" aria-label={t('filters.datePeriod')} leftIcon={<ICalendar size={18} />}>
+            {periodKeys.map((value) => (
               <option key={value} value={value}>
-                {label}
+                {t(`periods.${value}`)}
               </option>
             ))}
           </Select>
-          <Checkbox name="compare" label="Compare" />
+          <Checkbox name="compare" label={t('filters.compare')} />
         </div>
       </div>
     </FormProvider>

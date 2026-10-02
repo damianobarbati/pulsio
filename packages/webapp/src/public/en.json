@@ -1,0 +1,89 @@
+{
+  "periods": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "last7Days": "Last 7 Days",
+    "last30Days": "Last 30 Days",
+    "last90Days": "Last 90 Days",
+    "last12Months": "Last 12 Months",
+    "monthToDate": "Month to Date",
+    "yearToDate": "Year to Date",
+    "allTime": "All time"
+  },
+  "filters": {
+    "selectedWebsites": "Selected websites",
+    "selectWebsites": "Select websites",
+    "datePeriod": "Date period",
+    "compare": "Compare"
+  },
+  "home": {
+    "choosePlan": "Choose a plan to view your analytics",
+    "accountLimit": "Your account has {{domains}} and {{events}}. This is above the limits of your current {{plan}} plan.",
+    "goToBilling": "Go to Billing",
+    "noEventsTitle": "No events received yet",
+    "noEventsDescription": "No events have been received. Add this snippet inside your website’s <head>, publish it, then visit your site.",
+    "selectWebsite": "Select a website to view analytics.",
+    "loadAnalyticsError": "Could not load analytics. Please try again.",
+    "liveNow": "Live Now",
+    "users": "Users",
+    "sessions": "Sessions",
+    "sessionViews": "Session Views",
+    "sessionTime": "Session Time",
+    "engagement": "Engagement",
+    "conversion": "Conversion",
+    "transactions": "Transactions",
+    "revenue": "Revenue",
+    "transactionRevenue": "Trans. revenue",
+    "updatingChart": "Updating chart",
+    "accountLogo": "Account logo"
+  },
+  "counts": {
+    "domains_one": "{{count}} domain",
+    "domains_other": "{{count}} domains",
+    "events_one": "{{count}} event",
+    "events_other": "{{count}} events"
+  },
+  "acquisition": {
+    "reports": "Acquisition reports",
+    "sources": "Sources",
+    "channels": "Channels",
+    "source": "Source",
+    "uniqueVisitors": "Unique visitors",
+    "visits": "Visits",
+    "loadError": "Could not load acquisition data. Please try again.",
+    "empty": "No acquisition data for this period."
+  },
+  "device": {
+    "demographics": "Device demographics",
+    "browsers": "Browsers",
+    "operatingSystem": "Operating system",
+    "device": "Device",
+    "name": "Name",
+    "users": "Users",
+    "loadError": "Could not load device demographics. Please try again.",
+    "empty": "No data for this period."
+  },
+  "location": {
+    "demographics": "Location demographics",
+    "worldMap": "World map",
+    "countries": "Countries",
+    "regions": "Regions",
+    "cities": "Cities",
+    "name": "Name",
+    "users": "Users",
+    "usersByCountry": "Users by country",
+    "loadError": "Could not load location demographics. Please try again.",
+    "empty": "No data for this period."
+  },
+  "goals": {
+    "title": "Goals",
+    "searchEvents": "Search events",
+    "event": "Event",
+    "count": "Count",
+    "users": "Users",
+    "conversionRate": "Conversion rate %",
+    "loadError": "Could not load events. Please try again.",
+    "matching": "No matching events.",
+    "empty": "No custom events found."
+  }
+}

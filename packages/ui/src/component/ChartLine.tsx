@@ -5,13 +5,14 @@ import { Chart } from '#ui/component/Chart.tsx';
 type ChartLineProps = {
   className?: string;
   label?: string;
+  primaryColor?: string;
   data: { timestamp: string; value: number }[];
   compareData?: { timestamp: string; value: number }[];
   interval: 'hour' | 'day' | 'week' | 'month';
   valueFormatter: (value: any) => string;
 };
 
-export const ChartLine = ({ className, label = '', interval, data, compareData, valueFormatter }: ChartLineProps) => {
+export const ChartLine = ({ className, label = '', primaryColor = '#055dfe', interval, data, compareData, valueFormatter }: ChartLineProps) => {
   const timeseriesY = data.map((point) =>
     new Date(point.timestamp).toLocaleString('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short', ...(interval === 'hour' ? { hour: '2-digit' } : {}) }),
   );
@@ -25,8 +26,8 @@ export const ChartLine = ({ className, label = '', interval, data, compareData, 
       type: 'line',
       showSymbol: false,
       connectNulls: false,
-      lineStyle: { width: 2 },
-      areaStyle: { color: '#055dfe', opacity: 0.2 },
+      lineStyle: { width: 2, color: primaryColor },
+      areaStyle: { color: primaryColor, opacity: 0.1 },
       data: timeseriesX,
       tooltip: {
         trigger: 'axis',
@@ -41,7 +42,7 @@ export const ChartLine = ({ className, label = '', interval, data, compareData, 
       type: 'line',
       showSymbol: false,
       connectNulls: false,
-      lineStyle: { width: 2, type: 'dotted' },
+      lineStyle: { width: 2, type: 'dotted', color: '#85858e' },
       data: timeseriesComparisonX,
       tooltip: {
         trigger: 'axis',
@@ -60,7 +61,7 @@ export const ChartLine = ({ className, label = '', interval, data, compareData, 
           animationDuration: 0,
           animationDurationUpdate: 450,
           animationEasingUpdate: 'cubicOut',
-          color: ['#7064ff', '#85858e'],
+          color: [primaryColor, '#85858e'],
           textStyle: { fontFamily: 'Inter, system-ui, sans-serif' },
           grid: { left: 45, right: 10, top: 20, bottom: 40 },
           tooltip: { trigger: 'axis', renderMode: 'richText' },

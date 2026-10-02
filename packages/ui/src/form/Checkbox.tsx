@@ -17,7 +17,7 @@ const toFieldName = (label: string) => {
 export const Checkbox = ({ className, label, name, rules, onChange, ...props }: CheckboxProps) => {
   const form = useFormContext<Record<string, boolean>>();
   const fieldName = name || (label ? toFieldName(label) : 'checkbox');
-  const registration = form.register(fieldName, rules);
+  const registration = form ? form.register(fieldName, rules) : undefined;
 
   return (
     <label className={cx('group flex cursor-pointer items-center gap-2 text-gray-600 text-sm', className)}>
@@ -27,8 +27,8 @@ export const Checkbox = ({ className, label, name, rules, onChange, ...props }: 
         type="checkbox"
         className="peer sr-only"
         onChange={(event) => {
-          registration.onChange(event);
-          onChange?.(event);
+          if (registration) void registration.onChange(event);
+          if (onChange) onChange(event);
         }}
       />
 

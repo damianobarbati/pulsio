@@ -18,7 +18,7 @@
             <tr>
               <td style="padding: 40px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px;">
                 <p style="margin: 0 0 12px; color: #055dfe; font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;">Support request</p>
-                <h1 style="margin: 0; font-size: 26px; line-height: 1.3;"><%= it.name %> sent a message.</h1>
+                <h1 style="margin: 0; font-size: 26px; line-height: 1.3;">A visitor sent a message.</h1>
                 <p style="margin: 20px 0 4px; color: #6b7280; font-size: 13px; font-weight: 600;">EMAIL</p>
                 <p style="margin: 0; color: #121826; font-size: 16px;"><%= it.email %></p>
                 <p style="margin: 24px 0 4px; color: #6b7280; font-size: 13px; font-weight: 600;">MESSAGE</p>

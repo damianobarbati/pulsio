@@ -181,7 +181,7 @@ export const Report = ({ className, query, tabs, initial, color, onFilter }: Rep
                           <span className="truncate">{label(row.name)}</span>
                         </button>
                       </td>
-                      <td className="min-w-20 py-2 pl-6 text-right tabular-nums">{toNumber(row.value)}</td>
+                      <td className="min-w-20 py-2 pl-6 text-right">{toNumber(row.value)}</td>
                       {expanded &&
                         [
                           toRate(row.percentage),
@@ -193,7 +193,7 @@ export const Report = ({ className, query, tabs, initial, color, onFilter }: Rep
                           toNumber(row.scrollDepth),
                           toRate(row.exitRate),
                         ].map((value, index) => (
-                          <td key={['share', 'views', 'visits', 'bounce', 'duration', 'time', 'scroll', 'exit'][index]} className="whitespace-nowrap px-3 tabular-nums">
+                          <td key={['share', 'views', 'visits', 'bounce', 'duration', 'time', 'scroll', 'exit'][index]} className="whitespace-nowrap px-3">
                             {value}
                           </td>
                         ))}

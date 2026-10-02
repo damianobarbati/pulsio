@@ -10,6 +10,7 @@ import { Dialog } from 'ui/component/Dialog.tsx';
 import { Toast } from 'ui/component/Toast.tsx';
 import { Checkbox, Input, Select } from 'ui/form';
 import { ICalendar, IChart, IClose, IDownload, IGlobe, ILink, IPlus, IReport, ITrash, IUsers } from 'ui/icons.tsx';
+import { DomainCreationForm } from '#webapp/components/DomainCreationForm.tsx';
 
 type Domain = IDomain.listResponse[number];
 type ShareLink = Domain['shares'][number];
@@ -181,11 +182,11 @@ export const Domains = ({ className }: { className?: string }) => {
   if (!selectedDomain) {
     return (
       <main className={cx('mx-auto max-w-6xl', className)}>
-        <div className="rounded-lg border border-pulsio-line bg-white p-10 text-center shadow-pulsio">
-          <IGlobe className="mx-auto text-pulsio-blue" size={36} />
-          <h1 className="mt-4 font-semibold text-xl">No tracked sites</h1>
+        <section className="rounded-lg border border-pulsio-line bg-white p-6 shadow-pulsio">
+          <h1 className="font-bold text-3xl tracking-tight">Your domains</h1>
           <p className="mt-2 text-pulsio-muted text-sm">Add a site to start tracking events.</p>
-        </div>
+          <DomainCreationForm className="mt-6 border-pulsio-line border-t pt-6" onCreated={async () => domainsSWR.mutate()} />
+        </section>
         <Toast message={toast} onClose={() => setToast('')} />
       </main>
     );
@@ -201,6 +202,10 @@ export const Domains = ({ className }: { className?: string }) => {
           Your domains
         </h1>
       </header>
+
+      <div className="mb-6 rounded-lg border border-pulsio-line bg-white p-5 shadow-pulsio sm:p-6">
+        <DomainCreationForm onCreated={async () => domainsSWR.mutate()} />
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
         <aside>

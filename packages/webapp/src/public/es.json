@@ -1,0 +1,79 @@
+{
+  "periods": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "last7Days": "Últimos 7 días",
+    "last30Days": "Últimos 30 días",
+    "last90Days": "Últimos 90 días",
+    "last12Months": "Últimos 12 meses",
+    "monthToDate": "Mes actual",
+    "yearToDate": "Año actual",
+    "allTime": "Todo el tiempo"
+  },
+  "filters": { "selectedWebsites": "Sitios seleccionados", "selectWebsites": "Seleccionar sitios", "datePeriod": "Periodo", "compare": "Comparar" },
+  "home": {
+    "choosePlan": "Elige un plan para ver tus análisis",
+    "accountLimit": "Tu cuenta tiene {{domains}} y {{events}}. Esto supera los límites de tu plan {{plan}} actual.",
+    "goToBilling": "Ir a facturación",
+    "noEventsTitle": "Aún no se han recibido eventos",
+    "noEventsDescription": "No se han recibido eventos. Añade este snippet dentro del <head> de tu sitio, publícalo y visita tu sitio.",
+    "selectWebsite": "Selecciona un sitio para ver los análisis.",
+    "loadAnalyticsError": "No se han podido cargar los análisis. Inténtalo de nuevo.",
+    "liveNow": "En directo",
+    "users": "Usuarios",
+    "sessions": "Sesiones",
+    "sessionViews": "Vistas de sesión",
+    "sessionTime": "Tiempo de sesión",
+    "engagement": "Interacción",
+    "conversion": "Conversión",
+    "transactions": "Transacciones",
+    "revenue": "Ingresos",
+    "transactionRevenue": "Ingresos por transacción",
+    "updatingChart": "Actualizando gráfico",
+    "accountLogo": "Logotipo de la cuenta"
+  },
+  "counts": { "domains_one": "{{count}} dominio", "domains_other": "{{count}} dominios", "events_one": "{{count}} evento", "events_other": "{{count}} eventos" },
+  "acquisition": {
+    "reports": "Informes de adquisición",
+    "sources": "Fuentes",
+    "channels": "Canales",
+    "source": "Fuente",
+    "uniqueVisitors": "Visitantes únicos",
+    "visits": "Visitas",
+    "loadError": "No se han podido cargar los datos de adquisición. Inténtalo de nuevo.",
+    "empty": "No hay datos de adquisición para este periodo."
+  },
+  "device": {
+    "demographics": "Datos del dispositivo",
+    "browsers": "Navegadores",
+    "operatingSystem": "Sistema operativo",
+    "device": "Dispositivo",
+    "name": "Nombre",
+    "users": "Usuarios",
+    "loadError": "No se han podido cargar los datos del dispositivo. Inténtalo de nuevo.",
+    "empty": "No hay datos para este periodo."
+  },
+  "location": {
+    "demographics": "Datos de ubicación",
+    "worldMap": "Mapa del mundo",
+    "countries": "Países",
+    "regions": "Regiones",
+    "cities": "Ciudades",
+    "name": "Nombre",
+    "users": "Usuarios",
+    "usersByCountry": "Usuarios por país",
+    "loadError": "No se han podido cargar los datos de ubicación. Inténtalo de nuevo.",
+    "empty": "No hay datos para este periodo."
+  },
+  "goals": {
+    "title": "Objetivos",
+    "searchEvents": "Buscar eventos",
+    "event": "Evento",
+    "count": "Cantidad",
+    "users": "Usuarios",
+    "conversionRate": "Tasa de conversión %",
+    "loadError": "No se han podido cargar los eventos. Inténtalo de nuevo.",
+    "matching": "No hay eventos coincidentes.",
+    "empty": "No se han encontrado eventos personalizados."
+  }
+}

@@ -5,11 +5,13 @@ import { IShield } from 'ui/icons.tsx';
 import { AccountDangerZone } from '#webapp/components/AccountDangerZone.tsx';
 import { AccountEmailForm } from '#webapp/components/AccountEmailForm.tsx';
 import { AccountPasswordForm } from '#webapp/components/AccountPasswordForm.tsx';
+import { AutodiscoveryForm } from '#webapp/components/AutodiscoveryForm.tsx';
+import { UserBrandForm } from '#webapp/components/UserBrandForm.tsx';
 
 const authMe = () => GET<IUser.user>(['/auth/me']);
 
 export const Account = ({ className }: { className?: string }) => {
-  const { mutate } = useMe<IUser.user>(authMe);
+  const { user, mutate } = useMe<IUser.user>(authMe);
 
   return (
     <div className={className}>
@@ -21,6 +23,8 @@ export const Account = ({ className }: { className?: string }) => {
       </header>
 
       <div className="mx-auto mt-8 max-w-4xl space-y-5 pb-10">
+        <UserBrandForm user={user} onUpdated={mutate} />
+        <AutodiscoveryForm user={user} onUpdated={mutate} />
         <AccountEmailForm onUpdated={mutate} />
         <AccountPasswordForm />
         <AccountDangerZone />

@@ -25,8 +25,8 @@ export default function Terms({ className }: { className?: string }) {
           <h2 className="font-semibold text-2xl text-ink">1. Operator and agreement</h2>
           <p className="mt-3">
             These Terms of Service (the “Terms”) govern access to and use of Pulsio, including its website analytics software, tracking script, dashboard, support and related
-            services (the “Service”). The Service is operated by Damiano Barbati, VAT number IT15365071008, with a contact address at Via dalle Palle 123, [POSTAL CODE AND CITY],
-            Italy, and email address info@pulsio.live (the “Operator”).
+            services (the “Service”). The Service is operated by Damiano Barbati, VAT number IT15365071008, with a registered office at Via Da Qui 123, 00100 Rome, Italy, and email
+            address info@pulsio.live (the “Operator”).
           </p>
           <p className="mt-3">
             By creating an account, selecting “I agree”, purchasing a plan, or using the Service, you accept these Terms. If you act for a business, you confirm that you have
@@ -139,8 +139,8 @@ export default function Terms({ className }: { className?: string }) {
             needed to protect the Service, users, or comply with law.
           </p>
           <p className="mt-3">
-            After termination, we may retain information where required for legal, accounting, security, dispute-resolution, or backup purposes. Otherwise, account and analytics
-            data will be deleted according to our Privacy Policy and operational retention practices.
+            Account deletion is permanent and cannot be undone. After deletion, we may retain limited information where required for legal, accounting, security,
+            dispute-resolution, or backup purposes. Otherwise, account and analytics data will be deleted according to our Privacy Policy and operational retention practices.
           </p>
         </section>
         <section>

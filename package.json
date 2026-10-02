@@ -13,7 +13,7 @@
   "type": "module",
   "scripts": {
     "postinstall": "pnpm audit --audit-level critical",
-    "format": "sql-formatter '**/*.sql' '!**/*/ch-schema.sql'",
+    "format": "pnpm sql-formatter --fix -l=postgresql packages/api/dao/pg-schema.sql",
     "lint": "biome check --write",
     "tsc": "tsc",
     "env:up": "docker compose up -d --wait --quiet-pull --remove-orphans",
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
-    "@types/node": "^26.6.3",
+    "@types/node": "^26.6.4",
     "@vitest/browser-playwright": "^5.0.3",
     "@vitest/coverage-v8": "^5.0.3",
     "kill-port": "^2.0.1",

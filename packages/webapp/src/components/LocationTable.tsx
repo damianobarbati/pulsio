@@ -1,6 +1,7 @@
 import cx from 'clsx-tw';
 import type { EChartsCoreOption } from 'echarts/core';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
 import type { IAnalytics } from 'types/Analytics.ts';
 import { Spinner, Table, type TableColumn } from 'ui';
@@ -13,10 +14,13 @@ type LocationDemographicsProps = {
   className?: string;
   domains: string[];
   from: string;
+  primaryColor?: string;
   to: string;
 };
 
 type LocationTab = 'map' | 'country' | 'region' | 'city';
+type MapRow = IAnalytics.demographicsResponse[number];
+type MapOptionInput = { max: number; primaryColor: string; rows: MapRow[] };
 
 const countryNames = new Intl.DisplayNames(['en'], { type: 'region' });
 const fetchMap = async (path: string) => {
@@ -27,10 +31,32 @@ const fetchMap = async (path: string) => {
 const dimensionForTab: Record<Exclude<LocationTab, 'map'>, IAnalytics.demographicsDimension> = { country: 'country', region: 'region', city: 'city' };
 const labelForCountry = (name: string) => (/^[A-Z]{2}$/.test(name) ? countryNames.of(name) || name : name);
 const mapNameForCountry = (name: string) => (name === 'US' ? 'United States of America' : labelForCountry(name));
-const columns = (tab: LocationTab): TableColumn<IAnalytics.demographicsResponse[number]>[] => [
+export const createLocationMapOption = ({ max, primaryColor, rows }: MapOptionInput): EChartsCoreOption => ({
+  tooltip: { trigger: 'item', renderMode: 'richText' },
+  visualMap: {
+    show: false,
+    min: 0,
+    max,
+    inRange: { color: [primaryColor, primaryColor], colorAlpha: [0.12, 1] },
+  },
+  series: [
+    {
+      type: 'map',
+      map: 'world',
+      roam: false,
+      zoom: 1.1,
+      top: 30,
+      bottom: 15,
+      itemStyle: { borderColor: '#fff', borderWidth: 0.5 },
+      emphasis: { label: { show: false }, itemStyle: { areaColor: primaryColor } },
+      data: rows.map((row) => ({ name: mapNameForCountry(row.name), value: row.users })),
+    },
+  ],
+});
+const columns = (tab: LocationTab, locale: string, translate: (key: string) => string): TableColumn<IAnalytics.demographicsResponse[number]>[] => [
   {
     key: 'name',
-    header: 'Name',
+    header: translate('location.name'),
     render: (row) => (
       <span className="flex items-center gap-2">
         {tab === 'country' && row.name.length === 2 ? (
@@ -49,39 +75,28 @@ const columns = (tab: LocationTab): TableColumn<IAnalytics.demographicsResponse[
       </span>
     ),
   },
-  { key: 'users', header: 'Users', render: (row) => `${toNumber(row.users)} (${toRate(row.percentage)})`, className: 'text-right tabular-nums' },
+  {
+    key: 'users',
+    header: translate('location.users'),
+    render: (row) => `${toNumber(row.users, '', locale)} (${toRate(row.percentage, '', locale)})`,
+    className: 'text-right ',
+  },
 ];
 
-export const LocationTable = ({ className, domains, from, to }: LocationDemographicsProps) => {
+export const LocationTable = ({ className, domains, from, primaryColor = '#055dfe', to }: LocationDemographicsProps) => {
+  const { t, i18n } = useTranslation();
   const [tab, setTab] = React.useState<LocationTab>('map');
   const dimension = tab === 'map' ? 'country' : dimensionForTab[tab];
   const report = useSWR<IAnalytics.demographicsResponse>(domains.length ? ['/analytics/demographics', { domains, from, to, dimension }] : null, POST, { keepPreviousData: true });
   const map = useSWR('/world.json', fetchMap);
   const rows = report.data ?? [];
   const max = Math.max(1, ...rows.map((row) => row.users));
-  const tabLabels: Record<LocationTab, string> = { map: 'World map', country: 'Countries', region: 'Regions', city: 'Cities' };
-  const mapOption: EChartsCoreOption = {
-    tooltip: { trigger: 'item', renderMode: 'richText' },
-    visualMap: { show: false, min: 0, max, inRange: { color: ['#e0e7ff', '#8584fa'] } },
-    series: [
-      {
-        type: 'map',
-        map: 'world',
-        roam: false,
-        zoom: 1.1,
-        top: 30,
-        bottom: 15,
-        itemStyle: { borderColor: '#fff', borderWidth: 0.5, areaColor: '#e0e7ff' },
-        emphasis: { label: { show: false }, itemStyle: { areaColor: '#a5a3fc' } },
-        data: rows.map((row) => ({ name: mapNameForCountry(row.name), value: row.users })),
-      },
-    ],
-  };
+  const mapOption = createLocationMapOption({ max, primaryColor, rows });
 
   return (
-    <section className={cx('h-full overflow-hidden rounded-sm border border-pulsio-line bg-white shadow-pulsio', className)}>
-      <div className="flex min-h-13 flex-wrap items-center justify-between gap-3 border-pulsio-line border-b px-5 pt-3">
-        <div className="flex gap-4" role="tablist" aria-label="Location demographics">
+    <section className={cx('h-[402px] overflow-hidden rounded-sm border border-pulsio-line bg-white shadow-pulsio', className)}>
+      <div className="flex h-[45px] flex-wrap items-center justify-between gap-3 border-pulsio-line border-b px-5">
+        <div className="flex h-full items-end gap-4" role="tablist" aria-label={t('location.demographics')}>
           {(['map', 'country', 'region', 'city'] as LocationTab[]).map((value) => (
             <button
               key={value}
@@ -89,32 +104,35 @@ export const LocationTable = ({ className, domains, from, to }: LocationDemograp
               role="tab"
               aria-selected={tab === value}
               onClick={() => setTab(value)}
-              className={cx('border-b-2 pb-1 font-semibold text-xs uppercase', tab === value ? 'border-pulsio-blue text-pulsio-blue' : 'border-transparent text-pulsio-muted')}
+              className={cx(
+                'border-b-2 pb-3 font-semibold text-xs uppercase',
+                tab === value ? 'border-(--home-primary-color) text-(--home-primary-color)' : 'border-transparent text-pulsio-muted',
+              )}
             >
-              {tabLabels[value]}
+              {value === 'map' ? t('location.worldMap') : value === 'country' ? t('location.countries') : value === 'region' ? t('location.regions') : t('location.cities')}
             </button>
           ))}
         </div>
       </div>
-      <div className="min-h-0 overflow-x-auto">
+      <div className="h-[355px] min-h-0 overflow-x-auto [&_td]:h-[35px] [&_td]:py-0 [&_th]:h-[40px] [&_th]:py-0">
         {report.isLoading && !report.data ? (
-          <div className="flex h-48 items-center justify-center">
+          <div className="flex h-full items-center justify-center">
             <Spinner size="lg" />
           </div>
         ) : report.error ? (
-          <p className="px-4 py-10 text-center text-red-600 text-sm">Could not load location demographics. Please try again.</p>
+          <p className="px-4 py-10 text-center text-red-600 text-sm">{t('location.loadError')}</p>
         ) : tab === 'map' ? (
           map.data ? (
-            <Chart className="h-[360px]" label="Users by country" map={map.data} option={mapOption} />
+            <Chart className="h-[355px]" label={t('location.usersByCountry')} map={map.data} option={mapOption} />
           ) : (
             <Spinner size="lg" />
           )
         ) : (
           <Table
-            columns={columns(tab)}
-            data={rows.slice(0, 10)}
+            columns={columns(tab, i18n.language, t)}
+            data={rows.slice(0, 9)}
             getRowKey={(row) => row.name}
-            emptyMessage="No data for this period."
+            emptyMessage={t('location.empty')}
             bar={{ getPercentage: (row) => row.percentage }}
           />
         )}

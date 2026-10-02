@@ -1,5 +1,6 @@
 import cx from 'clsx-tw';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
 import type { IAnalytics } from 'types/Analytics.ts';
 import { Spinner, Table, type TableColumn } from 'ui';
@@ -34,12 +35,6 @@ type DeviceDemographicsProps = {
 
 type DeviceTab = 'browser' | 'os' | 'device';
 
-const tabLabels: Record<DeviceTab, string> = {
-  browser: 'Browsers',
-  os: 'Operating system',
-  device: 'Device',
-};
-
 const getBrowserIcon = (name: string) => {
   const normalizedName = name.toLowerCase();
   if (normalizedName.includes('chrome')) return <IChrome className="text-blue-500" aria-hidden="true" />;
@@ -71,10 +66,10 @@ const getDeviceIcon = (name: string) => {
   return <IDesktop className="text-blue-500" aria-hidden="true" />;
 };
 
-const columns = (tab: DeviceTab): TableColumn<IAnalytics.demographicsResponse[number]>[] => [
+const columns = (tab: DeviceTab, locale: string, translate: (key: string) => string): TableColumn<IAnalytics.demographicsResponse[number]>[] => [
   {
     key: 'name',
-    header: 'Name',
+    header: translate('device.name'),
     render: (row) => (
       <span className="flex items-center gap-2">
         {tab === 'browser' && getBrowserIcon(row.name)}
@@ -84,18 +79,24 @@ const columns = (tab: DeviceTab): TableColumn<IAnalytics.demographicsResponse[nu
       </span>
     ),
   },
-  { key: 'users', header: 'Users', render: (row) => `${toNumber(row.users)} (${toRate(row.percentage)})`, className: 'text-right tabular-nums' },
+  {
+    key: 'users',
+    header: translate('device.users'),
+    render: (row) => `${toNumber(row.users, '', locale)} (${toRate(row.percentage, '', locale)})`,
+    className: 'text-right ',
+  },
 ];
 
 export const DeviceTable = ({ className, domains, from, to }: DeviceDemographicsProps) => {
+  const { t, i18n } = useTranslation();
   const [tab, setTab] = React.useState<DeviceTab>('browser');
   const dimension = tab as IAnalytics.demographicsDimension;
   const report = useSWR<IAnalytics.demographicsResponse>(domains.length ? ['/analytics/demographics', { domains, from, to, dimension }] : null, POST, { keepPreviousData: true });
   const rows = report.data ?? [];
 
   return (
-    <section className={cx('h-full overflow-hidden rounded-sm border border-pulsio-line bg-white shadow-pulsio', className)}>
-      <div className="flex min-h-13 items-center gap-4 overflow-x-auto border-pulsio-line border-b px-5 pt-3" role="tablist" aria-label="Device demographics">
+    <section className={cx('h-[402px] overflow-hidden rounded-sm border border-pulsio-line bg-white shadow-pulsio', className)}>
+      <div className="flex h-[45px] items-end gap-4 overflow-x-auto border-pulsio-line border-b px-5" role="tablist" aria-label={t('device.demographics')}>
         {(['browser', 'os', 'device'] as DeviceTab[]).map((value) => (
           <button
             key={value}
@@ -105,26 +106,26 @@ export const DeviceTable = ({ className, domains, from, to }: DeviceDemographics
             onClick={() => setTab(value)}
             className={cx(
               'whitespace-nowrap border-b-2 pb-3 font-semibold text-xs uppercase',
-              tab === value ? 'border-pulsio-blue text-pulsio-blue' : 'border-transparent text-pulsio-muted',
+              tab === value ? 'border-(--home-primary-color) text-(--home-primary-color)' : 'border-transparent text-pulsio-muted',
             )}
           >
-            {tabLabels[value]}
+            {value === 'browser' ? t('device.browsers') : value === 'os' ? t('device.operatingSystem') : t('device.device')}
           </button>
         ))}
       </div>
-      <div className="min-h-0 overflow-x-auto">
+      <div className="h-[355px] min-h-0 overflow-x-auto [&_td]:h-[35px] [&_td]:py-0 [&_th]:h-[40px] [&_th]:py-0">
         {report.isLoading && !report.data ? (
-          <div className="flex h-48 items-center justify-center">
+          <div className="flex h-full items-center justify-center">
             <Spinner size="lg" />
           </div>
         ) : report.error ? (
-          <p className="px-4 py-10 text-center text-red-600 text-sm">Could not load device demographics. Please try again.</p>
+          <p className="px-4 py-10 text-center text-red-600 text-sm">{t('device.loadError')}</p>
         ) : (
           <Table
-            columns={columns(tab)}
-            data={rows.slice(0, 10)}
+            columns={columns(tab, i18n.language, t)}
+            data={rows.slice(0, 9)}
             getRowKey={(row) => row.name}
-            emptyMessage="No data for this period."
+            emptyMessage={t('device.empty')}
             bar={{ getPercentage: (row) => row.percentage }}
           />
         )}

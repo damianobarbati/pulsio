@@ -1,4 +1,5 @@
 export { Alert } from './component/Alert.tsx';
+export { ApiHowTo } from './component/ApiHowTo.tsx';
 export { Badge } from './component/Badge.tsx';
 export { Button } from './component/Button.tsx';
 export { Card } from './component/Card.tsx';

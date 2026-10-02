@@ -5,6 +5,12 @@ import AuthService from '#api/auth/AuthService.ts';
 import UserRepository from '#api/user/UserRepository.ts';
 
 export default class UserService {
+  static async getBrand({ user_id }: { user_id: string }): Promise<IUser.brandResponse> {
+    const user = await UserRepository.get(user_id);
+    const result = { name: user.name, primary_color: user.primary_color };
+    return result;
+  }
+
   static async verifyCurrentPassword({ password, password_hash }: { password: string; password_hash: string }) {
     const validPassword = await AuthService.verifyPassword(password, password_hash);
     if (!validPassword) throw new AppError(401, 'INVALID_CREDENTIALS', 'Current password is incorrect.');
@@ -31,6 +37,20 @@ export default class UserService {
     return true;
   }
 
+  static async updateBrand({ user_id, name, primary_color }: IUser.brandUpdateRequest & { user_id: string }): Promise<IUser.accountResponse> {
+    await UserRepository.get(user_id);
+    await UserRepository.update(user_id, { name, primary_color });
+    const result = await UserRepository.get(user_id);
+    return result;
+  }
+
+  static async updateSettings({ user_id, autodiscover_enabled }: IUser.settingsUpdateRequest & { user_id: string }): Promise<IUser.accountResponse> {
+    await UserRepository.get(user_id);
+    await UserRepository.update(user_id, { autodiscover_enabled });
+    const result = await UserRepository.get(user_id);
+    return result;
+  }
+
   static async deleteAccount({ user_id, current_password, confirmation }: IUser.deleteAccountRequest & { user_id: string }): Promise<true> {
     const user = await UserRepository.get(user_id);
     await UserService.verifyCurrentPassword({ password: current_password, password_hash: user.password_hash });
@@ -46,7 +66,7 @@ export default class UserService {
       email_verification_token_hash: null,
       email_verification_expires_at: null,
       name: null,
-      logo: null,
+      primary_color: null,
     });
     return true;
   }

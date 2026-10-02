@@ -158,7 +158,7 @@ export const createClientHeaders = () => {
 };
 
 export const createClientEvent = (params: Partial<IEvent.clientEvent>) => {
-  const user_id = params.user_id || global.user.id;
+  const user_id = params.user_id || global.user2.id;
 
   const result: IEvent.clientEvent = {
     version: '1',
@@ -179,7 +179,7 @@ export const createClientEvent = (params: Partial<IEvent.clientEvent>) => {
 };
 
 export const createEventRow = async (params: Partial<IEvent.clientEvent>): Promise<IEvent.rowInsert> => {
-  const user_id = params.user_id || global.user.id;
+  const user_id = params.user_id || global.user2.id;
 
   const result = await EventService.createEventRow({
     ...createClientEvent({ ...params, user_id }),

@@ -81,7 +81,7 @@ const AnalyticsAcquisitionRequestSchema = AnalyticsKPIRequestSchema.extend({
 });
 type AnalyticsAcquisitionRequest = z.infer<typeof AnalyticsAcquisitionRequestSchema>;
 
-const AnalyticsAcquisitionResponseSchema = AnalyticsDemographicsResponseSchema;
+const AnalyticsAcquisitionResponseSchema = z.array(z.object({ name: z.string(), users: z.number(), visits: z.number(), percentage: z.number() }));
 type AnalyticsAcquisitionResponse = z.infer<typeof AnalyticsAcquisitionResponseSchema>;
 
 const AnalyticsLiveRequestSchema = z.object({

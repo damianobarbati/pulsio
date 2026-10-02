@@ -13,7 +13,7 @@ const ClientEventSchema = z.object({
   engagement_ms: z.number().int().nonnegative().optional(),
   props: z.record(z.string(), z.union([z.string(), z.number()])),
   transaction_id: z.string().nullable(),
-  revenue_amount: z.number().positive().nullable(),
+  revenue_amount: z.number().positive().max(100_000).nullable(),
   revenue_currency: z.string().min(1).max(10).nullable(),
   items: z.object({ id: z.string().min(1).max(64), name: z.string().min(1).max(64), price: z.number().positive(), quantity: z.number().positive() }).array(),
 });

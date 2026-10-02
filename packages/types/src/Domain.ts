@@ -78,6 +78,15 @@ const DomainUpdateRequestSchema = DomainIdRequestSchema.extend(
 );
 const DomainShareCreateRequestSchema = DomainIdRequestSchema.extend(DomainShareRowSchema.pick({ label: true }).shape);
 const DomainShareResponseSchema = DomainShareSchema.omit({ domain_id: true }).extend({ url: z.url() });
+const DomainCreateRequestSchema = z.object({
+  domain: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(1)
+    .max(253)
+    .regex(/^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)(\.([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?))+$/),
+});
 const DomainResetResponseSchema = z.object({ reset: z.literal(true) });
 const DomainDeleteResponseSchema = z.object({ deleted: z.literal(true) });
 
@@ -99,6 +108,7 @@ export const DomainSchemas = {
   shareIdRequest: DomainShareIdRequestSchema,
   updateRequest: DomainUpdateRequestSchema,
   shareCreateRequest: DomainShareCreateRequestSchema,
+  createRequest: DomainCreateRequestSchema,
   shareResponse: DomainShareResponseSchema,
   resetResponse: DomainResetResponseSchema,
   deleteResponse: DomainDeleteResponseSchema,
@@ -117,6 +127,7 @@ export namespace IDomain {
   export type shareIdRequest = DomainShareIdRequest;
   export type updateRequest = DomainUpdateRequest;
   export type shareCreateRequest = DomainShareCreateRequest;
+  export type createRequest = z.infer<typeof DomainCreateRequestSchema>;
   export type shareResponse = z.infer<typeof DomainShareResponseSchema>;
   export type resetResponse = z.infer<typeof DomainResetResponseSchema>;
   export type deleteResponse = z.infer<typeof DomainDeleteResponseSchema>;

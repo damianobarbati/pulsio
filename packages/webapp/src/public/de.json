@@ -1,0 +1,79 @@
+{
+  "periods": {
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "last7Days": "Letzte 7 Tage",
+    "last30Days": "Letzte 30 Tage",
+    "last90Days": "Letzte 90 Tage",
+    "last12Months": "Letzte 12 Monate",
+    "monthToDate": "Aktueller Monat",
+    "yearToDate": "Aktuelles Jahr",
+    "allTime": "Gesamter Zeitraum"
+  },
+  "filters": { "selectedWebsites": "Ausgewählte Websites", "selectWebsites": "Websites auswählen", "datePeriod": "Zeitraum", "compare": "Vergleichen" },
+  "home": {
+    "choosePlan": "Wähle einen Plan, um deine Analysen zu sehen",
+    "accountLimit": "Dein Konto hat {{domains}} und {{events}}. Das überschreitet die Grenzen deines aktuellen {{plan}}-Plans.",
+    "goToBilling": "Zur Abrechnung",
+    "noEventsTitle": "Noch keine Ereignisse empfangen",
+    "noEventsDescription": "Es wurden keine Ereignisse empfangen. Füge dieses Snippet in den <head> deiner Website ein, veröffentliche es und besuche deine Website.",
+    "selectWebsite": "Wähle eine Website, um Analysen zu sehen.",
+    "loadAnalyticsError": "Analysen konnten nicht geladen werden. Bitte versuche es erneut.",
+    "liveNow": "Jetzt live",
+    "users": "Nutzer",
+    "sessions": "Sitzungen",
+    "sessionViews": "Sitzungsansichten",
+    "sessionTime": "Sitzungsdauer",
+    "engagement": "Interaktion",
+    "conversion": "Konversion",
+    "transactions": "Transaktionen",
+    "revenue": "Umsatz",
+    "transactionRevenue": "Umsatz pro Transaktion",
+    "updatingChart": "Diagramm wird aktualisiert",
+    "accountLogo": "Kontologo"
+  },
+  "counts": { "domains_one": "{{count}} Domain", "domains_other": "{{count}} Domains", "events_one": "{{count}} Ereignis", "events_other": "{{count}} Ereignisse" },
+  "acquisition": {
+    "reports": "Akquisitionsberichte",
+    "sources": "Quellen",
+    "channels": "Kanäle",
+    "source": "Quelle",
+    "uniqueVisitors": "Eindeutige Besucher",
+    "visits": "Besuche",
+    "loadError": "Akquisitionsdaten konnten nicht geladen werden. Bitte versuche es erneut.",
+    "empty": "Keine Akquisitionsdaten für diesen Zeitraum."
+  },
+  "device": {
+    "demographics": "Gerätedaten",
+    "browsers": "Browser",
+    "operatingSystem": "Betriebssystem",
+    "device": "Gerät",
+    "name": "Name",
+    "users": "Nutzer",
+    "loadError": "Gerätedaten konnten nicht geladen werden. Bitte versuche es erneut.",
+    "empty": "Keine Daten für diesen Zeitraum."
+  },
+  "location": {
+    "demographics": "Standortdaten",
+    "worldMap": "Weltkarte",
+    "countries": "Länder",
+    "regions": "Regionen",
+    "cities": "Städte",
+    "name": "Name",
+    "users": "Nutzer",
+    "usersByCountry": "Nutzer nach Land",
+    "loadError": "Standortdaten konnten nicht geladen werden. Bitte versuche es erneut.",
+    "empty": "Keine Daten für diesen Zeitraum."
+  },
+  "goals": {
+    "title": "Ziele",
+    "searchEvents": "Ereignisse suchen",
+    "event": "Ereignis",
+    "count": "Anzahl",
+    "users": "Nutzer",
+    "conversionRate": "Konversionsrate %",
+    "loadError": "Ereignisse konnten nicht geladen werden. Bitte versuche es erneut.",
+    "matching": "Keine passenden Ereignisse.",
+    "empty": "Keine benutzerdefinierten Ereignisse gefunden."
+  }
+}

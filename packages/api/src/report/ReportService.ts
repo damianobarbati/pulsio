@@ -43,6 +43,12 @@ const getPreviousPeriodStart = (frequency: IReport.frequency, currentStart: Date
   return new Date(Date.UTC(currentStart.getUTCFullYear(), currentStart.getUTCMonth() - 1, 1));
 };
 
+export const isReportDue = ({ frequency, lastSentAt, now = new Date() }: { frequency: IReport.frequency; lastSentAt: string | null; now?: Date }) => {
+  if (!lastSentAt) return true;
+  const currentPeriodStart = getCurrentPeriodStart(frequency, now);
+  return new Date(lastSentAt).getTime() < currentPeriodStart.getTime();
+};
+
 export const getReportPeriods = ({ frequency, now = new Date() }: { frequency: IReport.frequency; now?: Date }) => {
   const currentStart = getCurrentPeriodStart(frequency, now);
   const previousStart = getPreviousPeriodStart(frequency, currentStart);
@@ -66,11 +72,11 @@ const getOwnedDomain = async ({ domainId, user_id }: { domainId: string; user_id
 };
 
 export default class ReportService {
-  static async send({ domainId, user_id }: { domainId: string; user_id: string }): Promise<IReport.sendResponse> {
+  static async send({ domainId, user_id, now = new Date() }: { domainId: string; user_id: string; now?: Date }): Promise<IReport.sendResponse> {
     const domain = await getOwnedDomain({ domainId, user_id });
     if (!domain.report_recipients.length) throw new AppError(422, 'REPORT_RECIPIENTS_REQUIRED', 'At least one report recipient is required.');
 
-    const periods = getReportPeriods({ frequency: domain.report_frequency });
+    const periods = getReportPeriods({ frequency: domain.report_frequency, now });
     const kpis = await EventRepository.getKPIs({ domains: [domain.domain], ...periods.current });
     const previousKpis = await EventRepository.getKPIs({ domains: [domain.domain], ...periods.previous });
     const emailKpis = await ReportService.getEmailKpis({ kpis, previousKpis });
@@ -92,9 +98,27 @@ export default class ReportService {
       subject: `${domain.domain} ${domain.report_frequency} analytics report`,
       html,
     });
-    await DomainRepository.update(domain.id, { report_last_sent_at: new Date().toISOString() });
+    await DomainRepository.update(domain.id, { report_last_sent_at: now.toISOString() });
 
     return { sent: true, recipients: domain.report_recipients, frequency: domain.report_frequency, period_start: periods.current.from, period_end: periods.current.to, kpis };
+  }
+
+  static async sendScheduled({ now = new Date() }: { now?: Date } = {}): Promise<number> {
+    const domains = await DomainRepository.getem({}, true);
+    let sent = 0;
+
+    for (const domain of domains) {
+      if (!domain.report_enabled || !domain.report_recipients.length || !isReportDue({ frequency: domain.report_frequency, lastSentAt: domain.report_last_sent_at, now })) continue;
+
+      try {
+        await ReportService.send({ domainId: domain.id, user_id: domain.user_id, now });
+        sent += 1;
+      } catch (error) {
+        console.error(`Scheduled report failed for ${domain.domain}:`, error);
+      }
+    }
+
+    return sent;
   }
 
   static async getEmailKpis({ kpis, previousKpis }: { kpis: IAnalytics.kpiResponse; previousKpis: IAnalytics.kpiResponse }) {
