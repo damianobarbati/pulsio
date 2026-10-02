@@ -145,6 +145,7 @@ create table payments
     id                 uuid primary key                                                                 default uuidv7(),
     created_at         timestamptz not null                                                             default now()::timestamptz(0),
     updated_at         timestamptz not null                                                             default now()::timestamptz(0),
+    paid_at            timestamptz,
     user_id            uuid        references users (id) on delete set null,
     amount             integer     not null,
     currency           char(3)     not null,
