@@ -1,6 +1,8 @@
 import z from 'nano-fw/zod.ts';
 
 const ClientEventSchema = z.object({
+  event_id: z.uuid().optional(),
+  timestamp: z.iso.datetime({ offset: true }).optional(),
   version: z.string().min(1),
   event_name: z.string().min(1),
   user_id: z.uuid(),
