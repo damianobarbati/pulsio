@@ -20,8 +20,8 @@ export const registerEventRoutes = (app: Hono) => {
         sec_ch_ua_mobile: c.req.header('sec-ch-ua-mobile') || '',
         sec_ch_ua_platform: c.req.header('sec-ch-ua-platform') || '',
       };
-      await EventService.ingest({ ...params, headers });
-      return true;
+      const event_id = await EventService.ingest({ ...params, headers });
+      return event_id;
     },
   });
 };
