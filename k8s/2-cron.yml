@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pulsio-api-cron
+  name: api-cron
   namespace: pulsio
   annotations:
     keel.sh/policy: force

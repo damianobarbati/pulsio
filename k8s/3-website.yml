@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pulsio-website
+  name: website
   namespace: pulsio
   annotations:
     keel.sh/policy: force
@@ -75,12 +75,13 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: pulsio-web-rate-limit@kubernetescrd
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   tls:
     - hosts:
         - pulsio.live
-      secretName: pulsio-website-tls
+      secretName: website-tls
   rules:
     - host: pulsio.live
       http:

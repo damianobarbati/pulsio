@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pulsio-superadmin
+  name: superadmin
   namespace: pulsio
   annotations:
     keel.sh/policy: force
@@ -78,12 +78,13 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: pulsio-web-rate-limit@kubernetescrd
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   tls:
     - hosts:
         - superadmin.pulsio.live
-      secretName: pulsio-superadmin-tls
+      secretName: superadmin-tls
   rules:
     - host: superadmin.pulsio.live
       http:
