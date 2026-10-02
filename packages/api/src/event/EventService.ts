@@ -2,15 +2,18 @@ import { createHash, randomBytes } from 'node:crypto';
 import { setTimeout } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { type CityResponse, open, validate } from 'maxmind';
+import { AppError } from 'nano-fw/docs/index.ts';
 import type { IEvent } from 'types/Event.ts';
 import { UAParser } from 'ua-parser-js';
 import CurrencyService from '#api/currency/CurrencyService.ts';
 import DomainRepository from '#api/domain/DomainRepository.ts';
+import ENV from '#api/env.ts';
 import EventRepository from '#api/event/EventRepository.ts';
 import UserRepository from '#api/user/UserRepository.ts';
+import { cache } from '#dao/cache.ts';
 
 type EventHeaders = Record<string, string | undefined>;
-type IngestParams = IEvent.clientEvent & { headers: EventHeaders; domain_id?: string };
+type IngestParams = IEvent.clientEvent & { event_id?: string; timestamp?: string; headers: EventHeaders; domain_id?: string };
 
 const geoReader = open<CityResponse>(fileURLToPath(new URL('../../GeoLite2-City.mmdb', import.meta.url)));
 
@@ -100,10 +103,61 @@ export default class EventService {
     return usdRate;
   }
 
-  static async startWorker({ signal }: { signal: AbortSignal }) {
+  static async startWorker({ signal }: { signal: AbortSignal }): Promise<void> {
+    let lastMessageId = '0-0';
+
     while (!signal.aborted) {
+      let messages: Awaited<ReturnType<typeof cache.xread>>;
+
       try {
-        await setTimeout(1_000, undefined, { signal });
+        messages = await cache.xread('COUNT', ENV.BATCH_SIZE, 'STREAMS', ENV.QUEUE_NAME, lastMessageId);
+      } catch (error) {
+        if (signal.aborted) break;
+        if (error instanceof Error) console.error('Event worker failed:', error.message);
+
+        try {
+          await setTimeout(100, undefined, { signal });
+        } catch (sleepError) {
+          if (signal.aborted) break;
+          throw sleepError;
+        }
+
+        continue;
+      }
+
+      if (messages) {
+        const [, entries] = messages[0];
+        const events = entries.map(([, fields]) => {
+          const eventIndex = fields.indexOf('event');
+          const payload = fields[eventIndex + 1];
+          if (!payload) throw new Error('Event stream entry has no event payload.');
+          return JSON.parse(payload) as IEvent.rowInsert;
+        });
+        const messageIds = entries.map(([messageId]) => messageId);
+
+        try {
+          await EventRepository.createAll(events);
+          await cache.xdel(ENV.QUEUE_NAME, ...messageIds);
+          lastMessageId = messageIds[messageIds.length - 1];
+        } catch (error) {
+          if (signal.aborted) break;
+
+          try {
+            await setTimeout(100, undefined, { signal });
+          } catch (sleepError) {
+            if (signal.aborted) break;
+            throw sleepError;
+          }
+
+          if (signal.aborted) break;
+          if (error instanceof Error) console.error('Event worker failed:', error.message);
+        }
+
+        continue;
+      }
+
+      try {
+        await setTimeout(100, undefined, { signal });
       } catch (error) {
         if (signal.aborted) break;
         throw error;
@@ -112,7 +166,7 @@ export default class EventService {
   }
 
   static async createEventRow({ headers, domain_id = undefined, ...clientEvent }: IngestParams): Promise<IEvent.rowInsert> {
-    const id = randomUUIDv7();
+    const id = clientEvent.event_id || randomUUIDv7();
 
     if (!headers) throw new Error('EventService.createEventRow failed.');
 
@@ -129,7 +183,7 @@ export default class EventService {
       .withClientHints();
 
     const url = new URL(clientEvent.url);
-    const timestamp = new Date().toISOString();
+    const timestamp = clientEvent.timestamp || new Date().toISOString();
     const attribution = getAttribution({ referrer: clientEvent.referrer || null, url });
     const fingerprint = getFingerprint({ domain: url.hostname, headers, ip, timestamp });
     const usd_rate = clientEvent.revenue_currency ? await EventService.getUSDRate(clientEvent.revenue_currency) : 1;
@@ -169,7 +223,7 @@ export default class EventService {
     return event_row;
   }
 
-  static async ingest(params: any): Promise<string> {
+  static async ingest(params: IngestParams): Promise<string> {
     const user_exists = await UserRepository.exists({ id: params.user_id });
     if (!user_exists) throw new Error('User does not exist');
 
@@ -178,7 +232,22 @@ export default class EventService {
     if (!domain) domain = await DomainRepository.create({ domain: url.hostname, user_id: params.user_id });
 
     const event_row = await EventService.createEventRow({ ...params, domain_id: domain.id });
-    await EventRepository.create(event_row);
+    let marker: string | null;
+
+    try {
+      marker = await cache.set(`event:${event_row.id}`, '1', 'EX', 3600, 'NX');
+    } catch {
+      throw new AppError(500, 'EVENT_QUEUE_UNAVAILABLE', 'Event queue is unavailable.');
+    }
+
+    if (!marker) return event_row.id;
+
+    try {
+      await cache.xadd(ENV.QUEUE_NAME, '*', 'event', JSON.stringify(event_row));
+    } catch {
+      throw new AppError(500, 'EVENT_QUEUE_UNAVAILABLE', 'Event queue is unavailable.');
+    }
+
     return event_row.id;
   }
 }

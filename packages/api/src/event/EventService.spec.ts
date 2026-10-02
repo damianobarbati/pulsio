@@ -107,14 +107,8 @@ describe('EventService', () => {
         while (performance.now() - startedAt < durationMs) {
           const event_id = randomUUID();
           const timestamp = new Date().toISOString();
-          const event = {
-            ...createClientEvent({
-              event_name: 'view',
-              url: `https://${HEAVY_LOAD_DOMAIN}/heavy-load`,
-            }),
-            event_id,
-            timestamp,
-          };
+          const url = `https://${HEAVY_LOAD_DOMAIN}/heavy-load`;
+          const event = { ...createClientEvent({ event_name: 'view', url }), event_id, timestamp };
           eventIds.push(event_id);
 
           const headers = new Headers({ 'content-type': 'application/json' });
@@ -124,11 +118,7 @@ describe('EventService', () => {
             if (value) headers.set(name, value);
           }
 
-          const response = await fetch(`${global.API_URL}/event`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(event),
-          });
+          const response = await fetch(`${global.API_URL}/event`, { method: 'POST', headers, body: JSON.stringify(event) });
 
           expect(response.ok).toEqual(true);
           const returnedEventId = await response.json();
