@@ -18,7 +18,7 @@
     "build": "storybook build --output-dir /tmp/pulsio-storybook"
   },
   "dependencies": {
-    "@tanstack/react-table": "^9.2.4",
+    "@tanstack/react-table": "^9.2.6",
     "clsx-tw": "^1.0.9",
     "echarts": "^6.1.0",
     "eta": "^4.6.0",
@@ -34,7 +34,7 @@
     "@storybook/react-vite": "^10.6.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.1",
+    "@vitejs/plugin-react": "^6.1.2",
     "storybook": "^10.6.1",
     "tailwindcss": "^4.3.3",
     "types": "workspace:*"
